@@ -25,7 +25,7 @@ const errorHandler = (err, req, res, next) => {
   };
   try {
     fs.appendFileSync(
-      path.join(logsDir, "error.log"),
+      path.join(logsDir, "error-details.log"),
       JSON.stringify(logEntry) + "\n",
       { encoding: "utf8" },
     );

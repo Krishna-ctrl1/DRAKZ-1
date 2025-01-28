@@ -115,7 +115,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/logs", logsRoutes);
-// Attach app-level context on settings routes (single mount)
+// Attach app-level context on settings dontenvroutes (single mount)
 app.use("/api/settings", requestContext, settingsRoutes);
 
 // --- SENSITIVE API ROUTES WITH CACHE CONTROL ---
