@@ -16,6 +16,12 @@ export default defineConfig({
         // optionally preserve host header
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
+      // Proxy error test route
+      "/trigger-error": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

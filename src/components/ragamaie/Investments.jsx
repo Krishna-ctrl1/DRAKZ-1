@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../api/axios.api";
+import { getToken } from "../../auth/auth.js";
 import "../../styles/ragamaie/investments.css";
 
 export default function Investments() {
@@ -17,11 +18,16 @@ export default function Investments() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Check token availability when component mounts
+    const token = getToken();
+    console.log("[INVESTMENTS] Component mounted, token status:", token ? "✓ Present" : "✗ Missing");
+    
     const fetchHistory = async () => {
       setLoading(true);
       setError("");
 
       try {
+        console.log("[INVESTMENTS] Making API request for investment-history...");
         const res = await api.get(`/api/investment-history?range=${range}`);
 
         // expecting [{ name: "Nov", value: 4925 }, ...] OR [{ name: "3", value: 4200 }, ...]
@@ -31,7 +37,7 @@ export default function Investments() {
           setData([]);
         }
       } catch (err) {
-        console.error(err);
+        console.error("[INVESTMENTS] API error:", err);
         setError("Could not load investment data.");
         setData([]);
       } finally {

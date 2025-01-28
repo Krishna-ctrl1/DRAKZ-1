@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import API from '../../config/api.config';
+import api from '../../api/axios.api';
 
 // Thunk to fetch summary statistics
 export const fetchDashboardStats = createAsyncThunk(
@@ -8,7 +7,7 @@ export const fetchDashboardStats = createAsyncThunk(
   async (period, { rejectWithValue }) => { // Accepts 'period' like 'monthly', 'yearly'
     try {
       // Example: passing query param for filtering
-      const response = await axios.get(`${API.dashboardStats}?period=${period || 'all'}`);
+      const response = await api.get(`/api/dashboard-stats?period=${period || 'all'}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg || 'Failed to fetch dashboard stats');

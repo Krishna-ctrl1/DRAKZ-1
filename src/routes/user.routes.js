@@ -1,9 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/user.controller');
-const { auth, requireAdmin } = require('../middlewares/auth.middleware.js');
-const validateUserInput = require('../middlewares/validateUserInput.middleware.js');
-
+const userController = require("../controllers/user.controller");
+const { auth, requireAdmin } = require("../middlewares/auth.middleware.js");
+const {
+  dashboardStatsLimiter,
+} = require("../middlewares/rateLimit.middleware");
+const cacheControl = require("../middlewares/cacheControl.middleware");
+const validateUserInput = require("../middlewares/validateUserInput.middleware.js");
 /**
  * @swagger
  * tags:
@@ -47,7 +50,7 @@ const validateUserInput = require('../middlewares/validateUserInput.middleware.j
  *         description: User created
  */
 // Read - Admin only
-router.get('/users', auth, requireAdmin, userController.getAllUsers);
+router.get("/users", auth, requireAdmin, userController.getAllUsers);
 
 /**
  * @swagger
@@ -61,7 +64,12 @@ router.get('/users', auth, requireAdmin, userController.getAllUsers);
  *       200:
  *         description: Dashboard statistics
  */
-router.get('/dashboard-stats', auth, requireAdmin, userController.getDashboardStats);
+router.get(
+  "/dashboard-stats",
+  auth,
+  requireAdmin,
+  userController.getDashboardStats,
+);
 
 /**
  * @swagger
@@ -75,10 +83,30 @@ router.get('/dashboard-stats', auth, requireAdmin, userController.getDashboardSt
  *       200:
  *         description: Server metrics
  */
-router.get('/server-metrics', auth, requireAdmin, userController.getServerMetrics);
+// Apply rate limiter specifically to dashboard stats
+router.get(
+  "/dashboard-stats",
+  dashboardStatsLimiter,
+  cacheControl,
+  auth,
+  requireAdmin,
+  userController.getDashboardStats,
+);
+router.get(
+  "/server-metrics",
+  auth,
+  requireAdmin,
+  userController.getServerMetrics,
+);
 
 // Create - Admin only
-router.post('/users', auth, requireAdmin, validateUserInput, userController.createUser);
+router.post(
+  "/users",
+  auth,
+  requireAdmin,
+  validateUserInput,
+  userController.createUser,
+);
 
 /**
  * @swagger
@@ -123,9 +151,15 @@ router.post('/users', auth, requireAdmin, validateUserInput, userController.crea
  *         description: User deleted
  */
 // Update - Admin only (we use PUT and include the ID in the URL)
-router.put('/users/:id', auth, requireAdmin, validateUserInput, userController.updateUser);
+router.put(
+  "/users/:id",
+  auth,
+  requireAdmin,
+  validateUserInput,
+  userController.updateUser,
+);
 
 // Delete - Admin only (we use DELETE and include the ID in the URL)
-router.delete('/users/:id', auth, requireAdmin, userController.deleteUser);
+router.delete("/users/:id", auth, requireAdmin, userController.deleteUser);
 
 module.exports = router;

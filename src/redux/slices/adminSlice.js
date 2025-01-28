@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import API from '../../config/api.config';
+import api from '../../api/axios.api';
 
 // Thunk to fetch all users for the Admin panel
 export const fetchAllUsers = createAsyncThunk(
   'admin/fetchAllUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(API.adminUsers);
+      const response = await api.get('/api/admin/users');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg || 'Failed to fetch users');
@@ -20,7 +19,7 @@ export const suspendUser = createAsyncThunk(
     'admin/suspendUser',
     async (userId, { rejectWithValue }) => {
       try {
-        const response = await axios.post(`${API.adminSuspend}/${userId}`);
+        const response = await api.post(`/api/admin/suspend/${userId}`);
         return response.data; // Returns updated user or success msg
       } catch (error) {
         return rejectWithValue(error.response?.data?.msg || 'Failed to suspend user');

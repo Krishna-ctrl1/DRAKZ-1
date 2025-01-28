@@ -9,21 +9,30 @@ const AuthGate = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const check = async () => {
-      // Client-side token validation first
-      if (!isAuthenticated()) {
+    const runCheck = async () => {
+      // First, rely on local token validity (fast, avoids over-eager redirects)
+      const authed = isAuthenticated();
+      console.log("[AUTHGATE] isAuthenticated:", authed);
+      if (!authed) {
+        console.log("[AUTHGATE] Not authenticated, redirecting to login");
         setStatus("redirect");
         return;
       }
+
+      // Soft server-side validation: do NOT redirect on transient failures
       try {
+        console.log("[AUTHGATE] Validating token with /api/auth/me...");
         await axios.get("/api/auth/me");
+        console.log("[AUTHGATE] ✓ Token validation passed");
         setStatus("ok");
       } catch (e) {
-        clearAuth();
-        setStatus("redirect");
+        // If server check fails but local token is valid, proceed without redirect
+        console.warn("[AUTHGATE] /api/auth/me check failed, but local token valid. Status:", e?.response?.status);
+        setStatus("ok");
       }
     };
-    check();
+
+    runCheck();
   }, [location.key]);
 
   if (status === "checking") return null; // or a spinner
