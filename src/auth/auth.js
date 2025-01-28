@@ -1,5 +1,17 @@
 export function getToken() {
-  return localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("[AUTH] getToken: token is null/undefined in localStorage");
+      // List all localStorage keys for debugging
+      const keys = Object.keys(localStorage);
+      console.warn("[AUTH] localStorage keys available:", keys);
+    }
+    return token;
+  } catch (e) {
+    console.error("[AUTH] getToken: Error accessing localStorage:", e.message);
+    return null;
+  }
 }
 
 export function getRole() {

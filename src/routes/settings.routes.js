@@ -1,12 +1,29 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { auth } = require('../middlewares/auth.middleware');
+const { auth } = require("../middlewares/auth.middleware");
 const {
   getProfile,
   updateProfile,
   updateFinancialPreferences,
-  changePassword
-} = require('../controllers/settings.controller');
+  changePassword,
+} = require("../controllers/settings.controller");
+const {
+  validateProfileUpdate,
+  validateFinancialUpdate,
+  validatePasswordChange,
+} = require("../middlewares/settingsValidation.middleware");
+
+// Settings-specific error handler (router-level)
+const settingsErrorHandler = (err, req, res, next) => {
+  if (!err) return next();
+  const status = err.status || 500;
+  const payload = {
+    success: false,
+    msg: err.message || "Settings endpoint error",
+  };
+  if (err.errors) payload.errors = err.errors;
+  res.status(status).json(payload);
+};
 
 /**
  * @swagger
@@ -38,12 +55,12 @@ const {
 // @route   GET /api/settings/profile
 // @desc    Get user profile
 // @access  Private
-router.get('/profile', auth, getProfile);
+router.get("/profile", auth, getProfile);
 
 // @route   PUT /api/settings/profile
 // @desc    Update profile information
 // @access  Private
-router.put('/profile', auth, updateProfile);
+router.put("/profile", auth, validateProfileUpdate, updateProfile);
 
 /**
  * @swagger
@@ -60,7 +77,12 @@ router.put('/profile', auth, updateProfile);
 // @route   PUT /api/settings/financial
 // @desc    Update financial preferences
 // @access  Private
-router.put('/financial', auth, updateFinancialPreferences);
+router.put(
+  "/financial",
+  auth,
+  validateFinancialUpdate,
+  updateFinancialPreferences,
+);
 
 /**
  * @swagger
@@ -87,6 +109,9 @@ router.put('/financial', auth, updateFinancialPreferences);
 // @route   PUT /api/settings/password
 // @desc    Change password
 // @access  Private
-router.put('/password', auth, changePassword);
+router.put("/password", auth, validatePasswordChange, changePassword);
+
+// Attach router-level error handler for settings
+router.use(settingsErrorHandler);
 
 module.exports = router;

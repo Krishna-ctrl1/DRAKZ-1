@@ -17,18 +17,23 @@ const accountSummaryRoutes = require("./src/routes/accountSummary.routes.js");
 const settingsRoutes = require("./src/routes/settings.routes.js");
 const contactRoutes = require("./src/routes/contactRoutes.js");
 const logsRoutes = require("./src/routes/logs.routes.js");
-
 const app = express();
 const server = http.createServer(app);
 
 // Middleware imports
 const logger = require("./src/middlewares/logger.middleware.js");
 const errorHandler = require("./src/middlewares/errorHandler.middleware.js");
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./src/config/swagger.config.js');
+const userActivity = require("./src/middlewares/userActivity.middleware.js");
+const requestContext = require("./src/middlewares/requestContext.middleware.js");
+const cacheControl = require("./src/middlewares/cacheControl.middleware.js");
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-const { getMorganMiddleware } = require("./src/middlewares/morgan.middleware.js");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./src/config/swagger.config.js");
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const {
+  getMorganMiddleware,
+} = require("./src/middlewares/morgan.middleware.js");
 
 connectDB();
 
@@ -37,7 +42,14 @@ app.use(
   cors({
     origin: ["http://localhost:3000", "http://localhost:5173"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Pragma", "Expires"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-auth-token",
+      "Cache-Control",
+      "Pragma",
+      "Expires",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   }),
 );
@@ -46,12 +58,22 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Morgan HTTP request logger
 const morganMiddlewares = getMorganMiddleware();
-morganMiddlewares.forEach(middleware => app.use(middleware));
+morganMiddlewares.forEach((middleware) => app.use(middleware));
 
 app.use(logger);
 
+// Global user activity logger (captures user, timing, requests)
+app.use(userActivity);
+
 // Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
+
+app.get("/trigger-error", (req, res, next) => {
+  console.log("--- Triggering Error Route ---"); // Add this
+  const err = new Error("This is a DRAKZ custom error!");
+  err.status = 403;
+  next(err);
+});
 
 // --- SOCKET SERVER ---
 const io = new Server(server, {
@@ -92,10 +114,17 @@ app.use("/api/advisor", advisorRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
-app.use("/api/settings", settingsRoutes);
 app.use("/api/logs", logsRoutes);
+// Attach app-level context on settings routes (single mount)
+app.use("/api/settings", requestContext, settingsRoutes);
 
-// Global Error Handler Middleware (MUST be last)
+// --- SENSITIVE API ROUTES WITH CACHE CONTROL ---
+
+app.use("/api/account-summary", cacheControl, accountSummaryRoutes);
+app.use("/api/investments", cacheControl, investmentsRoutes);
+app.use("/api/spendings", cacheControl, spendingsRoutes);
+app.use("/api/cards", cacheControl, require("./src/routes/card.routes"));
+// Global Error Handler Middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;

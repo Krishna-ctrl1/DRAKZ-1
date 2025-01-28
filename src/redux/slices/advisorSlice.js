@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import API from '../../config/api.config';
+import api from '../../api/axios.api';
 
 // Thunk to fetch clients from Backend
 export const fetchClients = createAsyncThunk(
   'advisor/fetchClients',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(API.advisorClients);
+      const response = await api.get('/api/advisor/clients');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg || 'Failed to fetch clients');

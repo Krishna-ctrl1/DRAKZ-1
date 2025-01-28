@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import API from '../../config/api.config';
+import api from '../../api/axios.api';
 
 // Thunk to fetch available roles and permissions
 export const fetchRoles = createAsyncThunk(
   'privileges/fetchRoles',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(API.rolesAndPermissions);
+      const response = await api.get('/api/roles-and-permissions');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg || 'Failed to fetch roles');
