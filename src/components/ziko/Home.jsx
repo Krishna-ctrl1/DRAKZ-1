@@ -5,6 +5,8 @@ import StickyScrollSections from './StickyScrollSections';
 import SymbolOfPurchasePowerSection from './SymbolOfPurchasePowerSection';
 import FastTransaction from './FastTransaction';
 import FinalSection from './FinalSection';
+import ContactUs from './ContactUs';
+import Footer from './Footer';
 
 const Home = () => {
   return (
@@ -15,6 +17,8 @@ const Home = () => {
       <SymbolOfPurchasePowerSection />
       <FastTransaction />
       <FinalSection />
+      <ContactUs />
+      <Footer />
     </>
   );
 };
