@@ -10,12 +10,19 @@ const StickyScrollSections = () => {
           <div className="scroll-content">
             <div className="text-column">
               <h2>
-                <span className="line-1">Instant</span>
-                <span className="line-2">Gratification</span>
+                <span className="line-1">Free-Tier</span>
+                <span className="line-2">Customers</span>
               </h2>
               <p>
-                Link your virtual card to your Apple or Google Pay wallet to start paying immediately.
+                Perfect for individuals seeking to manage their personal finances and improve financial literacy.
               </p>
+              <ul className="feature-points">
+                <li>Financial dashboards displaying assets, liabilities, credit score, and investments</li>
+                <li>Access to basic financial education</li>
+                <li>AI chatbot for financial queries</li>
+                <li>Alerts for EMIs, bills, and investment renewals</li>
+                <li>Community blogs to share and learn financial tips</li>
+              </ul>
               <div className="accent-bar"></div>
             </div>
           </div>
@@ -26,12 +33,20 @@ const StickyScrollSections = () => {
           <div className="scroll-content">
             <div className="text-column">
               <h2>
-                <span className="line-1">Protected with</span>
-                <span className="line-2">in app Secure</span>
+                <span className="line-1">Premium</span>
+                <span className="line-2">Customers</span>
               </h2>
               <p>
-                Manage your card security, transaction from the app and keep things in your control
+                For individuals who want advanced tools for managing their finances.
               </p>
+              <ul className="feature-points">
+                <li>All features of free-tier</li>
+                <li>Access to premium video courses</li>
+                <li>Live sessions with financial advisors</li>
+                <li>Ad-free experience</li>
+                <li>Downloadable resources such as financial templates and reports</li>
+                <li>Advanced dashboards with real-time market data</li>
+              </ul>
               <div className="accent-bar"></div>
             </div>
           </div>

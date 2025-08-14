@@ -23,16 +23,19 @@ const SymbolOfPurchasePowerSection = () => {
         </div>
 
         {/* Divider Line */}
-        <div className="divider-line"></div>
+        <div className="divider-line"></div> 
 
         {/* Right Side - Text */}
         <div className="text-section">
           <div className="text-content">
-            <p className="tagline">Premium product</p>
-            <h2 className="headline">
-              <span className="line-1">Symbol of</span>
-              <span className="line-2">purchase power</span>
-            </h2>
+            <h2 className="headline">Brains Behind The Build</h2>
+            <p className="tagline">
+              <span className="line-1"><span className="team-name">Krishna</span> — The Mind Behind the Machine</span>
+              <span className="line-1"><span className="team-name">Deepthi</span> — The Artist of Data</span>
+              <span className="line-1"><span className="team-name">Ragamaie</span> — The Guardian of Databases</span>
+              <span className="line-1"><span className="team-name">Zulqarnain</span> — The Architect of Experience</span>
+              <span className="line-1"><span className="team-name">Abhinay</span> — The Creative Visionary</span>
+            </p>
           </div>
         </div>
       </div>

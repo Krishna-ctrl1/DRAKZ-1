@@ -1,40 +1,17 @@
-Final Section MVP Build
-1. Container
-Width: 100% viewport width.
-Height: ~550–600px (match screenshot proportions).
-Background: Use your provided background image (centered, cover, no repeat, bg.png).
-Position: Relative.
-2. Left Side (Text Block)
-Position:
-Flexbox: display: flex; align-items: center; justify-content: flex-start;
-Padding-left: ~4rem on desktop.
-Content:
-Main Heading
-Text: Get your card in just 5min.
-Font size: ~64px desktop, bold (font-weight: 700).
-Color: White (#FFFFFF).
-Line height: ~1.1.
-Subheading
-Text: Simple 3 step verification with online KYC verification and instant digital card unlocked.
-Font size: ~20px.
-Color: Light gray (#BBBBBB).
-Max width: ~450px.
-Margin-top: 1rem.
-CTA Button
-Text: Get A Card.
-Background: Solid blue (#3B82F6).
-Text color: White.
-Border radius: 9999px (pill shape).
-Padding: 0.75rem 2rem.
-Font weight: 500.
-Margin-top: 2rem.
-3. Right Side (Card Image)
-Use your provided card PNG.
-Size: ~480px width.
-Position: Absolutely positioned to the right of text, vertically centered.
-Transform: Small rotation (~rotateY(5deg)) to match screenshot style.
-Shadow: Subtle, matching glow from background.
-4. MVP Rules
-Keep exact spacing between heading, subheading, and button — no auto spacing from frameworks.
-Card should never stretch; maintain proportions from your image.
-Background must be full bleed and not crop important glow areas.
+Financial Dashboard. Track Your Finances.
+While many financial tools require separate apps to monitor assets, liabilities, loans, investments, and expenses, ours provides all in one place with clear, interactive visual dashboards.
+
+Instant Financial Advice.
+While many online chatbots give generic responses without personalization, ours delivers instant, accurate, and tailored financial guidance to help you make smarter money decisions quickly and confidently.
+
+Reminders & Alerts. Never Miss Deadlines.
+While many people forget EMIs, bills, and investment renewals, our alert system ensures timely notifications so you never miss a payment or critical financial due date.
+
+Financial Education. Learn About Finance.
+While many individuals lack access to quality financial resources, we provide educational videos, expert articles, and guides to improve your money skills and long-term financial literacy.
+
+Achieve Financial Goals.
+While many struggle to set and follow realistic plans, our goal planner offers actionable strategies to achieve both short-term and long-term objectives effectively and without stress.
+
+Push Notifications. Stay Financially Informed.
+While many services fail to update users about important changes, ours sends timely SMS and email alerts so you are always informed and ready to act.

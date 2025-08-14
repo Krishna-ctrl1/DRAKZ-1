@@ -6,7 +6,7 @@ const InstantGratificationSection = () => {
       <div className="instant-gratification-container">
         <div className="text-column">
           <h2>
-            <span className="line-1">Instant</span>
+            <span className="line-1">Free-Tier</span>
             <span className="line-2">Gratification</span>
           </h2>
           <p>

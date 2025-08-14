@@ -56,8 +56,8 @@ const StickyScrollSection = () => (
         <div className="scroll-content">
           <div className="text-column">
             <h2>
-              <span className="line-1">Instant</span>
-              <span className="line-2">Gratification</span>
+              <span className="line-1">Free-Tier</span>
+              <span className="line-2">User</span>
             </h2>
             <p>
               Get immediate access to your funds and enjoy instant transactions 
@@ -157,7 +157,7 @@ const FinalSection = () => (
   <div className="final-section">
     <div className="final-container">
       <div className="final-text-block">
-        <h1 className="final-heading">Get your card in just 5min.</h1>
+        <h1 className="final-heading">Plan you finances in just 5min.</h1>
         <p className="final-subheading">
           Simple 3 step verification with online KYC verification and instant digital card unlocked.
         </p>
