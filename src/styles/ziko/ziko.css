@@ -1570,8 +1570,38 @@ body {
 }
 
 .contact-container {
-  max-width: 1400px;
+  max-width: 1200px;
+  width: 100%;
+  background: #2a2a2a;
+  border-radius: 6rem;
+  position: relative;
+  overflow: hidden;
   margin: 0 auto;
+}
+
+/* Background gradient overlay - same as team section */
+.contact-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/gradient.png') center / cover no-repeat;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Background overlay - same as team section */
+.contact-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #2a2a2a 0%, #2a2a2a 40%, transparent 100%);
+  z-index: 1;
 }
 
 .contact-content {
@@ -1579,6 +1609,9 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 6rem;
   align-items: flex-start;
+  position: relative;
+  z-index: 2;
+  padding: 6rem 4rem;
 }
 
 /* Contact Info */
@@ -1652,11 +1685,13 @@ body {
 
 /* Contact Form */
 .contact-form-container {
-  background: rgba(42, 42, 42, 0.8);
+  background: rgba(42, 42, 42, 0.9);
   border-radius: 2rem;
   padding: 3rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 3;
 }
 
 .contact-form {
@@ -2004,9 +2039,14 @@ body {
 }
 
 @media (max-width: 968px) {
+  .contact-container {
+    border-radius: 2rem;
+  }
+  
   .contact-content {
     grid-template-columns: 1fr;
     gap: 3rem;
+    padding: 4rem 2rem;
   }
   
   .contact-info {
@@ -2035,6 +2075,10 @@ body {
 @media (max-width: 768px) {
   .contact-section {
     padding: 4rem 1rem;
+  }
+  
+  .contact-content {
+    padding: 3rem 1.5rem;
   }
   
   .contact-title {
@@ -2072,6 +2116,10 @@ body {
 }
 
 @media (max-width: 480px) {
+  .contact-content {
+    padding: 2.5rem 1rem;
+  }
+  
   .contact-title {
     font-size: 2rem;
   }

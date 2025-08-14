@@ -85,8 +85,7 @@ const ContactUs = () => {
           </div>
 
           {/* Right Side - Contact Form */}
-          <div className="contact-form-container">
-            <form className="contact-form" onSubmit={handleSubmit}>
+          <form className="contact-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="name">Full Name *</label>
@@ -181,7 +180,6 @@ const ContactUs = () => {
                 </div>
               )}
             </form>
-          </div>
         </div>
       </div>
     </section>
