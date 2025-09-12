@@ -1,5 +1,17 @@
 /* Deepthi's CSS Styles - Dashboard */
 
+.app {
+  display: flex;
+  background: #0f0f1a;
+  color: white;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
 /* Dashboard Styles */
 .dashboard-page {
   min-height: 100vh;

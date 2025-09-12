@@ -1,0 +1,90 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+   align-items: center; 
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.logo {
+  font-size: 22px;
+  background: #333;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.date {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-center nav {
+  display: inline-flex;
+  gap: 20px;
+}
+
+.header-center nav a {
+  color: #aaa;
+  cursor: pointer;
+}
+
+.header-center nav a.active {
+  color: gold;
+  font-weight: bold;
+}
+
+.filters {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.filter-btn,
+.tab,
+.create-btn {
+  background: #222;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: gold;
+  color: black;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.welcome {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.profile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
