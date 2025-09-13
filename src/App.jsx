@@ -13,6 +13,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          {/* <Route path="/investments" element={<Investments />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/finbot" element={<FinBot />} />
+            <Route path="/privileges" element={<Privileges />} />
+            <Route path="/settings" element={<Settings />} /> */}
         </Routes>
       </div>
     </Router>

@@ -7,12 +7,12 @@ export default function Sidebar() {
   const [active, setActive] = useState("dashboard");
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: "fas fa-home" },
-    { id: "investments", label: "Investments", icon: "fa-solid fa-chart-column" },
-    { id: "blog", label: "Blog", icon: "fa-solid fa-blog" },
-    { id: "finbot", label: "Fin Bot", icon: "fas fa-robot" },
-    { id: "privileges", label: "My Privileges", icon: "fas fa-gift" },
-    { id: "settings", label: "Settings", icon: "fas fa-cog" },
+    { id: "dashboard", label: "Dashboard", icon: "fas fa-home", path: "#" },
+    { id: "investments", label: "Investments", icon: "fa-solid fa-chart-column", path: "/investments" },
+    { id: "blog", label: "Blog", icon: "fa-solid fa-blog", path: "/blog" },
+    { id: "finbot", label: "Fin Bot", icon: "fas fa-robot", path: "/finbot" },
+    { id: "privileges", label: "My Privileges", icon: "fas fa-gift", path: "/privileges" },
+    { id: "settings", label: "Settings", icon: "fas fa-cog", path: "/settings" },
   ];
 
   return (
