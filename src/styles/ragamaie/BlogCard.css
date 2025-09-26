@@ -1,0 +1,21 @@
+.blog-card {
+  background: #1c1c2b;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.blog-card h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.blog-card img {
+  width: 150px;
+  height: 120px;
+  border-radius: 10px;
+  object-fit: cover;
+}
