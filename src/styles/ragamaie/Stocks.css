@@ -1,0 +1,38 @@
+.stocks-container {
+  background: #1e1e2f;
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+}
+.stocks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stocks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+.stock-card {
+  background: #2a2a3d;
+  padding: 15px;
+  border-radius: 10px;
+}
+.stock-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.stock-price {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+.stock-change.green {
+  color: #22c55e;
+}
+.stock-change.red {
+  color: #ef4444;
+}

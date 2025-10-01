@@ -1,0 +1,56 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  background: #111122;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* Sidebar takes fixed width */
+.app-container > .sidebar {
+  width: 220px;
+  background: #1a1a2e;
+  padding: 20px 10px;
+}
+
+/* Main content beside sidebar */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header sticks at top */
+.main-content > .header {
+  background: #1e1e2f;
+  padding: 15px 20px;
+  border-bottom: 1px solid #333;
+}
+
+/* Dashboard grid under header */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* left wider, right smaller */
+  gap: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Column layouts */
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Scroll styling */
+.dashboard-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.dashboard-grid::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 5px;
+}

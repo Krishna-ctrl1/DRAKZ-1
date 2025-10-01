@@ -1,0 +1,30 @@
+.loan-calculator {
+  background: #1e1e2f;
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+}
+.loan-calculator label {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #aaa;
+}
+.loan-calculator input[type="range"] {
+  width: 100%;
+  margin: 5px 0;
+}
+.btn-primary {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+.emi-result {
+  text-align: center;
+  margin-top: 10px;
+}
