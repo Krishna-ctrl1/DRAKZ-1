@@ -7,12 +7,11 @@ import "../../styles/ragamaie/BlogPage";
 
 function BlogPage() {
   return (
-    <div className="app">
+   <div className="app">
       <Sidebar />
       <main className="main-content">
         <Header />
-        <BlogControls />   
-        <BlogList />
+        <BlogSection /> 
       </main>
     </div>
   );
