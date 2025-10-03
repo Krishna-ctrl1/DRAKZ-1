@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import BlogControls from "./BlogControls";   
 import BlogList from "./BlogList";
 
-import stocksImg from "../assets/stocksImg.png";
-import cryptoImg from "../assets/crypto.png";
-import budgetImg from "../assets/budget.png";
+import stocksImg from "../../../public/stocksImg.png";
+import cryptoImg from "../../../public/crypto.png";
+import budgetImg from "../../../public/budget.png";
 
 const BlogSection = () => {
   const [blogs] = useState([

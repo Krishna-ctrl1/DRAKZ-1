@@ -4,11 +4,7 @@
   border-radius: 15px;
   color: white;
 }
-.loans-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+
 .btn-primary {
   background: #2563eb;
   color: white;
