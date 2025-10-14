@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-
+import React from "react";
 import "../../styles/global/Sidebar.css";
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [active, setActive] = useState("dashboard");
+// MODIFIED: Accepts state and setter as props
+export default function Sidebar({ collapsed, setCollapsed }) {
+  const [active, setActive] = useState("dashboard"); // Kept local active state
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: "fas fa-home", path: "#" },
@@ -17,19 +16,7 @@ export default function Sidebar() {
 
   return (
     <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
-      {/* Collapse/Expand button */}
-      <button
-        className="collapse-btn"
-        onClick={() => setCollapsed(!collapsed)}
-        aria-label="Toggle Sidebar"
-      >
-        <img
-          src={collapsed ? "/sidebaropen.png" : "/sidebarclose.png"}
-          alt="toggle sidebar"
-          className="toggle-icon"
-        />
-      </button>
-
+      
       {/* Menu items */}
       <ul className="sidebar-list">
         {menuItems.map((item) => (
@@ -44,12 +31,20 @@ export default function Sidebar() {
         ))}
       </ul>
 
-      {/* Bottom users */}
-      <div className="sidebar-users">
-        <img src="https://via.placeholder.com/32" alt="user1" />
-        <img src="https://via.placeholder.com/32" alt="user2" />
-        <button className="add-btn">+</button>
-      </div>
+      {/* Collapse/Expand button - Moved to the bottom-most part of the component */}
+      <button
+        className="collapse-btn"
+        onClick={() => setCollapsed(!collapsed)}
+        aria-label="Toggle Sidebar"
+      >
+        <img
+          src={collapsed ? "/sidebaropen.png" : "/sidebarclose.png"}
+          alt="toggle sidebar"
+          className="toggle-icon"
+        />
+      </button>
+
+      {/* Bottom users section REMOVED */}
     </aside>
   );
 }

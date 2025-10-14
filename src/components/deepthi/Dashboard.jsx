@@ -5,6 +5,7 @@ import Sidebar from '../global/Sidebar';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [collapsed, setCollapsed] = useState(false); // ADDED: State for sidebar collapse
 
   const handleLogout = () => {
     navigate('/');
@@ -30,7 +31,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-page">
       {/* Header */}
-      <div className="dashboard-header">
+      <div className={`dashboard-header ${collapsed ? 'collapsed' : ''}`}>
         <div className="header-content">
           <div className="logo-section">
             <h1 className="dashboard-logo">DRAKZ</h1>
@@ -46,8 +47,9 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="app" ><Sidebar />
-        <div className="main-content">
+      <div className="app" >
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <div className={`main-content ${collapsed ? 'main-content-collapsed' : ''}`}>
           <div className="dashboard-content">
             <div className="dashboard-container">
 

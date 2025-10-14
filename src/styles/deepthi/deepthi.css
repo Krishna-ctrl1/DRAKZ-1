@@ -1,7 +1,7 @@
 /* Deepthi's CSS Styles - Dashboard */
 
 .app {
-  display: flex;
+  /* Removed display: flex as it's not needed for the fixed/main content layout */
   background: #0f0f1a;
   color: white;
   min-height: 100vh;
@@ -10,6 +10,9 @@
 .main-content {
   flex: 1;
   padding: 20px;
+  margin-left: 180px; /* ADDED: Default margin to clear fixed sidebar (180px) */
+  margin-top: 5rem; /* ADDED: Margin to clear the fixed header (Approx 80px) */
+  transition: margin-left 0.3s ease; /* ADDED: Smooth transition */
 }
 
 /* Dashboard Styles */
@@ -20,10 +23,26 @@
 }
 
 .dashboard-header {
+  position: fixed; /* FIX: Make header fixed */
+  top: 0;
+  width: 100%;
+  z-index: 999; /* FIX: Below sidebar's 1000 */
+  padding-left: 180px; /* ADDED: Default margin to clear fixed sidebar (180px) */
+  transition: padding-left 0.3s ease; /* ADDED: Smooth transition */
+  
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1rem 0;
   backdrop-filter: blur(10px);
+}
+
+/* NEW STYLES for Collapsed State */
+.dashboard-header.collapsed {
+  padding-left: 60px; /* Collapsed sidebar width */
+}
+
+.main-content-collapsed {
+  margin-left: 60px; /* Collapsed sidebar width */
 }
 
 .header-content {
