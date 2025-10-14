@@ -3,15 +3,21 @@
   flex-direction: column;
   justify-content: space-between;
   width: 180px;
-  height: 100vh; /* FIX: Set to full viewport height */
+  
+  /* MODIFIED: Height is calculated to fill space BELOW the header */
+  height: calc(100vh - 5rem); 
+  
   background: #000000;
   color: white;
   transition: width 0.3s ease;
   font-family: 'Inter', sans-serif;
-  position: fixed; /* FIX: Fixed position */
-  top: 0;
+  position: fixed;
+  
+  /* MODIFIED: Top is now 5rem to start below the header */
+  top: 5rem;
+  
   left: 0;
-  z-index: 1000; /* FIX: Ensure it sits above main content */
+  z-index: 1000;
 }
 
 /* Collapsed state */
@@ -22,9 +28,8 @@
 /* Collapse/Expand button */
 .collapse-btn {
   position: absolute;
-  /* top: 10px; REMOVED */
-  bottom: 10px; /* FIX: New position (bottom) */
-  right: 10px; /* FIX: New position (inside sidebar) */
+  bottom: 10px;
+  right: 10px;
   background: #1e293b;
   border: none;
   border-radius: 50%;
@@ -36,7 +41,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
-  padding: 0; /* remove default button padding */
+  padding: 0;
 }
 
 .collapse-btn:hover {
@@ -45,16 +50,16 @@
 
 /* Icon image inside button */
 .toggle-icon {
-  width: 14px;   /* adjust size */
-  height: 14px;  /* adjust size */
+  width: 14px;
+  height: 14px;
   object-fit: contain;
-  filter: invert(100%); /* make it white if needed */
+  filter: invert(100%);
 }
 
 
 .sidebar-list {
   list-style: none;
-  padding: 16px 0 0 0; /* MODIFIED: Adjusted top padding */
+  padding: 16px 0 0 0;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -84,5 +89,3 @@
 .sidebar.collapsed .sidebar-list li span {
   display: none;
 }
-
-/* Bottom user section styles REMOVED */
