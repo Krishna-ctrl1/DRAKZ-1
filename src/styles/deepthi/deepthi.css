@@ -24,30 +24,31 @@
   color: white;
 }
 
+/* MODIFIED: Header styles for full-width layout */
 .dashboard-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999;
-  padding-left: 180px;
-  transition: padding-left 0.3s ease;
+  z-index: 1001; /* High z-index to stay on top */
+  
+  /* REMOVED padding-left to make the header full width */
   
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
   padding-bottom: 1rem;
   backdrop-filter: blur(10px);
+  
+  /* ADDED: Explicit height to match sidebar and content margins */
+  height: 5rem; 
+  box-sizing: border-box; /* Ensures padding is included in the height */
 }
 
-.dashboard-header.collapsed {
-  padding-left: 60px;
-}
+/* REMOVED: .dashboard-header.collapsed is no longer needed */
 
 .header-content {
-  /* max-width: 1400px; <-- REMOVED */
-  /* margin: 0 auto;    <-- REMOVED */
-  padding: 0 2rem; /* Keeps content from touching the screen edges */
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -101,12 +102,11 @@
   padding: 2rem;
 }
 
+/* The rest of the file remains the same... */
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;
 }
-
-/* ... (rest of your CSS is unchanged) ... */
 
 .card-section {
   display: grid;
