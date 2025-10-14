@@ -1,7 +1,6 @@
 /* Deepthi's CSS Styles - Dashboard */
 
 .app {
-  /* Removed display: flex as it's not needed for the fixed/main content layout */
   background: #0f0f1a;
   color: white;
   min-height: 100vh;
@@ -10,12 +9,15 @@
 .main-content {
   flex: 1;
   padding: 20px;
-  margin-left: 180px; /* ADDED: Default margin to clear fixed sidebar (180px) */
-  margin-top: 5rem; /* ADDED: Margin to clear the fixed header (Approx 80px) */
-  transition: margin-left 0.3s ease; /* ADDED: Smooth transition */
+  margin-left: 180px;
+  margin-top: 5rem;
+  transition: margin-left 0.3s ease;
 }
 
-/* Dashboard Styles */
+.main-content.collapsed {
+  margin-left: 60px;
+}
+
 .dashboard-page {
   min-height: 100vh;
   background: #000000;
@@ -23,32 +25,29 @@
 }
 
 .dashboard-header {
-  position: fixed; /* FIX: Make header fixed */
+  position: fixed;
   top: 0;
-  width: 100%;
-  z-index: 999; /* FIX: Below sidebar's 1000 */
-  padding-left: 180px; /* ADDED: Default margin to clear fixed sidebar (180px) */
-  transition: padding-left 0.3s ease; /* ADDED: Smooth transition */
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding-left: 180px;
+  transition: padding-left 0.3s ease;
   
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 0;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   backdrop-filter: blur(10px);
 }
 
-/* NEW STYLES for Collapsed State */
 .dashboard-header.collapsed {
-  padding-left: 60px; /* Collapsed sidebar width */
-}
-
-.main-content-collapsed {
-  margin-left: 60px; /* Collapsed sidebar width */
+  padding-left: 60px;
 }
 
 .header-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  /* max-width: 1400px; <-- REMOVED */
+  /* margin: 0 auto;    <-- REMOVED */
+  padding: 0 2rem; /* Keeps content from touching the screen edges */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -106,6 +105,8 @@
   max-width: 1400px;
   margin: 0 auto;
 }
+
+/* ... (rest of your CSS is unchanged) ... */
 
 .card-section {
   display: grid;
