@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../styles/global/Sidebar.css";
 
 // MODIFIED: Accepts state and setter as props
