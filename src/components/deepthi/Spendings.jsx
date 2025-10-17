@@ -13,8 +13,9 @@ export default function Spendings({ weeks = 5 }) {
   const [err, setErr] = useState(null);
   const [selectedWeek, setSelectedWeek] = useState(null);
 
-  useEffect(() => {
+  const loadData = () => {
     setLoading(true);
+    setErr(null);
     fetchWeeklySpendings({ weeks })
       .then((res) => {
         if (res?.weeks) {
@@ -25,11 +26,42 @@ export default function Spendings({ weeks = 5 }) {
       })
       .catch((e) => setErr(e.message || "Failed"))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
   }, [weeks]);
 
   if (loading)
     return <div className="spendings-card">Loading spendings...</div>;
-  if (err) return <div className="spendings-card">Error: {err}</div>;
+  if (err)
+    return (
+      <div
+        className="spendings-card"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <p>Error: {err}</p>
+        <button
+          onClick={loadData}
+          style={{
+            marginTop: "10px",
+            padding: "6px 12px",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "#fff",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
   if (!data || data.length === 0)
     return <div className="spendings-card">No spendings data</div>;
 
@@ -38,6 +70,10 @@ export default function Spendings({ weeks = 5 }) {
     ...data.map((w) => Math.max(w.income, w.expense)),
     50,
   );
+
+  // compute totals across all weeks
+  const totalIncome = data.reduce((sum, w) => sum + (w.income || 0), 0);
+  const totalExpense = data.reduce((sum, w) => sum + (w.expense || 0), 0);
 
   // chart dimensions and padding
   const chartHeight = 220;
@@ -172,12 +208,8 @@ export default function Spendings({ weeks = 5 }) {
           Current margin: <strong>Week view</strong>
         </div>
         <div className="spendings-totals">
-          <div className="income-total">
-            {formatCurrency(data[data.length - 1].income)} /
-          </div>
-          <div className="expense-total">
-            {formatCurrency(data[data.length - 1].expense)}
-          </div>
+          <div className="income-total">{formatCurrency(totalIncome)} /</div>
+          <div className="expense-total">{formatCurrency(totalExpense)}</div>
         </div>
       </div>
 

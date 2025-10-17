@@ -1,4 +1,5 @@
 // src/controllers/spendingController.js
+const mongoose = require("mongoose");
 const Spending = require("../models/Spending");
 const Person = require("../models/people.model");
 
@@ -42,7 +43,9 @@ exports.getWeeklySummary = async (req, res) => {
       user: userId,
       date: { $gte: earliest },
     })
+      .select("amount type date category -_id")
       .lean()
+      .sort({ date: 1 })
       .exec();
 
     // build buckets: an array of weeks from earliest -> current
@@ -129,13 +132,111 @@ exports.getRecentSpendings = async (req, res) => {
 
     const limit = Math.min(200, parseInt(req.query.limit || "50", 10));
     const docs = await Spending.find({ user: userId })
+      .select("amount type date category description")
       .sort({ date: -1 })
-      .limit(limit)
+      .limit(lim)
       .lean()
       .exec();
     res.json({ success: true, spendings: docs });
   } catch (err) {
     console.error("getRecentSpendings error", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+/**
+ * GET /api/spendings/distribution-pie?days=30
+ * Aggregates expense spendings by category for the past N days (default 30).
+ * Returns category breakdown with amounts, percentages, and colors for pie chart.
+ */
+exports.getExpenseDistributionPie = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!userId) return res.status(401).json({ msg: "Unauthorized" });
+
+    const days = Math.max(
+      1,
+      Math.min(365, parseInt(req.query.days || "30", 10)),
+    );
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - days);
+
+    const userObjectId =
+      typeof userId === "string" ? new mongoose.Types.ObjectId(userId) : userId;
+
+    // Aggregate expenses by category
+    const distribution = await Spending.aggregate([
+      {
+        $match: {
+          user: userObjectId,
+          type: "expense",
+          date: { $gte: since },
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          total: { $sum: "$amount" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { total: -1 } },
+    ])
+      .allowDiskUse(true)
+      .exec();
+
+    const total = distribution.reduce((sum, item) => sum + item.total, 0);
+
+    // Define colors for each category
+    const categoryColors = {
+      "Shopping and Entertainment": "#7C3AED",
+      "Groceries and Utilities": "#F97316",
+      "Transportation and Health": "#38BDF8",
+      "Dining and Takeout": "#10B981",
+      "Travel and Experiences": "#F472B6",
+      "Bills and Subscriptions": "#FACC15",
+      Entertainment: "#8B5CF6",
+      Shopping: "#EC4899",
+      Transport: "#06B6D4",
+      Groceries: "#84CC16",
+      Dining: "#F43F5E",
+      Other: "#6B7280",
+    };
+
+    const categories = distribution.map((item) => {
+      const color = categoryColors[item._id] || categoryColors["Other"];
+      return {
+        category: item._id || "Other",
+        amount: Number(item.total.toFixed(2)),
+        percentage:
+          total > 0 ? Number(((item.total / total) * 100).toFixed(1)) : 0,
+        count: item.count,
+        color,
+      };
+    });
+
+    res.json({
+      success: true,
+      total: Number(total.toFixed(2)),
+      days,
+      categories,
+      summary: {
+        topCategory: categories[0]?.category || "N/A",
+        topAmount: categories[0]?.amount || 0,
+        averagePerTransaction:
+          total > 0
+            ? Number(
+                (
+                  total /
+                  distribution.reduce((sum, item) => sum + item.count, 0)
+                ).toFixed(2),
+              )
+            : 0,
+      },
+    });
+  } catch (err) {
+    console.error("getExpenseDistributionPie error", err);
     res.status(500).json({ msg: "Server error" });
   }
 };
