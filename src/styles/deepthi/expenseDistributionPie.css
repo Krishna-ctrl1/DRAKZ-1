@@ -1,0 +1,300 @@
+/* src/styles/deepthi/expenseDistributionPie.css */
+
+.expense-pie-container {
+  background: linear-gradient(135deg, #1a1d2e 0%, #16192b 100%);
+  border-radius: 16px;
+  padding: 24px;
+  /* margin: 20px 0; REMOVED for grid layout */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0px;
+  height: 100%; /* Ensure it fills the grid cell */
+}
+
+.pie-title {
+  color: #f3f4f6;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.pie-content {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.pie-chart-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pie-chart {
+  filter: drop-shadow(0 10px 25px rgba(124, 58, 237, 0.15));
+}
+
+.pie-segment path {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+.pie-segment.hovered path {
+  filter: drop-shadow(0 8px 20px rgba(124, 58, 237, 0.4));
+  opacity: 1 !important;
+}
+
+.pie-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* Tooltip */
+.pie-tooltip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.95);
+  color: #f3f4f6;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 1000;
+  pointer-events: none;
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.2);
+  white-space: nowrap;
+  animation: tooltipAppear 0.2s ease-out;
+}
+
+@keyframes tooltipAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-category {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #7c3aed;
+}
+
+.tooltip-amount {
+  color: #10b981;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.tooltip-percentage {
+  color: #f97316;
+  font-size: 12px;
+}
+
+/* Legend */
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.legend-item:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: translateX(4px);
+}
+
+.legend-item.active {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legend-name {
+  font-weight: 500;
+  color: #f3f4f6;
+  font-size: 13px;
+}
+
+.legend-value {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Summary Stats */
+.pie-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(124, 58, 237, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+/* States */
+.pie-loading,
+.pie-error,
+.pie-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  font-size: 16px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.pie-error {
+  color: #f87171;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .expense-pie-container {
+    padding: 16px;
+    min-height: auto;
+  }
+
+  .pie-title {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .pie-content {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .pie-chart-wrapper svg {
+    width: 200px;
+    height: 200px;
+  }
+
+  .pie-legend {
+    max-width: 100%;
+    min-width: auto;
+  }
+
+  .pie-summary {
+    grid-template-columns: 1fr;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .pie-tooltip {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expense-pie-container {
+    padding: 12px;
+    margin: 10px 0;
+  }
+
+  .pie-title {
+    font-size: 1rem;
+  }
+
+  .pie-content {
+    gap: 16px;
+  }
+
+  .pie-chart-wrapper svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .pie-label {
+    font-size: 10px;
+  }
+
+  .legend-item {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .legend-name {
+    font-size: 12px;
+  }
+
+  .legend-value {
+    font-size: 11px;
+  }
+
+  .summary-stat {
+    padding: 10px;
+  }
+
+  .summary-value {
+    font-size: 14px;
+  }
+}

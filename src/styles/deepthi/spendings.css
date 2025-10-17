@@ -11,11 +11,14 @@
   );
   padding: 18px;
   border-radius: 14px;
-  display: block;
+  /* margin-top: 20px; REMOVED for grid layout */
+
+  display: flex;
+  flex-direction: column;
   color: #e6eef5;
   box-shadow: 0 5px 20px rgba(32, 3, 118, 0.6);
   width: 100%;
-  max-width: 100%; /* allow full width of the grid column */
+  /* max-width: 100%; already 100% */
   border: 1px solid rgba(255, 255, 255, 0.03);
   font-family:
     "Inter",
@@ -25,6 +28,8 @@
     Roboto,
     "Helvetica Neue",
     Arial;
+  height: 100%; /* Ensure it fills the grid cell */
+  box-sizing: border-box;
 }
 
 .spendings-header {
@@ -66,6 +71,8 @@
   padding-bottom: 8px;
   display: flex;
   justify-content: center;
+  flex: 1;
+  align-items: center;
 }
 .spendings-chart-wrap[style*="pointer-events: none"] {
   filter: blur(0.6px) brightness(0.9);
