@@ -1,91 +1,217 @@
+/* ---
+  Root variables for the new "floating" theme.
+  Easily change your app's entire look here.
+--- */
+:root {
+  --page-bg: #0d0d1a; /* Dark background for the page body */
+  --sidebar-bg: #1c1c2e; /* Sidebar background */
+  --icon-color: #8a8a9e; /* Default icon color (grey) */
+  --icon-hover-color: #4a90e2; /* Icon color on hover (dark blue) */
+  --active-bg: #5d5fef; /* Background of the active item (rounded box) */
+  --active-icon-color: #ffffff; /* Icon color of the active item (white) */
+  --text-color: #d1d5db; /* Text color for labels */
+}
+
+/* ---
+  Floating Sidebar Container
+--- */
 .sidebar {
+  /* Positioning: Floating and isolated from the border */
+  position: fixed;
+  top: 6rem;
+  left: 1rem;
+  height: calc(100vh - 7rem); /* Full height minus top/bottom margin */
+
+  /* Layout: Split top and bottom */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 180px;
-  
-  /* MODIFIED: Height is calculated to fill space BELOW the header */
-  height: calc(100vh - 5rem); 
-  
-  background: #000000;
-  color: white;
-  transition: width 0.3s ease;
-  font-family: 'Inter', sans-serif;
-  position: fixed;
-  
-  /* MODIFIED: Top is now 5rem to start below the header */
-  top: 5rem;
-  
-  left: 0;
-  z-index: 1000;
-}
-
-/* Collapsed state */
-.sidebar.collapsed {
-  width: 60px;
-}
-
-/* Collapse/Expand button */
-.collapse-btn {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: #1e293b;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-  padding: 0;
+  padding: 1.5rem 0;
+  box-sizing: border-box; /* Ensures padding doesn't affect width/height */
+
+  /* Collapsed (icon-only) state */
+  width: 80px;
+
+  /* Visuals: Rounded corners, background, and subtle shadow */
+  background: linear-gradient(-45deg, #000000, #111827, #0f0c29, #302b63);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  /* Animation */
+  transition: width 0.3s ease-in-out;
 }
 
-.collapse-btn:hover {
-  background: #334155;
+/* ---
+  Expanded State
+--- */
+.sidebar:not(.collapsed) {
+  width: 220px; /* Width when expanded */
+  align-items: flex-start; /* Align text to the left */
 }
-
 /* Icon image inside button */
 .toggle-icon {
-  width: 14px;
-  height: 14px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
-  filter: invert(100%);
+  /* filter: invert(100%); */
 }
 
+/* ---
+  Logo
+--- */
+/* .logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--active-icon-color);
+  margin-bottom: 2rem;
+  width: 100%;
+  text-align: center;
+} */
 
+/* ---
+  Top & Bottom Sections
+--- */
+.sidebar-top,
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* ---
+  Menu List Styling
+--- */
 .sidebar-list {
   list-style: none;
-  padding: 16px 0 0 0;
+  padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 1.25rem; /* Space between items */
+  width: 100%;
 }
 
 .sidebar-list li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
+  justify-content: center; /* Center icons when collapsed */
+  height: 50px;
+  width: calc(100% - 2rem); /* Full width minus some padding */
+  margin: 0 1rem;
+  padding: 0;
   cursor: pointer;
-  transition: background 0.2s, padding 0.2s;
+  border-radius: 0.75rem; /* Rounded box for the active state */
+  transition: background-color 0.3s ease;
+  position: relative;
 }
 
-.sidebar-list li:hover,
+/* ---
+  Icon Styling
+--- */
+.sidebar-list li i {
+  font-size: 1.25rem;
+  color: var(--icon-color); /* Default grey */
+  transition: color 0.3s ease;
+  width: 50px; /* Fixed width for alignment */
+  text-align: center;
+}
+
+/* ---
+  Text Label Styling (Expanded)
+--- */
+.sidebar:not(.collapsed) .sidebar-list li {
+  justify-content: flex-start; /* Align icon/text left */
+  padding-left: 15px; /* Indent items */
+}
+
+.sidebar:not(.collapsed) .sidebar-list li i {
+  width: 30px; /* Adjust icon width */
+  text-align: center;
+  margin-right: 10px;
+}
+
+.sidebar:not(.collapsed) .sidebar-list li span {
+  color: var(--text-color);
+  font-weight: 500;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* ---
+  Fix for the text transition
+--- */
+
+/* 1. Define the fade-in animation */
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 2. Apply animation to spans ONLY when sidebar is expanded */
+.sidebar:not(.collapsed) .sidebar-list li span {
+  color: var(--text-color);
+  font-weight: 500;
+  white-space: nowrap;
+
+  /* Start the element as invisible to prepare for animation.
+    This prevents the "pop-in" effect.
+  */
+  opacity: 0;
+
+  /* Apply the animation:
+    - 0.2s duration for the fade
+    - 'ease' timing function
+    - '0.2s' delay to wait for the sidebar to open
+    - 'forwards' to keep the text visible after
+  */
+  animation: fadeInText 0.2s ease 0.2s forwards;
+}
+
+/* ---
+  Hover Effect (Icon turns blue)
+--- */
+
+.sidebar-list li:not(.active):hover i {
+  color: var(--icon-hover-color);
+}
+
+/* ---
+  Active Effect (Rounded box)
+--- */
 .sidebar-list li.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  background-color: var(--active-bg);
 }
 
-.sidebar.collapsed .sidebar-list li {
-  justify-content: center;
-  padding: 8px 0;
+.sidebar-list li.active i {
+  color: var(--active-icon-color);
 }
 
-.sidebar.collapsed .sidebar-list li span {
-  display: none;
+.sidebar:not(.collapsed) .sidebar-list li.active span {
+  color: var(--active-icon-color);
+}
+
+/* ---
+  Collapse Button
+--- */
+.collapse-btn {
+  background: transparent;
+  border: none;
+  color: var(--icon-color);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 0.75rem;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.collapse-btn:hover {
+  color: var(--icon-hover-color);
+  background-color: rgba(74, 144, 226, 0.1); /* Faint blue background */
 }
