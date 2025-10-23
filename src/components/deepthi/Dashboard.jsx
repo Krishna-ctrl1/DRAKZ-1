@@ -1,37 +1,67 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import Sidebar from '../global/Sidebar';
+import Sidebar from "../global/Sidebar";
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [collapsed, setCollapsed] = useState(false); // ADDED: State for sidebar collapse
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const cardData = {
-    cardNumber: '**** **** **** 1234',
-    cardHolder: 'JOHN DRAKZ',
-    expiryDate: '12/28',
-    balance: '$5,247.89',
-    availableCredit: '$4,752.11',
-    creditLimit: '$10,000.00'
+    cardNumber: "**** **** **** 1234",
+    cardHolder: "JOHN DRAKZ",
+    expiryDate: "12/28",
+    balance: "$5,247.89",
+    availableCredit: "$4,752.11",
+    creditLimit: "$10,000.00",
   };
 
   const transactions = [
-    { id: 1, merchant: 'Amazon', amount: '-$129.99', date: '2024-08-14', category: 'Shopping' },
-    { id: 2, merchant: 'Starbucks', amount: '-$4.50', date: '2024-08-13', category: 'Food' },
-    { id: 3, merchant: 'Gas Station', amount: '-$45.00', date: '2024-08-12', category: 'Transport' },
-    { id: 4, merchant: 'Netflix', amount: '-$15.99', date: '2024-08-11', category: 'Entertainment' },
-    { id: 5, merchant: 'Payment Received', amount: '+$500.00', date: '2024-08-10', category: 'Payment' }
+    {
+      id: 1,
+      merchant: "Amazon",
+      amount: "-$129.99",
+      date: "2024-08-14",
+      category: "Shopping",
+    },
+    {
+      id: 2,
+      merchant: "Starbucks",
+      amount: "-$4.50",
+      date: "2024-08-13",
+      category: "Food",
+    },
+    {
+      id: 3,
+      merchant: "Gas Station",
+      amount: "-$45.00",
+      date: "2024-08-12",
+      category: "Transport",
+    },
+    {
+      id: 4,
+      merchant: "Netflix",
+      amount: "-$15.99",
+      date: "2024-08-11",
+      category: "Entertainment",
+    },
+    {
+      id: 5,
+      merchant: "Payment Received",
+      amount: "+$500.00",
+      date: "2024-08-10",
+      category: "Payment",
+    },
   ];
 
   return (
     <div className="dashboard-page">
       {/* Header */}
-      <div className={`dashboard-header ${collapsed ? 'collapsed' : ''}`}>
+      <div className={`dashboard-header ${collapsed ? "collapsed" : ""}`}>
         <div className="header-content">
           <div className="logo-section">
             <h1 className="dashboard-logo">DRAKZ</h1>
@@ -47,23 +77,30 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="app" >
+      <div className="app">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <div className={`main-content ${collapsed ? 'main-content-collapsed' : ''}`}>
+        <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           <div className="dashboard-content">
             <div className="dashboard-container">
-
               {/* Card Section */}
               <div className="card-section">
                 <div className="virtual-card">
                   <div className="card-background">
-                    <img src="/card.png" alt="DRAKZ Card" className="card-bg-img" />
+                    <img
+                      src="/card.png"
+                      alt="DRAKZ Card"
+                      className="card-bg-img"
+                    />
                     <div className="card-overlay">
                       <div className="card-info">
                         <div className="card-number">{cardData.cardNumber}</div>
                         <div className="card-details">
-                          <div className="card-holder">{cardData.cardHolder}</div>
-                          <div className="card-expiry">{cardData.expiryDate}</div>
+                          <div className="card-holder">
+                            {cardData.cardHolder}
+                          </div>
+                          <div className="card-expiry">
+                            {cardData.expiryDate}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -89,20 +126,20 @@ const Dashboard = () => {
               {/* Navigation Tabs */}
               <div className="dashboard-tabs">
                 <button
-                  className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('overview')}
+                  className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
+                  onClick={() => setActiveTab("overview")}
                 >
                   Overview
                 </button>
                 <button
-                  className={`tab-btn ${activeTab === 'transactions' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('transactions')}
+                  className={`tab-btn ${activeTab === "transactions" ? "active" : ""}`}
+                  onClick={() => setActiveTab("transactions")}
                 >
                   Transactions
                 </button>
                 <button
-                  className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('settings')}
+                  className={`tab-btn ${activeTab === "settings" ? "active" : ""}`}
+                  onClick={() => setActiveTab("settings")}
                 >
                   Settings
                 </button>
@@ -110,7 +147,7 @@ const Dashboard = () => {
 
               {/* Tab Content */}
               <div className="tab-content">
-                {activeTab === 'overview' && (
+                {activeTab === "overview" && (
                   <div className="overview-content">
                     <div className="quick-actions">
                       <h3>Quick Actions</h3>
@@ -125,14 +162,23 @@ const Dashboard = () => {
                     <div className="recent-activity">
                       <h3>Recent Transactions</h3>
                       <div className="transaction-list">
-                        {transactions.slice(0, 3).map(transaction => (
-                          <div key={transaction.id} className="transaction-item">
+                        {transactions.slice(0, 3).map((transaction) => (
+                          <div
+                            key={transaction.id}
+                            className="transaction-item"
+                          >
                             <div className="transaction-info">
-                              <span className="merchant">{transaction.merchant}</span>
-                              <span className="category">{transaction.category}</span>
+                              <span className="merchant">
+                                {transaction.merchant}
+                              </span>
+                              <span className="category">
+                                {transaction.category}
+                              </span>
                             </div>
                             <div className="transaction-details">
-                              <span className={`amount ${transaction.amount.startsWith('+') ? 'positive' : 'negative'}`}>
+                              <span
+                                className={`amount ${transaction.amount.startsWith("+") ? "positive" : "negative"}`}
+                              >
                                 {transaction.amount}
                               </span>
                               <span className="date">{transaction.date}</span>
@@ -144,21 +190,27 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {activeTab === 'transactions' && (
+                {activeTab === "transactions" && (
                   <div className="transactions-content">
                     <div className="transactions-header">
                       <h3>All Transactions</h3>
                       <button className="filter-btn">Filter</button>
                     </div>
                     <div className="transaction-list">
-                      {transactions.map(transaction => (
+                      {transactions.map((transaction) => (
                         <div key={transaction.id} className="transaction-item">
                           <div className="transaction-info">
-                            <span className="merchant">{transaction.merchant}</span>
-                            <span className="category">{transaction.category}</span>
+                            <span className="merchant">
+                              {transaction.merchant}
+                            </span>
+                            <span className="category">
+                              {transaction.category}
+                            </span>
                           </div>
                           <div className="transaction-details">
-                            <span className={`amount ${transaction.amount.startsWith('+') ? 'positive' : 'negative'}`}>
+                            <span
+                              className={`amount ${transaction.amount.startsWith("+") ? "positive" : "negative"}`}
+                            >
                               {transaction.amount}
                             </span>
                             <span className="date">{transaction.date}</span>
@@ -169,7 +221,7 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {activeTab === 'settings' && (
+                {activeTab === "settings" && (
                   <div className="settings-content">
                     <div className="settings-section">
                       <h3>Account Settings</h3>
