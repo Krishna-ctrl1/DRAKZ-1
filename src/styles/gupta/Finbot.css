@@ -1,0 +1,472 @@
+/*
+* =================================================================
+* FINBOT STYLES - DARK THEME (Matching Your New Images)
+* This CSS is self-contained and will only affect the FinBot component.
+* =================================================================
+*/
+
+:root {
+  /* Dark Theme Variables from Images */
+  --finbot-bg: #0d0d1a;         /* Overall page background */
+  --finbot-card-bg: #1a1a2e;    /* Card/Section background */
+  --finbot-border: rgba(255, 255, 255, 0.1);
+  --finbot-primary: #5d5fef;    /* Purple accent */
+  --finbot-secondary: #4a90e2;  /* Blue accent (buttons, etc.) */
+  --finbot-text-primary: #ffffff; /* White text */
+  --finbot-text-secondary: #8a8a9e;/* Grey text */
+  --finbot-text-heading: #e0e0e0; /* Slightly off-white for headings */
+  --finbot-input-bg: rgba(255, 255, 255, 0.05);
+  --finbot-input-border: rgba(255, 255, 255, 0.2);
+  --finbot-input-focus: #4a90e2;
+  --finbot-success: #22c55e;
+  --finbot-danger: #ef4444;
+  --finbot-warning: #f59e0b;
+  --finbot-radius-md: 12px;
+  --finbot-radius-lg: 16px;
+  --finbot-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --finbot-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --finbot-transition: all 0.3s ease;
+  --finbot-font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Main Container - This wrapper ensures the dark theme */
+.chatbot-container {
+  width: 100%;
+  min-height: 100%; 
+  background-color: var(--finbot-bg); /* Dark background */
+  color: var(--finbot-text-primary);
+  padding: 1.5rem; /* Padding around the main card */
+  box-sizing: border-box;
+}
+
+/* Main Card - This is the main component */
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  /* Calculate height minus header (approx 60px) and padding.
+    Adjust 100px as needed for your header/padding.
+  */
+  height: calc(100vh - 100px); 
+  background-color: var(--finbot-card-bg); /* Dark card background */
+  border-radius: var(--finbot-radius-lg); 
+  border: 1px solid var(--finbot-border);
+  box-shadow: var(--finbot-shadow-md);
+  overflow: hidden;
+}
+
+/* Tab Navigation - Dark theme */
+.tab-navigation {
+  display: flex;
+  background-color: transparent; 
+  border-bottom: 1px solid var(--finbot-border);
+  padding: 0 1.5rem; /* Padding inside the nav bar */
+  flex-shrink: 0;
+}
+
+.tab-item {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--finbot-text-secondary);
+  transition: var(--finbot-transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 3px solid transparent; /* Underline indicator */
+}
+
+.tab-item.active {
+  color: var(--finbot-primary); /* Purple text */
+  border-bottom-color: var(--finbot-primary); /* Purple underline */
+}
+
+.tab-item:hover:not(.active) {
+  color: var(--finbot-text-primary);
+}
+
+.icon { 
+  display: inline-block;
+  width: 20px; 
+  height: 20px;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+/* Section Content - Dark theme */
+.section-content {
+  display: none;
+  padding: 24px;
+  flex: 1; 
+  overflow-y: auto; 
+  color: var(--finbot-text-secondary); 
+}
+
+.section-content.active {
+  display: block;
+}
+
+.section-content h2 {
+  color: var(--finbot-text-heading);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.section-content h3 {
+   color: var(--finbot-text-heading);
+   font-size: 1.1rem;
+   margin-top: 25px;
+   margin-bottom: 15px;
+}
+
+/* Welcome Message - Dark theme */
+.welcome-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+.welcome-message h1 {
+  color: var(--finbot-text-heading);
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+.welcome-message p {
+  color: var(--finbot-text-secondary);
+  margin-bottom: 40px; 
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Section Cards (Welcome Page) - Dark theme */
+.section-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+  gap: 24px;
+  margin: 40px auto;
+  max-width: 1000px;
+}
+.section-card {
+  background-color: rgba(255, 255, 255, 0.03); 
+  border: 1px solid var(--finbot-border);
+  border-radius: var(--finbot-radius-lg); 
+  padding: 24px 16px; 
+  cursor: pointer;
+  transition: all 0.3s ease; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.section-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--finbot-shadow-lg);
+  border-color: var(--finbot-primary); 
+  background-color: rgba(93, 95, 239, 0.05);
+}
+.section-card .icon-container { margin-bottom: 15px; }
+.section-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--finbot-text-heading);
+  transition: color 0.3s ease;
+}
+.section-card:hover h3 { color: var(--finbot-primary); }
+.section-card p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--finbot-text-secondary);
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+/* Financial Planning Inputs - Dark theme */
+.financial-planning-inputs {
+  width: 100%;
+  max-width: 900px; 
+  margin: 0 auto;
+  padding: 20px;
+}
+.input-row {
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.input-group { margin-bottom: 0; }
+.input-group label {
+  margin-bottom: 8px; 
+  font-weight: 500;
+  display: block;
+  color: var(--finbot-text-secondary);
+  font-size: 0.9rem;
+}
+.number-input,
+.stock-input,
+textarea {
+  padding: 12px 16px; 
+  border: 1px solid var(--finbot-input-border);
+  border-radius: var(--finbot-radius-md);
+  font-size: 1rem;
+  width: 100%;
+  background-color: var(--finbot-input-bg);
+  color: var(--finbot-text-primary);
+  transition: var(--finbot-transition);
+  box-sizing: border-box; /* Add this */
+}
+.number-input:focus,
+.stock-input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--finbot-input-focus);
+  background-color: rgba(74, 144, 226, 0.05); 
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2); 
+}
+textarea::placeholder { color: var(--finbot-text-secondary); }
+
+/* Toggle Switch - Dark theme */
+.toggle-container { margin: 25px 0; }
+.toggle-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: relative; display: inline-block; width: 50px; height: 24px; background-color: rgba(255, 255, 255, 0.2); border-radius: 34px; transition: var(--finbot-transition); }
+.toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: var(--finbot-transition); }
+.toggle-switch input:checked + .toggle-slider { background-color: var(--finbot-secondary); } /* Blue toggle */
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(26px); }
+.toggle-label { margin-left: 10px; font-weight: 500; color: var(--finbot-text-heading); }
+
+.hidden { display: none; }
+
+#variable-costs-container {
+  background-color: rgba(255, 255, 255, 0.03); 
+  padding: 20px;
+  border-radius: var(--finbot-radius-md);
+  margin-bottom: 20px;
+  border: 1px solid var(--finbot-border);
+}
+#variable-costs-container h3 {
+  margin-bottom: 15px;
+  color: var(--finbot-secondary); /* Blue heading */
+}
+
+/* Buttons - Dark theme */
+.calculate-btn,
+.stock-button {
+  background-color: var(--finbot-secondary); /* Blue button */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600; 
+  border-radius: var(--finbot-radius-md);
+  cursor: pointer;
+  transition: var(--finbot-transition);
+  margin-top: 20px;
+  width: 100%;
+}
+.calculate-btn:hover,
+.stock-button:hover {
+  background-color: #3182ce; /* Darker blue on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+}
+.stock-button {
+  width: auto; 
+  margin-top: 0;
+  flex-shrink: 0; 
+}
+
+/* Financial Summary Results - Dark theme */
+.financial-summary {
+  background-color: transparent; 
+  border-radius: var(--finbot-radius-md);
+  padding: 20px 0; 
+  margin-top: 30px;
+}
+.metrics-container { margin: 20px 0; }
+.metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+.metric {
+  background-color: rgba(255, 255, 255, 0.03); 
+  padding: 20px;
+  border-radius: var(--finbot-radius-md);
+  border: 1px solid var(--finbot-border);
+}
+.metric-label { color: var(--finbot-text-secondary); font-size: 0.9rem; margin-bottom: 8px; }
+.metric-value { color: var(--finbot-text-primary); font-size: 1.5rem; font-weight: 600; }
+
+/* Stock Analysis - Dark theme */
+.stock-input-container {
+  display: flex;
+  margin: 20px 0 30px 0; 
+  gap: 15px; 
+  align-items: center;
+}
+.stock-input { margin-right: 0; } 
+.stock-analysis-results { margin-top: 20px; }
+.stock-graph {
+  width: 100%;
+  height: 350px; 
+  background-color: rgba(255, 255, 255, 0.03); 
+  margin: 20px 0 30px 0;
+  border-radius: var(--finbot-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--finbot-border);
+  padding: 15px; 
+}
+.key-metrics { 
+   display: grid; 
+   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+   gap: 15px; 
+   margin-bottom: 30px; 
+}
+.metric-card { /* This is the same as .metric, can be merged */
+  background-color: rgba(255, 255, 255, 0.03); 
+  padding: 20px; 
+  border-radius: var(--finbot-radius-md); 
+  border: 1px solid var(--finbot-border);
+}
+.metric-label { font-size: 0.9rem; color: var(--finbot-text-secondary); margin-bottom: 8px; }
+.metric-value { font-size: 1.5rem; font-weight: 600; color: var(--finbot-text-primary); }
+
+.company-info {
+  background-color: rgba(255, 255, 255, 0.03); 
+  padding: 20px;
+  border-radius: var(--finbot-radius-md);
+  margin-top: 20px;
+  border: 1px solid var(--finbot-border);
+}
+.company-info p { margin-bottom: 10px; color: var(--finbot-text-secondary); }
+.company-info strong { color: var(--finbot-text-heading); }
+.positive { color: var(--finbot-success); }
+.negative { color: var(--finbot-danger); }
+
+/* Chat Interface (Advisor) - Dark Theme */
+#advisor-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+  padding: 0; 
+}
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+.message {
+  padding: 12px 18px; 
+  border-radius: 20px; 
+  max-width: 75%; 
+  word-break: break-word;
+  line-height: 1.5;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.message.user {
+  background: linear-gradient(to right, #4a90e2, #3b82f6); /* Blue gradient */
+  color: white;
+  align-self: flex-end;
+  border-radius: 20px 20px 5px 20px; 
+}
+.message.bot {
+  background-color: #2a2a3d; /* Darker grey for bot */
+  color: var(--finbot-text-primary);
+  align-self: flex-start;
+  border-radius: 20px 20px 20px 5px; 
+}
+.bot-thinking { display: flex; align-items: center; padding: 12px 16px; max-width: 100px; background-color: #2a2a3d; border-radius: 20px 20px 20px 5px; }
+.typing-indicator { display: flex; gap: 4px; }
+.typing-dot { width: 8px; height: 8px; background-color: var(--finbot-text-secondary); border-radius: 50%; animation: typing 1.5s infinite ease-in-out; }
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.3s; }
+.typing-dot:nth-child(3) { animation-delay: 0.6s; }
+@keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+/* Chat Input Area - Dark Theme */
+.input-area {
+  display: flex;
+  padding: 16px 20px; 
+  border-top: 1px solid var(--finbot-border);
+  background-color: var(--finbot-card-bg); 
+  align-items: center;
+}
+.input-area textarea {
+  flex: 1;
+  border-radius: 20px; 
+  height: 44px; 
+  max-height: 120px;
+  resize: none;
+  background-color: var(--finbot-input-bg);
+  padding: 12px 16px;
+  font-size: 1rem; 
+  border: 1px solid var(--finbot-input-border);
+  color: var(--finbot-text-primary);
+}
+.send-btn {
+  width: 44px; 
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--finbot-secondary); 
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  margin-left: 12px;
+  cursor: pointer;
+  transition: var(--finbot-transition);
+  flex-shrink: 0;
+  font-size: 1.2rem; 
+}
+.send-btn:hover {
+  background-color: #3182ce;
+  transform: scale(1.05);
+}
+.send-btn:disabled {
+  background-color: var(--finbot-text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading and error states - Dark Theme */
+.loading,
+.error {
+  padding: 20px;
+  text-align: center;
+  border-radius: var(--finbot-radius-md);
+  margin: 20px;
+  border: 1px solid var(--finbot-border);
+}
+.loading {
+  background-color: rgba(74, 144, 226, 0.1); 
+  color: var(--finbot-secondary);
+}
+.error {
+  background-color: rgba(239, 68, 68, 0.1); 
+  color: var(--finbot-danger);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chatbot-container { padding: 0.5rem; }
+  .chat-section { height: calc(100vh - 80px); } /* Adjust for mobile */
+  .tab-navigation { padding: 0 0.5rem; }
+  .tab-item { padding: 0.75rem 0.5rem; font-size: 0.8rem; gap: 4px; }
+  .section-cards { grid-template-columns: 1fr 1fr; }
+  .input-row { grid-template-columns: 1fr; } /* Stack inputs */
+  .stock-input-container { flex-direction: column; align-items: stretch; gap: 10px; }
+  .stock-button { width: 100%; }
+  .metrics-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 576px) {
+  .section-cards { grid-template-columns: 1fr; }
+  .message { max-width: 85%; }
+}
