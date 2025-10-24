@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/ziko/Home';
 import LoginPage from './components/ziko/LoginPage';
 import Dashboard from './components/deepthi/Dashboard';
-import FinBot from "./components/gupta/FinBot";
+import FinBot from "./components/gupta/Finbot";
 import './App.css';
 
 function App() {
