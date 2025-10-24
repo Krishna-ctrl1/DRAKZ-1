@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/global/Sidebar.css";
+import { Link, useLocation } from "react-router-dom";
 
 // MODIFIED: Accepts state and setter as props
 // Using the same props as your original file
@@ -48,6 +49,8 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     icon: "fa-solid fa-gear",
     path: "/settings",
   };
+
+  const location = useLocation(); 
 
   return (
     <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
