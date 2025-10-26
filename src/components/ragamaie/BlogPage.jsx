@@ -1,18 +1,24 @@
-import React from "react";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
-import BlogControls from "./BlogControls";   
-import BlogList from "./BlogList";
-import "../../styles/ragamaie/BlogPage";
+import React, { useState } from "react";
+import Sidebar from "../global/Sidebar";
+import BlogSection from "./BlogSection";
+import "../../styles/ragamaie/BlogPage.css";
+import Header from "../global/Header";
 
 function BlogPage() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-   <div className="app">
-      <Sidebar />
-      <main className="main-content">
-        <Header />
-        <BlogSection /> 
-      </main>
+    <div className="dashboard-page">
+      <Header />
+
+      <div className="app">
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+
+        <div className={collapsed ? "main-content-collapsed" : "main-content"}>
+          {/* BlogSection manages controls, filtering and the BlogList (with data) */}
+          <BlogSection />
+        </div>
+      </div>
     </div>
   );
 }

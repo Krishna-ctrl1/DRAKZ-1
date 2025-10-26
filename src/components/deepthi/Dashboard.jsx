@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -61,20 +61,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-page">
       {/* Header */}
-      <div className={`dashboard-header ${collapsed ? "collapsed" : ""}`}>
-        <div className="header-content">
-          <div className="logo-section">
-            <h1 className="dashboard-logo">DRAKZ</h1>
-            <span className="dashboard-subtitle">Dashboard</span>
-          </div>
-          <div className="header-actions">
-            <span className="welcome-text">Welcome back, John!</span>
-            <button className="logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+      <Header />
 
       {/* Main Content */}
       <div className="app">

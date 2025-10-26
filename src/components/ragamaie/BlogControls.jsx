@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/ragamaie/BlogControls";
+import "../../styles/ragamaie/BlogControls.css";
 
 function BlogControls() {
   const [activeTab, setActiveTab] = useState("Top");

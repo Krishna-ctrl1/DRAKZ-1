@@ -1,27 +1,29 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/global/Header.css";
 
-
 const Header = () => {
-  return (
-    <header className="header">
-      <div className="header-left">
-        <div className="logo">D</div>
-        <p className="date">Date : Monday, August 11, 2025</p>
-      </div>
+  const navigate = useNavigate();
 
-      <div className="header-right">
-        <div className="actions">
-          <span className="notification">🔔</span>
-          <span className="welcome">Welcome back, K.Raju!</span>
-          <img
-            className="profile"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQf5WOzvXp8VmmLciCxW96u9j_FyNaXulh_ig&s"
-            alt="profile"
-          />
+  const handleLogout = () => {
+    navigate("/");
+  };
+
+  return (
+    <div className="dashboard-header">
+      <div className="header-content">
+        <div className="logo-section">
+          <h1 className="dashboard-logo">DRAKZ</h1>
+          <span className="dashboard-subtitle">Dashboard</span>
+        </div>
+        <div className="header-actions">
+          <span className="welcome-text">Welcome back, K.Raju!</span>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
-    </header>
+    </div>
   );
 };
 
