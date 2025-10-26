@@ -676,6 +676,33 @@ textarea::placeholder {
   min-height: 300px;
 }
 
+.section-card .icon-container {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--finbot-primary-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  transition: all 0.3s ease;
+}
+
+.section-card .icon-container i {
+  font-size: 24px;
+  color: var(--finbot-primary);
+  transition: color 0.3s ease;
+}
+
+.section-card:hover .icon-container {
+  background-color: var(--finbot-primary);
+  transform: scale(1.1);
+}
+
+.section-card:hover .icon-container i {
+  color: var(--finbot-bg-primary);
+}
+
 /* Responsive layout for charts */
 @media (max-width: 900px) {
   .charts-grid {

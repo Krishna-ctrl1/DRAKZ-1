@@ -643,7 +643,9 @@ const FinBot = () => {
                         className="section-card"
                         onClick={() => setActiveSection("financial-planning")}
                       >
-                        <div className="icon-container">{/* Icon */}</div>
+                        <div className="icon-container">
+                          <i className="fas fa-calculator"></i>
+                        </div>
                         <h3>Financial Planning</h3>
                         <p>Budgeting & goals</p>
                       </div>
@@ -651,7 +653,9 @@ const FinBot = () => {
                         className="section-card"
                         onClick={() => setActiveSection("stock-analysis")}
                       >
-                        <div className="icon-container">{/* Icon */}</div>
+                        <div className="icon-container">
+                          <i className="fas fa-chart-line"></i>
+                        </div>
                         <h3>Stock Analysis</h3>
                         <p>Market insights</p>
                       </div>
@@ -659,7 +663,9 @@ const FinBot = () => {
                         className="section-card"
                         onClick={() => setActiveSection("investment")}
                       >
-                        <div className="icon-container">{/* Icon */}</div>
+                        <div className="icon-container">
+                          <i className="fas fa-seedling"></i>
+                        </div>
                         <h3>Recommendations</h3>
                         <p>Investment ideas</p>
                       </div>
@@ -667,7 +673,9 @@ const FinBot = () => {
                         className="section-card"
                         onClick={() => setActiveSection("advisor")}
                       >
-                        <div className="icon-container">{/* Icon */}</div>
+                        <div className="icon-container">
+                          <i className="fas fa-user-tie"></i>
+                        </div>
                         <h3>Financial Advisor</h3>
                         <p>Ask questions</p>
                       </div>
