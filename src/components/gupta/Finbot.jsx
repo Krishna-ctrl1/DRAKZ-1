@@ -148,21 +148,24 @@ const FinBot = () => {
   useEffect(() => {
     if (!stockResults || !stockResults.timeSeries || !stockChartRef.current)
       return;
+    
     const canvas = stockChartRef.current;
     const existingChart = Chart.getChart(canvas);
     if (existingChart) existingChart.destroy();
-    const timeSeriesData = stockResults.timeSeries["Time Series (Daily)"];
+    
+    const timeSeriesData = stockResults.timeSeries.historical;
     if (!timeSeriesData) {
       setStockError("No time series data found.");
       return;
     }
-    const chartData = Object.entries(timeSeriesData)
-      .map(([date, values]) => ({
-        date,
-        price: parseFloat(values["4. close"]),
+
+    const chartData = timeSeriesData
+      .map(d => ({
+        date: d.date,
+        price: d.close,
       }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-30);
+      .reverse();
+
     new Chart(canvas, {
       type: "line",
       data: {
@@ -397,7 +400,7 @@ const FinBot = () => {
       );
     }
     
-    const savingsRate = (monthlySavings / monthlyIncome) * 100;
+    const savingsRate = (monthlyIncome > 0) ? (monthlySavings / monthlyIncome) * 100 : 0;
     
     const expensesMap = {
       "Outing": summary.outing,
@@ -428,11 +431,13 @@ const FinBot = () => {
               <strong>{formatCurrency(Math.abs(monthlySavings))}</strong> per month.
             </li>
           )}
-          <li>
-            Your largest monthly expense category is{" "}
-            <strong>{maxExpense}</strong> at{" "}
-            <strong>{formatCurrency(expensesMap[maxExpense])}</strong>.
-          </li>
+          {expensesMap[maxExpense] > 0 && (
+            <li>
+              Your largest monthly expense category is{" "}
+              <strong>{maxExpense}</strong> at{" "}
+              <strong>{formatCurrency(expensesMap[maxExpense])}</strong>.
+            </li>
+          )}
           <li>
             Your total projected yearly investment (savings) is{" "}
             <strong>{formatCurrency(summary.yearlyInvestment)}</strong>.
@@ -451,42 +456,59 @@ const FinBot = () => {
     setStockError(null);
     setStockResults(null);
     setIsStockLoading(true);
-    // --- IMPORTANT: REPLACE WITH YOUR KEY ---
-    const apiKey = "YOUR_NEW_API_KEY_HERE";
-    // --- IMPORTANT: REPLACE WITH YOUR KEY ---
-    if (apiKey === "YOUR_NEW_API_KEY_HERE" || apiKey === "demo") {
-      setStockError("Please add your Alpha Vantage API key.");
+
+    const apiKey = "xEUZFi3q8rzn6D6fgBmtDnCrr2bIgFyJ";
+    
+    if (apiKey === "YOUR_NEW_API_KEY_HERE") {
+      setStockError("Please add your Financial Modeling Prep API key.");
       setIsStockLoading(false);
       return;
     }
+
     const urls = [
-      `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${stockSymbol}&apikey=${apiKey}`,
-      `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${apiKey}`,
-      `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockSymbol}&apikey=${apiKey}`,
+      `https://financialmodelingprep.com/api/v3/profile/${stockSymbol}?apikey=${apiKey}`,
+      `https://financialmodelingprep.com/api/v3/quote/${stockSymbol}?apikey=${apiKey}`,
+      `https://financialmodelingprep.com/api/v3/historical-price-full/${stockSymbol}?timeseries=30&apikey=${apiKey}`,
     ];
+
     try {
-      const [overviewRes, priceRes, tsRes] = await Promise.all(
+      const [profileRes, quoteRes, tsRes] = await Promise.all(
         urls.map((url) => fetch(url)),
       );
-      const [overviewData, priceData, tsData] = await Promise.all([
-        overviewRes.json(),
-        priceRes.json(),
+      
+      if (!profileRes.ok) {
+        throw new Error(`Failed to fetch profile: ${profileRes.status} ${profileRes.statusText} (Check API key or symbol)`);
+      }
+      if (!quoteRes.ok) {
+        throw new Error(`Failed to fetch quote: ${quoteRes.status} ${quoteRes.statusText} (Check API key or symbol)`);
+      }
+      if (!tsRes.ok) {
+        throw new Error(`Failed to fetch time series: ${tsRes.status} ${tsRes.statusText} (Check API key or symbol)`);
+      }
+
+      const [profileData, quoteData, tsData] = await Promise.all([
+        profileRes.json(),
+        quoteRes.json(),
         tsRes.json(),
       ]);
-      if (overviewData.Note || priceData.Note || tsData.Note)
-        throw new Error("API limit reached.");
-      if (
-        !overviewData.Symbol ||
-        !priceData["Global Quote"] ||
-        Object.keys(priceData["Global Quote"]).length === 0
-      )
-        throw new Error(`Could not find valid data for symbol: ${stockSymbol}`);
+
+      if (!profileData || profileData.length === 0 || profileData[0]["Error Message"]) {
+        throw new Error(`Could not find valid profile data for symbol: ${stockSymbol}`);
+      }
+      if (!quoteData || quoteData.length === 0 || quoteData[0]["Error Message"]) {
+        throw new Error(`Could not find valid quote data for symbol: ${stockSymbol}`);
+      }
+      if (!tsData || tsData["Error Message"]) {
+        throw new Error(`Could not find valid time series data for symbol: ${stockSymbol}`);
+      }
+      
       setStockResults({
-        symbol: overviewData.Symbol,
-        overview: overviewData,
-        price: priceData["Global Quote"],
+        symbol: profileData[0].symbol,
+        overview: profileData[0],
+        price: quoteData[0],
         timeSeries: tsData,
       });
+
     } catch (error) {
       console.error("Stock fetch error:", error);
       setStockError(error.message);
@@ -879,52 +901,48 @@ const FinBot = () => {
                         <div className="metric-card">
                           <div className="metric-label">Price</div>
                           <div className="metric-value">
-                            {stockResults.price["05. price"]}
+                            {formatCurrency(stockResults.price.price)}
                           </div>
                         </div>
                         <div className="metric-card">
                           <div className="metric-label">Change (%)</div>
                           <div
-                            className={`metric-value ${parseFloat(stockResults.price["10. change percent"]) >= 0 ? "positive" : "negative"}`}
+                            className={`metric-value ${stockResults.price.changesPercentage >= 0 ? "positive" : "negative"}`}
                           >
-                            {stockResults.price["10. change percent"]}
+                            {stockResults.price.changesPercentage.toFixed(2)}%
                           </div>
                         </div>
                         <div className="metric-card">
                           <div className="metric-label">Revenue (TTM)</div>
                           <div className="metric-value">
-                            {formatCurrency(stockResults.overview.RevenueTTM)}
+                            {formatCurrency(stockResults.overview.revenue)}
                           </div>
                         </div>
                         <div className="metric-card">
-                          <div className="metric-label">Net Income</div>
+                          <div className="metric-label">Market Cap</div>
                           <div className="metric-value">
-                            {formatCurrency(stockResults.overview.NetIncome)}
+                            {formatCurrency(stockResults.overview.mktCap)}
                           </div>
                         </div>
                         <div className="metric-card">
-                          <div className="metric-label">Margin</div>
+                          <div className="metric-label">P/E Ratio</div>
                           <div className="metric-value">
-                            {(
-                              parseFloat(stockResults.overview.ProfitMargin) *
-                              100
-                            ).toFixed(2)}
-                            %
+                            {stockResults.price.pe?.toFixed(2) || "N/A"}
                           </div>
                         </div>
                       </div>
                       <div className="company-info">
                         <h3>Company Info</h3>
                         <p>
-                          <strong>Name:</strong> {stockResults.overview.Name}
+                          <strong>Name:</strong> {stockResults.overview.companyName}
                         </p>
                         <p>
                           <strong>Industry:</strong>{" "}
-                          {stockResults.overview.Industry}
+                          {stockResults.overview.industry}
                         </p>
                         <p>
                           <strong>Desc:</strong>{" "}
-                          {stockResults.overview.Description}
+                          {stockResults.overview.description}
                         </p>
                       </div>
                     </div>
