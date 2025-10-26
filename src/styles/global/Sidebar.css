@@ -107,7 +107,12 @@
   transition: background-color 0.3s ease;
   position: relative;
 }
+.sidebar-link {
+  display: block; /* Makes the link fill the entire <li> */
 
+  text-decoration: none; /* <-- FIX: Removes the underline */
+  color: inherit; /* <-- FIX: Makes text color match the parent */
+}
 /* ---
   Icon Styling
 --- */
