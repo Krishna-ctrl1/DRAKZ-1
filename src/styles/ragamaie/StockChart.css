@@ -3,6 +3,7 @@
   padding: 20px;
   border-radius: 15px;
   color: white;
+  margin-top: 20px;
 }
 .stockchart-header {
   display: flex;
@@ -15,7 +16,8 @@
   border-collapse: collapse;
   color: #ddd;
 }
-.stock-table th, .stock-table td {
+.stock-table th,
+.stock-table td {
   padding: 10px;
   border-bottom: 1px solid #333;
 }

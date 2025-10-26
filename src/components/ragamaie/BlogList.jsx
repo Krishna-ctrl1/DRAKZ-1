@@ -1,11 +1,12 @@
 import React from "react";
-import BlogCard from "./BlogCard"; 
-import "../styles/BlogList.css";
+import BlogCard from "./BlogCard";
+import "../../styles/ragamaie/BlogList.css";
 
-const BlogList = ({ blogs }) => {
+// Provide a safe default for `blogs` so the component doesn't crash
+const BlogList = ({ blogs = [] }) => {
   return (
     <section className="blog-list">
-      {blogs.length > 0 ? (
+      {blogs && blogs.length > 0 ? (
         blogs.map((blog, index) => <BlogCard key={index} {...blog} />)
       ) : (
         <p>No blogs found.</p>
