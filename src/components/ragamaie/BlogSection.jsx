@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import BlogControls from "./BlogControls";   
+import BlogControls from "./BlogControls";
 import BlogList from "./BlogList";
 
-import stocksImg from "../../../public/stocksImg.png";
-import cryptoImg from "../../../public/crypto.png";
-import budgetImg from "../../../public/budget.png";
+// import stocksImg from "../../../public/stocksImg.png";
+// import cryptoImg from "../../../public/crypto.png";
+// import budgetImg from "../../../public/budget.png";
 
 const BlogSection = () => {
   const [blogs] = useState([
@@ -12,27 +12,30 @@ const BlogSection = () => {
       title: "The Ultimate Guide to Investing in Stocks",
       description:
         "Learn the basics of stock market investing, including how to choose stocks, manage risk, and build a diversified portfolio.",
-      image: stocksImg,
+      image: "/stocksImg.png",
       authorType: "user",
     },
     {
       title: "Understanding Cryptocurrency: A Beginner’s Guide",
       description:
         "Explore the world of cryptocurrencies, including Bitcoin, Ethereum, and other digital currencies. Learn about blockchain technology, wallets, and trading.",
-      image: cryptoImg,
+      image: "/crypto.png",
       authorType: "advisor",
     },
     {
       title: "Budgeting 101: How to Create a Budget That Works",
       description:
         "Master your personal finances with a step-by-step guide to creating and sticking to a budget that actually works.",
-      image: budgetImg,
+      image: "/budget.png",
       authorType: "user",
     },
   ]);
 
   const [filteredBlogs, setFilteredBlogs] = useState(blogs);
-  const [filters, setFilters] = useState({ authorType: "all", sortBy: "newest" });
+  const [filters, setFilters] = useState({
+    authorType: "all",
+    sortBy: "newest",
+  });
   const [searchQuery, setSearchQuery] = useState("");
 
   // Apply search + filters together
@@ -42,7 +45,7 @@ const BlogSection = () => {
     // search
     if (query) {
       result = result.filter((b) =>
-        b.title.toLowerCase().includes(query.toLowerCase())
+        b.title.toLowerCase().includes(query.toLowerCase()),
       );
     }
 
@@ -75,7 +78,7 @@ const BlogSection = () => {
       <BlogControls
         onSearch={handleSearch}
         onFiltersChange={handleFiltersChange}
-      />   
+      />
       <BlogList blogs={filteredBlogs} />
     </>
   );
