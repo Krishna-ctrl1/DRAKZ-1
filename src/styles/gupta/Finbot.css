@@ -262,6 +262,11 @@ textarea::placeholder {
   color: var(--finbot-text-secondary);
 }
 
+.financial-graph-container {
+  max-width: 350px;
+  max-height: 350px;
+  margin: 20px auto; 
+}
 /* Toggle Switch */
 .toggle-container {
   margin: 25px 0;
@@ -619,5 +624,61 @@ textarea::placeholder {
   }
   .message {
     max-width: 85%;
+  }
+}
+.insights-section {
+  background-color: var(--finbot-bg-secondary);
+  border: 1px solid var(--finbot-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.insights-section h4 {
+  margin-top: 0;
+  color: var(--finbot-text-heading);
+}
+
+.insights-section ul {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.insights-section li {
+  margin-bottom: 8px;
+  color: var(--finbot-text-secondary);
+}
+
+.insights-section .insight-warning {
+  color: #ff6384;
+  font-weight: bold;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  min-height: 300px; /* Give charts a min-height */
+  max-width: 400px;
+  margin: auto;
+}
+
+.chart-container-full {
+  grid-column: 1 / -1; /* Make this chart span both columns */
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+}
+
+/* Responsive layout for charts */
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr; 
   }
 }

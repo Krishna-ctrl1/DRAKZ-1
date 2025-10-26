@@ -1,42 +1,47 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Chart from "chart.js/auto";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 import "../../styles/gupta/Finbot.css";
 
-// Main FinBot Component
 const FinBot = () => {
   const [activeSection, setActiveSection] = useState("welcome");
   const [planInputs, setPlanInputs] = useState({
-    monthlyIncome: 0,
-    outingExpenses: 0,
-    transportationCosts: 0,
-    fixedCosts: 0,
-    foodCosts: 0,
-    availableSavings: 0,
+    monthlyIncome: "",
+    outingExpenses: "",
+    transportationCosts: "",
+    fixedCosts: "",
+    foodCosts: "",
+    availableSavings: "",
   });
   const [hasVariableCosts, setHasVariableCosts] = useState(false);
   const [variableCosts, setVariableCosts] = useState({
-    january: 0,
-    february: 0,
-    march: 0,
-    april: 0,
-    may: 0,
-    june: 0,
-    july: 0,
-    august: 0,
-    september: 0,
-    october: 0,
-    november: 0,
-    december: 0,
+    january: "",
+    february: "",
+    march: "",
+    april: "",
+    may: "",
+    june: "",
+    july: "",
+    august: "",
+    september: "",
+    october: "",
+    november: "",
+    december: "",
   });
   const [summary, setSummary] = useState(null);
   const [stockSymbol, setStockSymbol] = useState("");
   const [stockResults, setStockResults] = useState(null);
   const [stockError, setStockError] = useState(null);
   const [isStockLoading, setIsStockLoading] = useState(false);
+  
   const stockChartRef = useRef(null);
+  const financialChartRef = useRef(null);
+  const incomeExpenseBarChartRef = useRef(null);
+  const variableCostsBarChartRef = useRef(null);
+  
   const [chatMessages, setChatMessages] = useState([
     {
       sender: "bot",
@@ -60,39 +65,83 @@ const FinBot = () => {
 
   const handlePlanInputChange = (e) => {
     const { id, value } = e.target;
-    // Handle potential ID differences (e.g., 'monthly-income' vs 'monthlyIncome')
     const key = id.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-    setPlanInputs((prev) => ({ ...prev, [key]: parseFloat(value) || 0 }));
+    
+    if (value === "") {
+      setPlanInputs((prev) => ({
+        ...prev,
+        [key]: "",
+      }));
+    } else {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        setPlanInputs((prev) => ({
+          ...prev,
+          [key]: parsedValue,
+        }));
+      }
+    }
   };
 
   const handleVariableCostChange = (e) => {
     const { id, value } = e.target;
     const month = id.replace("-costs", "");
-    setVariableCosts((prev) => ({ ...prev, [month]: parseFloat(value) || 0 }));
+
+    if (value === "") {
+      setVariableCosts((prev) => ({
+        ...prev,
+        [month]: "",
+      }));
+    } else {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        setVariableCosts((prev) => ({
+          ...prev,
+          [month]: parsedValue,
+        }));
+      }
+    }
   };
 
+
   const handleCalculateSummary = () => {
-    const yearlyIncome = (planInputs.monthlyIncome || 0) * 12;
-    const yearlyFixedCosts =
-      ((planInputs.transportationCosts || 0) +
-        (planInputs.foodCosts || 0) +
-        (planInputs.outingExpenses || 0) +
-        (planInputs.fixedCosts || 0)) *
-      12;
-    const yearlyVariableCosts = hasVariableCosts
+    const monthlyIncome = planInputs.monthlyIncome || 0;
+    const outing = planInputs.outingExpenses || 0;
+    const transport = planInputs.transportationCosts || 0;
+    const fixed = planInputs.fixedCosts || 0;
+    const food = planInputs.foodCosts || 0;
+
+    const yearlyIncome = monthlyIncome * 12;
+    
+    const monthlyFixedExpenses = outing + transport + fixed + food;
+    const yearlyFixedCosts = monthlyFixedExpenses * 12;
+
+    const totalYearlyVariable = hasVariableCosts
       ? Object.values(variableCosts).reduce(
           (sum, val) => sum + (parseFloat(val) || 0),
-          0,
+          0
         )
       : 0;
-    const totalYearlyExpenses = yearlyFixedCosts + yearlyVariableCosts;
+    const avgMonthlyVariable = totalYearlyVariable / 12;
+
+    const totalMonthlyExpenses = monthlyFixedExpenses + avgMonthlyVariable;
+    const totalYearlyExpenses = yearlyFixedCosts + totalYearlyVariable;
+    
+    const monthlySavings = monthlyIncome - totalMonthlyExpenses;
     const yearlyInvestment = yearlyIncome - totalYearlyExpenses;
-    const monthlyInvestment = yearlyInvestment / 12;
+
     setSummary({
       yearlyIncome,
       totalYearlyExpenses,
       yearlyInvestment,
-      monthlyInvestment,
+      monthlyIncome,
+      totalMonthlyExpenses,
+      monthlySavings,
+      avgMonthlyVariable,
+      outing,
+      transport,
+      fixed,
+      food,
     });
   };
 
@@ -150,6 +199,249 @@ const FinBot = () => {
       },
     });
   }, [stockResults]);
+
+  useEffect(() => {
+    if (!summary || !financialChartRef.current) return;
+
+    const canvas = financialChartRef.current;
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    new Chart(canvas, {
+      type: "doughnut",
+      data: {
+        labels: [
+          "Outing",
+          "Transport",
+          "Other Fixed",
+          "Food",
+          "Variable Costs (Avg)",
+          "Savings",
+        ],
+        datasets: [
+          {
+            label: "Monthly Financial Breakdown",
+            data: [
+              summary.outing,
+              summary.transport,
+              summary.fixed,
+              summary.food,
+              summary.avgMonthlyVariable,
+              Math.max(0, summary.monthlySavings),
+            ],
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#2ECC71",
+            ],
+            hoverOffset: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              color: "var(--finbot-text-heading)"
+            }
+          },
+          title: {
+            display: true,
+            text: "Monthly Expense Breakdown",
+            color: "var(--finbot-text-heading)"
+          },
+        },
+      },
+    });
+  }, [summary]);
+
+  useEffect(() => {
+    if (!summary || !incomeExpenseBarChartRef.current) return;
+
+    const canvas = incomeExpenseBarChartRef.current;
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Income", "Expenses", "Savings"],
+        datasets: [
+          {
+            label: "Monthly Summary",
+            data: [
+              summary.monthlyIncome,
+              summary.totalMonthlyExpenses,
+              Math.max(0, summary.monthlySavings),
+            ],
+            backgroundColor: [
+              "rgba(46, 204, 113, 0.6)",
+              "rgba(255, 99, 132, 0.6)",
+              "rgba(54, 162, 235, 0.6)",
+            ],
+            borderColor: [
+              "rgba(46, 204, 113, 1)",
+              "rgba(255, 99, 132, 1)",
+              "rgba(54, 162, 235, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          title: {
+            display: true,
+            text: "Monthly Income vs. Expenses",
+            color: "var(--finbot-text-heading)"
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "var(--finbot-text-secondary)" },
+            grid: { color: "var(--finbot-border)" },
+          },
+          x: {
+            ticks: { color: "var(--finbot-text-secondary)" },
+            grid: { color: "var(--finbot-border)" },
+          },
+        },
+      },
+    });
+  }, [summary]);
+  
+  useEffect(() => {
+    const canvas = variableCostsBarChartRef.current;
+    if (!canvas) return;
+
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    if (!summary || !hasVariableCosts) {
+      return; 
+    }
+
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: [
+          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ],
+        datasets: [
+          {
+            label: "Monthly Variable Costs",
+            data: Object.values(variableCosts).map(v => parseFloat(v) || 0),
+            backgroundColor: "rgba(153, 102, 255, 0.6)",
+            borderColor: "rgba(153, 102, 255, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          title: {
+            display: true,
+            text: "Variable Costs Over 12 Months",
+            color: "var(--finbot-text-heading)"
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: "var(--finbot-text-secondary)" },
+            grid: { color: "var(--finbot-border)" },
+          },
+          x: {
+            ticks: { color: "var(--finbot-text-secondary)" },
+            grid: { color: "var(--finbot-border)" },
+          },
+        },
+      },
+    });
+  }, [summary, variableCosts, hasVariableCosts]);
+
+  const renderInsights = () => {
+    if (!summary) return null;
+
+    const { monthlyIncome, totalMonthlyExpenses, monthlySavings } = summary;
+    
+    if (monthlyIncome === 0) {
+      return (
+        <div className="insights-section">
+          <p>Please enter your monthly income to generate insights.</p>
+        </div>
+      );
+    }
+    
+    const savingsRate = (monthlySavings / monthlyIncome) * 100;
+    
+    const expensesMap = {
+      "Outing": summary.outing,
+      "Transport": summary.transport,
+      "Other Fixed Costs": summary.fixed,
+      "Food": summary.food,
+      "Variable Costs (Avg)": summary.avgMonthlyVariable,
+    };
+
+    const maxExpense = Object.keys(expensesMap).reduce((a, b) =>
+      expensesMap[a] > expensesMap[b] ? a : b
+    );
+
+    return (
+      <div className="insights-section">
+        <h4>Key Insights</h4>
+        <ul>
+          {monthlySavings > 0 ? (
+            <li>
+              Congratulations! You are saving{" "}
+              <strong>{formatCurrency(monthlySavings)}</strong> per month, which is{" "}
+              <strong>{savingsRate.toFixed(1)}%</strong> of your income.
+            </li>
+          ) : (
+            <li className="insight-warning">
+              Warning: Your expenses ({formatCurrency(totalMonthlyExpenses)}) are
+              higher than your income. You have a shortfall of{" "}
+              <strong>{formatCurrency(Math.abs(monthlySavings))}</strong> per month.
+            </li>
+          )}
+          <li>
+            Your largest monthly expense category is{" "}
+            <strong>{maxExpense}</strong> at{" "}
+            <strong>{formatCurrency(expensesMap[maxExpense])}</strong>.
+          </li>
+          <li>
+            Your total projected yearly investment (savings) is{" "}
+            <strong>{formatCurrency(summary.yearlyInvestment)}</strong>.
+          </li>
+        </ul>
+      </div>
+    );
+  };
+
 
   const handleGetStockDetails = async () => {
     if (!stockSymbol) {
@@ -303,7 +595,6 @@ const FinBot = () => {
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           <div className="chatbot-container">
             <div className="chat-section">
-              {/* Tabs */}
               <div className="tab-navigation">
                 <div
                   className={`tab-item ${activeSection === "welcome" ? "active" : ""}`}
@@ -342,7 +633,6 @@ const FinBot = () => {
                 </div>
               </div>
 
-              {/* Welcome Section */}
               {activeSection === "welcome" && (
                 <div className="section-content active">
                   <div className="welcome-message">
@@ -386,7 +676,6 @@ const FinBot = () => {
                 </div>
               )}
 
-              {/* Financial Planning */}
               {activeSection === "financial-planning" && (
                 <div className="section-content active">
                   <div className="financial-planning-inputs">
@@ -403,11 +692,10 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.monthlyIncome}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
-                      {/* More inputs... */}
                     </div>
-                    {/* Rest of planning inputs, toggle, variable costs, button, summary display */}
                     <div className="input-row">
                       <div className="input-group">
                         <label htmlFor="outing-expenses">2. Outing (INR)</label>
@@ -417,6 +705,7 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.outingExpenses}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
                       <div className="input-group">
@@ -429,6 +718,7 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.transportationCosts}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
                       <div className="input-group">
@@ -441,6 +731,7 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.fixedCosts}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
                     </div>
@@ -453,6 +744,7 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.foodCosts}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
                       <div className="input-group">
@@ -465,6 +757,7 @@ const FinBot = () => {
                           className="number-input"
                           value={planInputs.availableSavings}
                           onChange={handlePlanInputChange}
+                          min="0"
                         />
                       </div>
                     </div>
@@ -522,13 +815,29 @@ const FinBot = () => {
                             </div>
                           </div>
                         </div>
+                        
+                        {renderInsights()}
+
+                        <div className="charts-grid">
+                          <div className="chart-container">
+                            <canvas ref={financialChartRef}></canvas>
+                          </div>
+                          <div className="chart-container">
+                            <canvas ref={incomeExpenseBarChartRef}></canvas>
+                          </div>
+                          {hasVariableCosts && (
+                            <div className="chart-container-full">
+                              <canvas ref={variableCostsBarChartRef}></canvas>
+                            </div>
+                          )}
+                        </div>
+                        
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Stock Analysis */}
               {activeSection === "stock-analysis" && (
                 <div className="section-content active">
                   <h2>Stock Analysis</h2>
@@ -615,7 +924,6 @@ const FinBot = () => {
                 </div>
               )}
 
-              {/* Investment Recommendations */}
               {activeSection === "investment" && (
                 <div className="section-content active">
                   <h2>Recommendations</h2>
@@ -623,12 +931,8 @@ const FinBot = () => {
                 </div>
               )}
 
-              {/* Financial Advisor Chat */}
               {activeSection === "advisor" && (
                 <div className="section-content active" id="advisor-content">
-                  {" "}
-                  {/* Ensure ID if needed, ensure active class for layout */}
-                  {/* Messages */}
                   <div className="messages-container">
                     {chatMessages.map((msg, index) => (
                       <div key={index} className={`message ${msg.sender}`}>
@@ -646,7 +950,6 @@ const FinBot = () => {
                     )}
                     <div ref={messagesEndRef} />
                   </div>
-                  {/* Input Form */}
                   <form className="input-area" onSubmit={handleSendMessage}>
                     <textarea
                       placeholder="Type message..."
