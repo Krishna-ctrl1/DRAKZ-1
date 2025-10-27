@@ -51,6 +51,8 @@
 .main-content-collapsed {
   margin-left: 110px;
   transition: margin-left 0.3s ease;
+  margin-top: 5rem;
+  width: 100%;
 }
 
 .chatbot-container {
@@ -265,7 +267,7 @@ textarea::placeholder {
 .financial-graph-container {
   max-width: 350px;
   max-height: 350px;
-  margin: 20px auto; 
+  margin: 20px auto;
 }
 /* Toggle Switch */
 .toggle-container {
@@ -706,6 +708,6 @@ textarea::placeholder {
 /* Responsive layout for charts */
 @media (max-width: 900px) {
   .charts-grid {
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
   }
 }
