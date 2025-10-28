@@ -1,8 +1,4 @@
-// ============================================================================
-// MAIN SERVER - Orchestrates all 5 team member servers
-// This file combines all individual server modules into one unified API
-// ============================================================================
-
+// main-server.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -17,48 +13,60 @@ const server2 = require('./servers/server2'); // Products/Items Management
 const server3 = require('./servers/server3'); // Orders Management
 const server4 = require('./servers/server4'); // Reviews and Ratings
 const server5 = require('./servers/server5'); // Analytics and Reports
+const server6 = require('./servers/server6'); // <-- ADD THIS (Privileges)
 
 const app = express();
 
 // ============================================================================
 // MIDDLEWARE SETUP
 // ============================================================================
-
-// CORS configuration
 app.use(cors(corsOptions));
-
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// Rate limiting (applied to all API routes)
 app.use('/api/', limiter);
-
-// Request logging middleware
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
     next();
 });
 
 // ============================================================================
-// ROUTE MOUNTING - Each server gets its own namespace
+// ROUTE MOUNTING
 // ============================================================================
-
-// Server 1: Authentication & User Management - /api/v1/*
 app.use('/api/v1', server1);
-
-// Server 2: Products/Items Management - /api/v2/*
 app.use('/api/v2', server2);
-
-// Server 3: Orders Management - /api/v3/*
 app.use('/api/v3', server3);
-
-// Server 4: Reviews and Ratings - /api/v4/*
 app.use('/api/v4', server4);
-
-// Server 5: Analytics and Reports - /api/v5/*
 app.use('/api/v5', server5);
+app.use('/api/privilege', server6); // <-- ADD THIS
 
+// ============================================================================
+// GLOBAL ROUTES
+// ============================================================================
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'OK',
+        message: 'Main server is running',
+        timestamp: new Date().toISOString(),
+        servers: {
+            server1: 'Authentication & User Management',
+            server2: 'Products/Items Management', 
+            server3: 'Orders Management',
+            server4: 'Reviews and Ratings',
+            server5: 'Analytics and Reports',
+            server6: 'Privileges & Holdings' // <-- ADD THIS
+        },
+        endpoints: {
+            v1: '/api/v1 - Authentication & Users',
+            v2: '/api/v2 - Products & Categories',
+            v3: '/api/v3 - Orders',
+            v4: '/api/v4 - Reviews',
+            v5: '/api/v5 - Analytics & Reports',
+            privilege: '/api/privilege - Privileges' // <-- ADD THIS
+        }
+    });
+});
+// ... (rest of the file: /api/docs, /api/test-all, error handling, server startup)
+// ... (The rest of your main-server.js file is correct)
 // ============================================================================
 // GLOBAL ROUTES (Available to all)
 // ============================================================================
@@ -74,14 +82,16 @@ app.get('/api/health', (req, res) => {
             server2: 'Products/Items Management', 
             server3: 'Orders Management',
             server4: 'Reviews and Ratings',
-            server5: 'Analytics and Reports'
+            server5: 'Analytics and Reports',
+            server6: 'Privileges & Holdings' // <-- ADDED
         },
         endpoints: {
             v1: '/api/v1 - Authentication & Users',
             v2: '/api/v2 - Products & Categories',
             v3: '/api/v3 - Orders',
             v4: '/api/v4 - Reviews',
-            v5: '/api/v5 - Analytics & Reports'
+            v5: '/api/v5 - Analytics & Reports',
+            privilege: '/api/privilege - Privileges' // <-- ADDED
         }
     });
 });
@@ -155,6 +165,20 @@ app.get('/api/docs', (req, res) => {
                     'GET /api/v5/reports/sales - Generate sales report (admin)',
                     'GET /api/v5/reports/system-health - System health report (admin)'
                 ]
+            },
+            { // <-- ADD THIS
+                name: 'Server 6 - Privileges & Holdings',
+                baseUrl: '/api/privilege',
+                endpoints: [
+                    'GET /api/privilege/seed - Adds sample data to the database',
+                    'GET /api/privilege/insurances - Get all insurances',
+                    'GET /api/privilege/properties - Get all properties',
+                    'POST /api/privilege/properties - Add a new property',
+                    'DELETE /api/privilege/properties/:id - Remove a property',
+                    'GET /api/privilege/precious_holdings - Get all holdings',
+                    'POST /api/privilege/precious_holdings - Add a new holding',
+                    'GET /api/privilege/transactions - Get recent transactions'
+                ]
             }
         ]
     });
@@ -168,7 +192,8 @@ app.get('/api/test-all', async (req, res) => {
             server2: { status: 'OK', message: 'Products/Items Management' },
             server3: { status: 'OK', message: 'Orders Management' },
             server4: { status: 'OK', message: 'Reviews and Ratings' },
-            server5: { status: 'OK', message: 'Analytics and Reports' }
+            server5: { status: 'OK', message: 'Analytics and Reports' },
+            server6: { status: 'OK', message: 'Privileges & Holdings' } // <-- ADDED
         };
 
         res.json({
@@ -219,6 +244,7 @@ const startServer = async () => {
             console.log(`   📦 Server 3 (Orders): http://localhost:${PORT}/api/v3`);
             console.log(`   ⭐ Server 4 (Reviews): http://localhost:${PORT}/api/v4`);
             console.log(`   📊 Server 5 (Analytics): http://localhost:${PORT}/api/v5`);
+            console.log(`   💎 Server 6 (Privilege): http://localhost:${PORT}/api/privilege`); // <-- ADDED
             console.log('🚀 ============================================');
         });
     } catch (error) {
@@ -227,6 +253,7 @@ const startServer = async () => {
     }
 };
 
+// ... (rest of the file: uncaughtException, unhandledRejection, SIGTERM, startServer)
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);

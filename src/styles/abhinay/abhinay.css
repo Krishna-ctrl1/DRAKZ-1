@@ -1,10 +1,439 @@
-/* Abhinay's CSS Styles */
-
-/* Add your component styles here */
-
-/* Example:
-.abhinay-component {
-  background: #your-color;
-  padding: 2rem;
+/* src/styles/abhinay/abhinay.css */
+.privilege-page .loading-container,
+.privilege-page .error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  font-size: 1.5rem;
+  color: #ccc;
 }
-*/
+.privilege-page .error-container {
+  color: #ef4444;
+}
+
+.privilege-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  padding: 1.5rem;
+  color: #e0e0e0;
+}
+
+.privilege-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.privilege-sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background-color: #1a1a2e;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  height: fit-content;
+}
+
+.privilege-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.notification-icon {
+  position: relative;
+  cursor: pointer;
+}
+.notification-icon i {
+  font-size: 1.2rem;
+  color: #ccc;
+}
+.notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 1px solid #1a1a2e;
+}
+
+.privilege-section {
+  background-color: #1a1a2e;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.privilege-section h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.insurance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+.insurance-card {
+  background-color: #2a2a3d;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #3a3a4d;
+}
+.insurance-card.active-card {
+  background-color: #ffffff;
+  color: #1a1a2e;
+  border: 1px solid #ffffff;
+}
+.insurance-card.active-card h3,
+.insurance-card.active-card span,
+.insurance-card.active-card p {
+  color: #1a1a2e;
+}
+.insurance-card.active-card .insurance-change {
+   color: #1a1a2e;
+}
+.insurance-card.active-card .insurance-change.positive {
+   color: #16a34a;
+}
+.insurance-card.active-card .insurance-change.negative {
+   color: #dc2626;
+}
+.insurance-card.active-card .card-header i {
+  color: #1a1a2e;
+}
+.insurance-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.insurance-card .card-header i {
+  font-size: 1.5rem;
+  color: #5d5fef;
+}
+.insurance-card .card-header .arrow-icon {
+  margin-left: auto;
+  color: #888;
+  font-size: 0.9rem;
+}
+.insurance-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #eee;
+}
+.insurance-card span {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+.insurance-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+}
+.mini-chart.placeholder-chart {
+  height: 40px;
+  background: linear-gradient(to right, rgba(93, 95, 239, 0.1), rgba(93, 95, 239, 0.5));
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  width: 80%;
+}
+.insurance-card.active-card .mini-chart.placeholder-chart {
+   background: linear-gradient(to right, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.5));
+}
+.insurance-change {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #aaa;
+}
+.insurance-change.positive { color: #22c55e; }
+.insurance-change.negative { color: #ef4444; }
+.insurance-change .secondary-change {
+   margin-left: auto;
+   font-size: 0.85rem;
+   color: #888;
+}
+.insurance-card.active-card .insurance-change .secondary-change {
+    color: #555;
+}
+
+.property-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.property-card {
+  background-color: #2a2a3d;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #3a3a4d;
+  color: #ccc;
+  display: flex;
+  flex-direction: column;
+}
+.property-image.placeholder-image {
+  height: 120px;
+  background-color: #3a3a4d;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  background-size: cover;
+  background-position: center;
+}
+.property-card h4 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #eee;
+  margin-bottom: 0.3rem;
+}
+.property-card p {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: #aaa;
+  line-height: 1.4;
+}
+.property-card p:last-of-type {
+  margin-bottom: 0.8rem;
+}
+.remove-button {
+  background-color: #5d5fef;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: auto; /* Pushes button to bottom */
+}
+.remove-button:hover {
+  background-color: #4a4cc7;
+}
+.add-more-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 2px dashed #3a3a4d;
+  cursor: pointer;
+  min-height: 200px;
+  color: #888;
+}
+.add-more-card:hover {
+  border-color: #5d5fef;
+  color: #5d5fef;
+}
+.add-more-card i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.holdings-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.75rem;
+  font-size: 0.9rem;
+}
+.holdings-table th, .holdings-table td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+.holdings-table th {
+  color: #aaa;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #3a3a4d;
+  padding-bottom: 0.5rem;
+}
+.holdings-table tbody tr {
+  background-color: #2a2a3d;
+}
+.holdings-table tbody td:first-child {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+.holdings-table tbody td:last-child {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+.holdings-table td {
+  color: #ccc;
+}
+.holdings-table td.current-value {
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.welcome-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2a2a3d;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.welcome-user p {
+  color: #eee;
+  font-weight: 500;
+}
+.profile-pic.placeholder-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #5d5fef;
+  background-size: cover;
+  background-position: center;
+}
+
+.sidebar-transactions {
+  background-color: #2a2a3d;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.transactions-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.filter-btn.small-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  background-color: #3a3a4d;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  border-radius: 0.4rem;
+}
+.filter-btn.small-btn.active-filter-btn {
+  background-color: #5d5fef;
+  color: white;
+}
+.options-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.options-btn:hover { color: #fff; }
+
+.transaction-list-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.transaction-item-sidebar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  font-size: 0.9rem;
+}
+.transaction-item-sidebar.header-row {
+  font-weight: 500;
+  color: #aaa;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #3a3a4d;
+  margin-bottom: 0.5rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: left;
+}
+.tx-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(93, 95, 239, 0.2);
+  color: #a1a3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+.tx-amount { color: #eee; }
+.tx-status {
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+.tx-status.pending { background-color: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.tx-status.paid { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.tx-status.completed { background-color: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+
+.track-holdings {
+  background-color: #2a2a3d;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+.track-holdings h4 {
+  color: #eee;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.add-holdings-text {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 1rem;
+}
+.add-more-holdings-box {
+  border: 2px dashed #3a3a4d;
+  border-radius: 0.5rem;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #888;
+}
+.add-more-holdings-box:hover {
+   border-color: #5d5fef;
+   color: #5d5fef;
+}
+.add-more-holdings-box i {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .privilege-content-grid {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+@media (max-width: 992px) {
+  .privilege-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .privilege-sidebar-column {
+    order: -1;
+    height: auto;
+  }
+}
+@media (max-width: 768px) {
+   .insurance-cards, .property-cards {
+      grid-template-columns: 1fr;
+   }
+   .holdings-table {
+      display: block;
+      overflow-x: auto;
+   }
+}
