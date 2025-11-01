@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { clearAuth } from "../../utils/auth.util";
 import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 import CreditScore from "./CreditScore";
@@ -18,7 +19,8 @@ const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false); // ADDED: State for sidebar collapse
 
   const handleLogout = () => {
-    navigate("/");
+    clearAuth();
+    navigate("/login", { replace: true });
   };
 
   const cardData = {
