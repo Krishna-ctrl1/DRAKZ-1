@@ -21,3 +21,8 @@ export function isAuthenticated() {
   const token = getToken();
   return isTokenValid(token);
 }
+export function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("user"); // if you store it
+}

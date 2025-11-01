@@ -28,3 +28,14 @@ exports.login = async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
+// Simple auth check endpoint
+exports.me = async (req, res) => {
+  try {
+    const user = await Person.findById(req.user.id).select('_id email name role');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+    return res.json({ id: user._id, email: user.email, name: user.name, role: user.role });
+  } catch (err) {
+    return res.status(500).json({ msg: 'Server error' });
+  }
+};

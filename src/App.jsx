@@ -16,6 +16,7 @@ import AdvisorSession from "./components/gupta/AdvisorVideo"; // Uses file Advis
 import UserSession from "./components/gupta/UserVideo"; // Uses file UserVideo.jsx
 
 import ProtectedRoute from "./auth/ProtectedRoute";
+import AuthGate from "./auth/AuthGate";
 import RoleRoute from "./auth/RoleRoute";
 import Unauthorized from "./auth/Unauthorized";
 import AdminLayout from "./components/ziko/admin/AdminLayout";
@@ -33,7 +34,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<AuthGate><ProtectedRoute /></AuthGate>}>
           {/* ADVISOR ROUTES */}
           <Route element={<RoleRoute allowed={["advisor"]} />}>
             <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />

@@ -7,14 +7,15 @@ import {
   LogoutButton,
 } from "../../../../styles/ziko/admin/Topbar.styles"; // Adjusted import path
 import { useNavigate } from "react-router-dom";
+import { clearAuth } from "../../../../utils/auth.util";
 
 const TopBar = ({ userName, userEmail }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("role");
+    clearAuth();
     localStorage.removeItem("email");
-    navigate("/login"); // Redirect to login page
+    navigate("/login", { replace: true });
   };
 
   const getInitials = (name) => {
