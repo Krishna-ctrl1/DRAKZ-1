@@ -1,50 +1,57 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import API from '../../config/api';
 
 const LoginPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: ''
-  });
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+  const handleBackToHome = () => navigate('/');
+
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+
+  const payload = { email: form.email, password: form.password };
+
+  try {
+    const { data } = await axios.post(API.login, payload, {
+      headers: { 'Content-Type': 'application/json' },
     });
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // For now, just navigate to dashboard without authentication
-    navigate('/dashboard');
-  };
+    console.log('Login response:', data);
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    // Reset form when switching between login/signup
-    setFormData({
-      email: '',
-      password: '',
-      confirmPassword: '',
-      fullName: ''
-    });
-  };
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', data.user.role);
 
-  const handleBackToHome = () => {
-    navigate('/');
-  };
+    const map = {
+      admin: '/admin-dashboard',
+      advisor: '/advisor-dashboard',
+      user: '/user-dashboard',
+    };
+
+    navigate(map[data.user.role] || '/');
+
+  } catch (err) {
+    console.error('Login error:', err.response?.data);
+    setError(err.response?.data?.msg || 'Request failed');
+  }
+};
+
 
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
           <button className="back-button" onClick={handleBackToHome}>
-            ← Back to Home
+            Back to Home
           </button>
           <h1 className="login-logo">DRAKZ</h1>
           <p className="login-subtitle">Your Digital Credit Card Solution</p>
@@ -53,107 +60,55 @@ const LoginPage = () => {
         <div className="login-form-container">
           <div className="login-card">
             <div className="form-header">
-              <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-              <p>{isLogin ? 'Sign in to your account' : 'Join DRAKZ today'}</p>
+              <h2>Welcome Back</h2>
+              <p>Sign in to your account</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="login-form">
-              {!isLogin && (
-                <div className="form-group">
-                  <label htmlFor="fullName">Full Name</label>
-                  <input
-                    type="text"
-                    id="fullName"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-              )}
+            {error && <p className="error-msg">{error}</p>}
 
+            <form onSubmit={handleSubmit} className="login-form">
               <div className="form-group">
-                <label htmlFor="email">Email Address</label>
+                <label>Email Address</label>
                 <input
                   type="email"
-                  id="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={form.email}
+                  onChange={handleChange}
                   placeholder="Enter your email"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label>Password</label>
                 <input
                   type="password"
-                  id="password"
                   name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
+                  value={form.password}
+                  onChange={handleChange}
                   placeholder="Enter your password"
                   required
                 />
               </div>
 
-              {!isLogin && (
-                <div className="form-group">
-                  <label htmlFor="confirmPassword">Confirm Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    placeholder="Confirm your password"
-                    required
-                  />
-                </div>
-              )}
-
               <button type="submit" className="login-submit-btn">
-                {isLogin ? 'Sign In' : 'Create Account'}
+                Sign In
               </button>
             </form>
 
             <div className="form-footer">
               <p>
-                {isLogin ? "Don't have an account? " : "Already have an account? "}
-                <button 
-                  type="button" 
-                  className="toggle-mode-btn"
-                  onClick={toggleMode}
-                >
-                  {isLogin ? 'Sign Up' : 'Sign In'}
-                </button>
+                Don't have an account? Contact support.
               </p>
             </div>
           </div>
 
           <div className="login-visual">
-            <div className="card-display">
-              <img 
-                src="/card.png" 
-                alt="DRAKZ Credit Card" 
-                className="login-card-img" 
-              />
-            </div>
+            <img src="/card.png" alt="Card" className="login-card-img" />
             <div className="features-list">
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-                <span>No Hidden Fees</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-                <span>Instant Approval</span>
-              </div>
-              <div className="feature-item">
-                <span className="feature-icon">✓</span>
-                <span>Secure Transactions</span>
-              </div>
+              <div className="feature-item"><span>Check</span> No Hidden Fees</div>
+              <div className="feature-item"><span>Check</span> Instant Approval</div>
+              <div className="feature-item"><span>Check</span> Secure Transactions</div>
             </div>
           </div>
         </div>
