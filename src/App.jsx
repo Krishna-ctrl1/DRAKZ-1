@@ -1,33 +1,47 @@
-// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+
 import Home from "./components/ziko/Home";
 import LoginPage from "./components/ziko/LoginPage";
-import FinBot from "./components/gupta/Finbot";
 import Dashboard from "./components/deepthi/Dashboard";
-import InvestmentsPage from "./components/ragamaie/InvestmentsPage";
-import BlogPage from "./components/ragamaie/BlogPage";
-import MyPrivilege from "./components/abhinay/MyPrivilege"; // <-- IMPORT
-import "./App.css";
+import AdvisorDashboard from "./components/gupta/advisor.dashboard";
+import FinBot from "./components/gupta/Finbot";
+import MyPrivilege from "./components/abhinay/MyPrivilege";
+
+import ProtectedRoute from "./auth/ProtectedRoute";
+import RoleRoute from "./auth/RoleRoute";
+import Unauthorized from "./auth/Unauthorized";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/finbot" element={<FinBot />} />
-          <Route path="/investments" element={<InvestmentsPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/privileges" element={<MyPrivilege />} /> {/* <-- ADD ROUTE */}
+    <div className="App">
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* This catch-all route sends any unknown URL to the dashboard */}
-          <Route path="*" element={<Dashboard />} />
-        </Routes>
-      </div>
-    </Router>
+        {/* Auth required */}
+        <Route element={<ProtectedRoute />}>
+          {/* Role: advisor-only */}
+          <Route element={<RoleRoute allowed={['advisor']} />}>
+            <Route path="/advisor-dashboard" element={<AdvisorDashboard />} />
+          </Route>
+
+          {/* Role: admin-only (example) */}
+          <Route element={<RoleRoute allowed={['admin']} />}>
+            <Route path="/admin-dashboard" element={<MyPrivilege />} />
+          </Route>
+
+          {/* Role: user-only (example) */}
+          <Route element={<RoleRoute allowed={['user']} />}>
+            <Route path="/user-dashboard" element={<Dashboard />} />
+            <Route path="/finbot" element={<FinBot />} />
+            <Route path="/privileges" element={<MyPrivilege />} />
+          </Route>
+        </Route>
+      </Routes>
+    </div>
   );
 }
 
