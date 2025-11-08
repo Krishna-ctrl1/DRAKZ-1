@@ -220,7 +220,7 @@ app.use('*', notFoundHandler);
 // SERVER STARTUP
 // ============================================================================
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Connect to database and start server
 const startServer = async () => {
@@ -240,7 +240,7 @@ const startServer = async () => {
             console.log('');
             console.log('📦 AVAILABLE SERVERS:');
             console.log(`   🔐 Server 1 (Auth): http://localhost:${PORT}/api/v1`);
-            console.log(`   🛍️  Server 2 (Products): http://localhost:${PORT}/api/v2`);
+            console.log(`   🛍️ Server 2 (Products): http://localhost:${PORT}/api/v2`);
             console.log(`   📦 Server 3 (Orders): http://localhost:${PORT}/api/v3`);
             console.log(`   ⭐ Server 4 (Reviews): http://localhost:${PORT}/api/v4`);
             console.log(`   📊 Server 5 (Analytics): http://localhost:${PORT}/api/v5`);
