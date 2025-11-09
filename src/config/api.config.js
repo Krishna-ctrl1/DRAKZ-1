@@ -5,6 +5,7 @@ export const API = {
   login: `${BASE}/api/auth/login`,
   register: `${BASE}/api/auth/register`,
   test: `${BASE}/api/test-all`,
+  advisor: `${BASE}/api/advisor`,
   // Add more endpoints later
 };
 

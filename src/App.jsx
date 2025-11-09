@@ -11,6 +11,7 @@ import MyPrivilege from "./components/abhinay/MyPrivilege";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
 import Unauthorized from "./auth/Unauthorized";
+import AdminDashboard from "./components/ziko/admin/admin.dahsboard";
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
 
           {/* Role: admin-only */}
           <Route element={<RoleRoute allowed={['admin']} />}>
-            <Route path="/admin-dashboard" element={<MyPrivilege />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Route>
 
           {/* Role: user-only */}
