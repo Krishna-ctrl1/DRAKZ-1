@@ -1,7 +1,7 @@
 // src/controllers/authController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Person = require('../models/Person.js');
+const Person = require('../models/people.model.js');
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 exports.login = async (req, res) => {

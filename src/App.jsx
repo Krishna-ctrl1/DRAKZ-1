@@ -25,19 +25,19 @@ function App() {
         <Route element={<ProtectedRoute />}>
           {/* Role: advisor-only */}
           <Route element={<RoleRoute allowed={['advisor']} />}>
-            <Route path="/advisor-dashboard" element={<AdvisorDashboard />} />
+            <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
           </Route>
 
-          {/* Role: admin-only (example) */}
+          {/* Role: admin-only */}
           <Route element={<RoleRoute allowed={['admin']} />}>
             <Route path="/admin-dashboard" element={<MyPrivilege />} />
           </Route>
 
-          {/* Role: user-only (example) */}
+          {/* Role: user-only */}
           <Route element={<RoleRoute allowed={['user']} />}>
-            <Route path="/user-dashboard" element={<Dashboard />} />
-            <Route path="/finbot" element={<FinBot />} />
-            <Route path="/privileges" element={<MyPrivilege />} />
+            <Route path="/user/dashboard" element={<Dashboard />} />
+            <Route path="/user/finbot" element={<FinBot />} />
+            <Route path="/user/privileges" element={<MyPrivilege />} />
           </Route>
         </Route>
       </Routes>

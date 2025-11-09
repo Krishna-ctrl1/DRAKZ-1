@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API from '../../config/api';
+import API from '../../config/api.config.js';
 
 const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -32,9 +32,9 @@ const LoginPage = () => {
     localStorage.setItem('role', data.user.role);
 
     const map = {
-      admin: '/admin-dashboard',
-      advisor: '/advisor-dashboard',
-      user: '/user-dashboard',
+      admin: '/admin/dashboard',
+      advisor: '/advisor/dashboard',
+      user: '/user/dashboard',
     };
 
     navigate(map[data.user.role] || '/');

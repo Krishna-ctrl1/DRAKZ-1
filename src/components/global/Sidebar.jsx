@@ -15,32 +15,32 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       id: "dashboard",
       label: "Dashboard",
       icon: "fa-solid fa-border-all",
-      path: "/dashboard",
+      path: "/user/dashboard",
     },
     {
       id: "investments",
       label: "Investments",
       icon: "fa-solid fa-chart-column",
-      path: "/investments",
+      path: "/user/investments",
     },
 
     {
       id: "privileges",
       label: "Privileges",
       icon: "fa-solid fa-star",
-      path: "/privileges",
+      path: "/user/privileges",
     },
     {
       id: "blog",
       label: "Blog",
       icon: "fa-solid fa-pen-to-square",
-      path: "/blog",
+      path: "/user/blog",
     },
     {
       id: "finbot",
       label: "FinBot",
       icon: "fa-solid fa-robot",
-      path: "/finbot",
+      path: "/user/finbot",
     },
   ];
 
@@ -49,7 +49,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     id: "settings",
     label: "Settings",
     icon: "fa-solid fa-gear",
-    path: "/settings",
+    path: "/user/settings",
   };
 
   return (
