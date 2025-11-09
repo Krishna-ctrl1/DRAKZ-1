@@ -158,30 +158,75 @@
 }
 .clear-all:hover { color: #fff; }
 
-/* Modal */
+
+
+/* ---------------------------------------------------
+   ✅ UPDATED MODAL — Bigger, More Color, More Blur
+---------------------------------------------------- */
+
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex; justify-content: center; align-items: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);      /* darker + cleaner */
+  backdrop-filter: blur(12px);           /* stronger blur */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 999;
 }
+
 .modal {
-  background: #1a1a1a;
-  padding: 20px;
-  border-radius: 12px;
-  width: 400px; max-width: 90%;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  background: rgba(20, 20, 32, 0.8);
+  padding: 30px;
+  border-radius: 16px;
+  width: 920px;
+  max-width: 95%;
+
+  
+  max-height: 80vh;         /* stops modal from growing too big */
+  overflow-y: auto;         /* adds scroll if content exceeds height */
+  scrollbar-width: thin;    /* clean scroll */
+  scrollbar-color: #4a90e2 #1a1a2e;
+
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  border: 1px solid rgba(74,144,226,0.3);
+  backdrop-filter: blur(20px);
   color: #fff;
+  animation: modalPop 0.18s ease-out;
 }
+
+
+@keyframes modalPop {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 .modal h2 { margin-bottom: 15px; }
-.modal form { display: flex; flex-direction: column; gap: 12px; }
-.modal input, .modal textarea, .modal select {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background: #0b0b14;
-  color: #fff;
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
+.modal input,
+.modal textarea,
+.modal select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: rgba(15, 15, 25, 0.85);
+  color: #fff;
+  transition: 0.2s ease;
+}
+
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus {
+  border-color: #4a90e2;
+  background: rgba(25, 25, 40, 0.9);
+  box-shadow: 0 0 8px rgba(74,144,226,0.4);
+}
+
 .modal button {
   padding: 8px;
   border: none;
@@ -189,8 +234,24 @@
   cursor: pointer;
   font-weight: 600;
 }
-.modal button[type="submit"] { background: #4a90e2; color: #fff; }
-.modal button.cancel { background: #333; color: #aaa; }
+.modal button[type="submit"] {
+  background: #4a90e2;
+  color: #fff;
+}
+.modal button[type="submit"]:hover {
+  background: #3b7acc;
+}
+
+.modal button.cancel {
+  background: #333;
+  color: #aaa;
+}
+.modal button.cancel:hover {
+  background: #444;
+  color: #ddd;
+}
+
+
 
 /* Responsive */
 @media (max-width: 768px) {
