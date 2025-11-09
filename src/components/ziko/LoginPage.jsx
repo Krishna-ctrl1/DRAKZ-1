@@ -15,7 +15,7 @@ const LoginPage = () => {
 
   const handleBackToHome = () => navigate('/');
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   setError('');
 
@@ -37,7 +37,7 @@ const LoginPage = () => {
       user: '/user/dashboard',
     };
 
-    navigate(map[data.user.role] || '/');
+    navigate(map[data.user.role] || '/', { replace: true });
 
   } catch (err) {
     console.error('Login error:', err.response?.data);
