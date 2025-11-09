@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getToken } from '../utils/auth';
+import { getToken } from '../utils/auth.util.js';
 
 const ProtectedRoute = () => {
   const token = getToken();

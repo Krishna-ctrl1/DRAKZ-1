@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { getRole } from '../utils/auth';
+import { getRole } from '../utils/auth.util.js';
 
 const RoleRoute = ({ allowed }) => {
   const role = getRole(); // 'admin' | 'advisor' | 'user' | null
