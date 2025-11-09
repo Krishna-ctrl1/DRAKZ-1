@@ -1,6 +1,6 @@
 import React from "react";
 
-const AdvisorDashboard = () => {
+const AdminDashboard = () => {
   const role = localStorage.getItem("role");
   const email = localStorage.getItem("email");
 
@@ -12,7 +12,7 @@ const AdvisorDashboard = () => {
         color: "var(--text-color, #fff)",
       }}
     >
-      <h1 style={{ margin: 0 }}>Advisor Dashboard</h1>
+      <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
       <p>
         You have successfully logged in as: <strong>{role}</strong>
       </p>
@@ -23,16 +23,16 @@ const AdvisorDashboard = () => {
           marginTop: "20px",
           padding: "15px",
           border: "1px solid rgba(255,255,255,0.25)",
-          width: "300px",
+          width: "320px",
           borderRadius: "8px",
           background: "rgba(255,255,255,0.06)",
           backdropFilter: "blur(4px)",
         }}
       >
-        <p style={{ margin: 0 }}>This page is ONLY for Advisors.</p>
+        <p style={{ margin: 0 }}>This page is ONLY for Admins.</p>
       </div>
     </div>
   );
 };
 
-export default AdvisorDashboard;
+export default AdminDashboard;
