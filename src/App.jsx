@@ -7,6 +7,8 @@ import Dashboard from "./components/deepthi/Dashboard";
 import AdvisorDashboard from "./components/gupta/advisor.dashboard";
 import FinBot from "./components/gupta/Finbot";
 import MyPrivilege from "./components/abhinay/MyPrivilege";
+import Blogs from "./components/ragamaie/BlogPage"
+import Investments from "./components/ragamaie/InvestmentsPage"
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -48,6 +50,8 @@ function App() {
           {/* Role: user-only */}
           <Route element={<RoleRoute allowed={["user"]} />}>
             <Route path="/user/dashboard" element={<Dashboard />} />
+            <Route path="/user/blog" element={<Blogs/>} />
+            <Route path="/user/investments" element={<Investments />} />
             <Route path="/user/finbot" element={<FinBot />} />
             <Route path="/user/privileges" element={<MyPrivilege />} />
           </Route>
