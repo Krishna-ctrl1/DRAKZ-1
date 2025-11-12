@@ -13,7 +13,6 @@ export default function StockChart() {
     <div className="stockchart-container">
       <div className="stockchart-header">
         <h2>Stock Chart</h2>
-        <button className="link-btn">View All</button>
       </div>
       <table className="stock-table">
         <thead>

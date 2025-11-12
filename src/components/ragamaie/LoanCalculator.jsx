@@ -1,37 +1,112 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/ragamaie/LoanCalculator.css";
 
 export default function LoanCalculator() {
-  const [amount, setAmount] = useState(2600000);
+  const [amount, setAmount] = useState(2000000);
   const [rate, setRate] = useState(7.5);
   const [tenure, setTenure] = useState(10);
+  const [emi, setEmi] = useState(0);
+  const [totalPayment, setTotalPayment] = useState(0);
+  const [totalInterest, setTotalInterest] = useState(0);
+  const [interestPercent, setInterestPercent] = useState(0);
 
-  const calculateEMI = () => {
+  useEffect(() => {
+    calculateLoanDetails();
+  }, [amount, rate, tenure]);
+
+  const calculateLoanDetails = () => {
+    const principal = Number(amount);
     const monthlyRate = rate / 100 / 12;
     const months = tenure * 12;
-    return (
-      (amount * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-      (Math.pow(1 + monthlyRate, months) - 1)
-    ).toFixed(2);
+
+    if (principal <= 0 || rate <= 0 || tenure <= 0) {
+      setEmi(0);
+      setTotalPayment(0);
+      setTotalInterest(0);
+      return;
+    }
+
+    const emiCalc =
+      (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+      (Math.pow(1 + monthlyRate, months) - 1);
+
+    const totalPaymentCalc = emiCalc * months;
+    const totalInterestCalc = totalPaymentCalc - principal;
+    const interestPercentCalc = (totalInterestCalc / principal) * 100;
+
+    setEmi(emiCalc.toFixed(2));
+    setTotalPayment(totalPaymentCalc.toFixed(2));
+    setTotalInterest(totalInterestCalc.toFixed(2));
+    setInterestPercent(interestPercentCalc.toFixed(1));
   };
 
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
+
   return (
-    <div className="loan-calculator">
-      <h2>Loan Calculator</h2>
-      <label>Home Loan Amount</label>
-      <input type="range" min="0" max="20000000" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <p>₹ {amount}</p>
+    <div className="loan-calculator-dark">
+      <h2>Home Loan Calculator</h2>
 
-      <label>Interest Rate</label>
-      <input type="range" min="5" max="15" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)} />
-      <p>{rate}%</p>
+      <div className="input-group">
+        <label>Loan Amount (₹)</label>
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(Number(e.target.value))}
+          placeholder="Enter loan amount"
+        />
+      </div>
 
-      <label>Loan Tenure (Years)</label>
-      <input type="range" min="1" max="20" value={tenure} onChange={(e) => setTenure(e.target.value)} />
-      <p>{tenure} years</p>
+      <div className="input-group">
+        <label>Interest Rate (%)</label>
+        <input
+          type="number"
+          step="0.1"
+          value={rate}
+          onChange={(e) => setRate(Number(e.target.value))}
+          placeholder="Enter interest rate"
+        />
+      </div>
 
-      <button className="btn-primary">Calculate EMI</button>
-      <p className="emi-result">EMI: ₹ {calculateEMI()}</p>
+      <div className="input-group">
+        <label>Loan Tenure (Years)</label>
+        <input
+          type="number"
+          value={tenure}
+          onChange={(e) => setTenure(Number(e.target.value))}
+          placeholder="Enter loan tenure"
+        />
+      </div>
+
+      <div className="emi-display">
+        <h3>Loan Summary</h3>
+        <div className="loan-results">
+          <p>
+            <span>Estimated EMI:</span>
+            <strong>{formatCurrency(emi)}</strong>
+          </p>
+          <p>
+            <span>Total Payment:</span>
+            <strong>{formatCurrency(totalPayment)}</strong>
+          </p>
+          <p>
+            <span>Total Interest:</span>
+            <strong>{formatCurrency(totalInterest)}</strong>
+          </p>
+          <p>
+            <span>Interest % of Principal:</span>
+            <strong>{interestPercent}%</strong>
+          </p>
+          {/* <p>
+            <span>Principal Amount:</span>
+            <strong>{formatCurrency(amount)}</strong>
+          </p> */}
+        </div>
+      </div>
     </div>
   );
 }

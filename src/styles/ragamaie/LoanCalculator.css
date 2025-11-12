@@ -1,30 +1,75 @@
-.loan-calculator {
-  background: #1e1e2f;
-  padding: 20px;
-  border-radius: 15px;
-  color: white;
+.loan-calculator-dark {
+  background: #1b1c25;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
-.loan-calculator label {
-  display: block;
-  margin-top: 10px;
-  font-size: 14px;
-  color: #aaa;
+
+.loan-calculator-dark h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #f9fafb;
 }
-.loan-calculator input[type="range"] {
-  width: 100%;
-  margin: 5px 0;
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.btn-primary {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px;
-  width: 100%;
+
+.input-group label {
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.input-group input {
+  background: #252733;
+  border: 1px solid #2e303e;
   border-radius: 10px;
-  margin-top: 15px;
-  cursor: pointer;
+  padding: 10px;
+  color: #f9fafb;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
 }
-.emi-result {
-  text-align: center;
+
+.input-group input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.emi-display {
+  background: #252733;
+  padding: 18px;
+  border-radius: 12px;
   margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.emi-display h3 {
+  color: #93c5fd;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.loan-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.loan-results p {
+  display: flex;
+  justify-content: space-between;
+  color: #e5e7eb;
+}
+
+.loan-results strong {
+  color: #3b82f6;
 }
