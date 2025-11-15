@@ -1,0 +1,778 @@
+/* src/styles/deepthi/cardsCarousel.css */
+
+.cards-carousel-wrapper {
+  width: 100%;
+  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: block;
+  position: relative;
+  z-index: 1;
+  min-height: 300px;
+  border: 2px solid rgba(124, 58, 237, 0.242);
+  /* margin-top: 20px; REMOVED for grid layout */
+  height: 100%; /* Ensure it fills the grid cell */
+  box-sizing: border-box;
+}
+
+.carousel-container {
+  position: relative;
+  display: block;
+}
+
+.carousel-title {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #e0e6ff;
+  letter-spacing: 0.5px;
+  display: block;
+  text-transform: uppercase;
+}
+
+/* Carousel */
+.carousel {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.carousel-viewport {
+  overflow: hidden;
+  border-radius: 12px;
+  width: 100%;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.carousel-track {
+  display: flex;
+  height: 220px;
+  position: relative;
+  width: 100%;
+  /* overflow: hidden;  <-- REMOVED: Track should not clip its content */
+}
+
+.card-slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Card Styles */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 200px;
+  border-radius: 16px;
+  border: 2px solid;
+  padding: 24px;
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.card-credit {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a55eea 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.card-debit {
+  background: linear-gradient(135deg, #00b894 0%, #00d2d3 100%);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Card Chip */
+.card-chip {
+  position: absolute;
+  top: 48px;
+  left: 24px;
+  width: 48px;
+  height: 38px;
+  background: linear-gradient(135deg, #ffd89b 0%, #f9ca24 100%);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.chip-inner {
+  width: 40px;
+  height: 30px;
+  background: repeating-linear-gradient(
+    90deg,
+    #daa520,
+    #daa520 2px,
+    #f9ca24 2px,
+    #f9ca24 4px
+  );
+  border-radius: 2px;
+}
+
+/* Card Header (Brand + Delete) */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.card-brand {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card-delete-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.card-delete-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.card-delete-btn:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Card Number */
+.card-number {
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: #fff;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: "Courier New", monospace;
+  position: relative;
+  z-index: 2;
+}
+
+/* Card Footer */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
+  gap: 16px;
+}
+
+.card-label {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.card-holder-name {
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-expiry {
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+}
+
+.card-type-label {
+  font-size: 11px;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Card Gradient Overlay */
+.card-gradient {
+  position: absolute;
+  top: 0;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 20% 50%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Carousel Navigation */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(124, 58, 237, 0.8);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  font-weight: 300;
+}
+
+.carousel-nav:hover {
+  background: rgba(124, 58, 237, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+.carousel-prev {
+  left: -20px;
+}
+
+.carousel-next {
+  right: -20px;
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  padding: 0;
+}
+
+.indicator:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.indicator.active {
+  background: #7c3aed;
+  width: 28px;
+  border-radius: 5px;
+}
+
+.indicator:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+/* No Cards Message */
+.no-cards-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 2px dashed rgba(124, 58, 237, 0.3);
+}
+
+.no-cards-message p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Add Card Button */
+.add-card-btn {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #7c3aed 0%, #a55eea 100%);
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 24px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.add-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+.add-card-btn:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+.add-card-btn:active {
+  transform: translateY(0);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #e0e6ff;
+  letter-spacing: 0.5px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  color: #fff;
+}
+
+.modal-close-btn:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+/* Form Styles */
+.add-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e6ff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.form-group input.error,
+.form-group select.error {
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.field-error {
+  font-size: 12px;
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.form-error-message {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* Form Row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Color Picker */
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-picker input[type="color"] {
+  width: 50px;
+  height: 50px;
+  border: 2px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-picker input[type="color"]:hover {
+  border-color: #7c3aed;
+}
+
+.color-hex {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: "Courier New", monospace;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-cancel,
+.btn-submit {
+  flex: 1;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e6ff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-cancel:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #7c3aed 0%, #a55eea 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+}
+
+.btn-submit:focus {
+  outline: 2px solid rgba(124, 58, 237, 0.5);
+  outline-offset: 2px;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cards-carousel-wrapper {
+    padding: 16px;
+  }
+
+  .carousel-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .card-slide {
+    padding: 16px;
+  }
+
+  .card {
+    max-width: 100%;
+    height: 180px;
+    padding: 20px;
+  }
+
+  .carousel-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .carousel-prev {
+    left: -18px;
+  }
+
+  .carousel-next {
+    right: -18px;
+  }
+
+  .modal-content {
+    padding: 24px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .card-number {
+    font-size: 18px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards-carousel-wrapper {
+    padding: 12px;
+  }
+
+  .carousel-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .card-slide {
+    padding: 12px;
+  }
+
+  .card {
+    height: 160px;
+    padding: 16px;
+  }
+
+  .card-header {
+    margin-bottom: 12px;
+  }
+
+  .card-chip {
+    width: 40px;
+    height: 32px;
+  }
+
+  .card-brand {
+    font-size: 14px;
+  }
+
+  .card-number {
+    font-size: 14px;
+    letter-spacing: 1.5px;
+  }
+
+  .card-footer {
+    gap: 8px;
+  }
+
+  .card-label {
+    font-size: 8px;
+    margin-bottom: 2px;
+  }
+
+  .card-holder-name,
+  .card-expiry,
+  .card-type-label {
+    font-size: 10px;
+  }
+
+  .carousel-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .carousel-prev {
+    left: -16px;
+  }
+
+  .carousel-next {
+    right: -16px;
+  }
+
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal-content {
+    padding: 20px;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    margin-bottom: 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  .add-card-form {
+    gap: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+/* Scrollbar for modal */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.4);
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.6);
+}
