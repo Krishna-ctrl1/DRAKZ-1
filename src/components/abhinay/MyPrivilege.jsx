@@ -1,3 +1,4 @@
+// ... imports ... (same as before)
 import React, { useState, useEffect, useMemo } from "react";
 import api from "../../api/axios.api.js"; 
 import Header from "../global/Header";
@@ -26,14 +27,13 @@ const MyPrivilege = () => {
   const [modalContent, setModalContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userData, setUserData] = useState({ name: "John Drakz" }); // Default name
+  const [userData, setUserData] = useState({ name: "John Drakz" });
 
   const [allInsurances, setAllInsurances] = useState([]);
   const [properties, setProperties] = useState([]);
   const [holdings, setHoldings] = useState([]);
   const [transactions, setTransactions] = useState([]);
 
-  // --- FETCH DATA ---
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -51,7 +51,6 @@ const MyPrivilege = () => {
       setTransactions(transactionsRes.data || []);
     } catch (err) {
       console.error("Error fetching data:", err);
-      // Don't show error on first load if empty, just show empty state
     } finally {
       setLoading(false);
     }
@@ -59,12 +58,12 @@ const MyPrivilege = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  // --- NEW: GENERATE RANDOM DATA ---
+  // --- MODIFIED: Seed ONLY Insurances ---
   const handleSeedData = async () => {
     try {
       setLoading(true);
-      await api.post('/api/privilege/seed');
-      await fetchData(); // Reload data after seeding
+      await api.post('/api/privilege/seed'); // Calls the new controller function
+      await fetchData();
     } catch (err) {
       alert("Failed to generate data");
     } finally {
@@ -72,7 +71,7 @@ const MyPrivilege = () => {
     }
   };
 
-  // --- EXISTING HANDLERS ---
+  // --- EXISTING HANDLERS (Same as before) ---
   const closeModal = () => setModalContent(null);
   const handleAddProperty = async (data) => {
     await api.post('/api/privilege/properties', data);
@@ -101,7 +100,6 @@ const MyPrivilege = () => {
     );
   };
 
-  // --- RENDER ---
   return (
     <div className="dashboard-page privilege-page">
       <Header />
@@ -110,19 +108,18 @@ const MyPrivilege = () => {
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           
           <div className="privilege-content-grid">
-            {/* Main Column */}
             <div className="privilege-main-column">
               <div className="privilege-header">
                 <div className="header-left">
                    <h2>My Privilege Dashboard</h2>
                    <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
+                {/* Updated Button Label */}
                 <button className="seed-btn" onClick={handleSeedData}>
-                  <i className="fa-solid fa-database"></i> Generate Demo Data
+                  <i className="fa-solid fa-wand-magic-sparkles"></i> Generate Insurances
                 </button>
               </div>
 
-              {/* Insurances */}
               <section className="privilege-section">
                 <h3>Insurances</h3>
                 <div className="insurance-cards">
@@ -139,7 +136,6 @@ const MyPrivilege = () => {
                 </div>
               </section>
 
-              {/* Properties */}
               <section className="privilege-section">
                 <h3>Your Properties</h3>
                 <div className="property-cards">
@@ -161,7 +157,6 @@ const MyPrivilege = () => {
                 </div>
               </section>
 
-              {/* Holdings */}
               <section className="privilege-section">
                 <h3>Precious Holdings</h3>
                 <table className="holdings-table">
@@ -183,7 +178,6 @@ const MyPrivilege = () => {
               </section>
             </div>
 
-            {/* Sidebar Column */}
             <div className="privilege-sidebar-column">
                <div className="user-welcome">
                  <img src="/1.jpg" alt="User" />

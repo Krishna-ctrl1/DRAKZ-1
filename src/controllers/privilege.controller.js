@@ -3,7 +3,7 @@ const Insurance = require('../models/insurance.model.js');
 const PreciousHolding = require('../models/preciousHolding.model.js');
 const Transaction = require('../models/transaction.model.js');
 
-// --- Existing Controllers ---
+// --- Existing Controllers (No changes needed here) ---
 const addProperty = async (req, res) => {
   try {
     const { name, value, location, imageUrl } = req.body;
@@ -62,45 +62,38 @@ const getTransactions = async (req, res) => {
   } catch (error) { res.status(500).json({ error: error.message }); }
 };
 
-// --- NEW: RANDOM DATA GENERATOR ---
+// --- MODIFIED: SEED ONLY INSURANCES ---
 const seedData = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // 1. Clear existing data (optional, safest for demo)
-    await Promise.all([
-      Property.deleteMany({ userId }),
-      Insurance.deleteMany({ userId }),
-      PreciousHolding.deleteMany({ userId }),
-      Transaction.deleteMany({ userId })
-    ]);
+    // Only delete existing insurances so we don't get duplicates
+    await Insurance.deleteMany({ userId });
 
-    // 2. Create Insurances
-    const insurances = await Insurance.create([
-      { userId, provider: 'Geico', type: 'Auto', coverageAmount: 25000, premium: 120 },
-      { userId, provider: 'BlueCross', type: 'Health', coverageAmount: 100000, premium: 450 }
-    ]);
+    // Create 2 Random Insurances
+    const providers = ['Geico', 'BlueCross', 'StateFarm', 'Allstate'];
+    const types = ['Auto', 'Health', 'Life', 'Home'];
+    
+    const randomInsurances = [];
+    for(let i=0; i<2; i++) {
+        const type = types[Math.floor(Math.random() * types.length)];
+        randomInsurances.push({
+            userId,
+            provider: providers[Math.floor(Math.random() * providers.length)],
+            type: type,
+            coverageAmount: Math.floor(Math.random() * 500000) + 10000,
+            premium: Math.floor(Math.random() * 500) + 50
+        });
+    }
 
-    // 3. Create Properties
-    const properties = await Property.create([
-      { userId, name: 'Sunset Villa', value: 450000, location: 'California', imageUrl: '/1.jpg' },
-      { userId, name: 'Downtown Apt', value: 850000, location: 'New York', imageUrl: '/2.jpg' }
-    ]);
+    const insurances = await Insurance.create(randomInsurances);
 
-    // 4. Create Holdings
-    const holdings = await PreciousHolding.create([
-      { userId, name: 'Gold Bar', type: 'Gold', weight: '50g', purchasedValue: 3000, currentValue: 3200, purchaseDate: new Date() },
-      { userId, name: 'Silver Coin', type: 'Silver', weight: '1kg', purchasedValue: 800, currentValue: 750, purchaseDate: new Date() }
-    ]);
+    // Fetch everything else to return full state (but don't change them)
+    const properties = await Property.find({ userId });
+    const holdings = await PreciousHolding.find({ userId });
+    const transactions = await Transaction.find({ userId });
 
-    // 5. Create Transactions
-    const transactions = await Transaction.create([
-      { userId, type: 'Expense', amount: 1200, status: 'Completed', description: 'Rent', date: new Date() },
-      { userId, type: 'Income', amount: 5000, status: 'Completed', description: 'Salary', date: new Date() },
-      { userId, type: 'Investment', amount: 2000, status: 'Pending', description: 'Stock Buy', date: new Date() }
-    ]);
-
-    res.status(200).json({ msg: "Data seeded successfully!", insurances, properties, holdings, transactions });
+    res.status(200).json({ msg: "Insurances updated!", insurances, properties, holdings, transactions });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -110,5 +103,5 @@ const seedData = async (req, res) => {
 module.exports = {
   addProperty, getProperties, deleteProperty,
   getInsurances, getPreciousHoldings, addPreciousHolding, getTransactions,
-  seedData // Export the new function
+  seedData 
 };
