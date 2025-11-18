@@ -5,7 +5,7 @@ import {
   UserAvatar,
   UserName,
   LogoutButton,
-} from "../../../../styles/ziko/admin/TopBar.styles"; // Adjusted import path
+} from "../../../../styles/ziko/admin/Topbar.styles"; // Adjusted import path
 import { useNavigate } from "react-router-dom";
 
 const TopBar = ({ userName, userEmail }) => {
