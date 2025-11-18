@@ -5,8 +5,8 @@ const cors = require('cors');
 const connectDB = require('./src/config/db.config.js');
 const authRoutes = require('./src/routes/auth.route.js');
 
-// --- 1. IMPORT THE NEW ROUTE HERE ---
-const advisorRoutes = require('./src/routes/advisor.route.js'); 
+// --- ADD THIS LINE ---
+const privilegeRoutes = require('./src/routes/privilege.route.js'); 
 
 const app = express();
 
@@ -14,9 +14,8 @@ const app = express();
 connectDB();
 
 // Middleware
-// NOTE: If your React app runs on port 5173 (Vite default), change 3000 to 5173 below!
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'], // Allowed both common ports
+  origin: 'http://localhost:3000', // Make sure this matches your frontend port
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'DELETE']
@@ -31,8 +30,8 @@ app.get('/api/test-all', (req, res) => {
 // Routes 
 app.use('/api/auth', authRoutes);
 
-// --- 2. USE THE NEW ROUTE HERE ---
-app.use('/api/advisor', advisorRoutes); 
+// --- AND ADD THIS LINE ---
+app.use('/api/privilege', privilegeRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
