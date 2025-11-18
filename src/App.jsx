@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./components/ziko/Home";
 import LoginPage from "./components/ziko/LoginPage";
 import Dashboard from "./components/deepthi/Dashboard";
-import AdvisorDashboard from "./components/gupta/advisor.dashboard";
+import AdvisorDashboard from "./components/gupta/AdvisorDashboard";
 import FinBot from "./components/gupta/Finbot";
 import MyPrivilege from "./components/abhinay/MyPrivilege";
 import Blogs from "./components/ragamaie/BlogPage"
