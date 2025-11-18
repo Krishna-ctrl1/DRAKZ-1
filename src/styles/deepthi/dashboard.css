@@ -15,10 +15,12 @@
 }
 
 .main-content-collapsed {
+  flex: 1;
+  padding: 20px;
   margin-left: 110px;
+  margin-top: 5rem; /* This was missing */
   transition: margin-left 0.3s ease;
 }
-
 .dashboard-page {
   min-height: 100vh;
   background: #000000;

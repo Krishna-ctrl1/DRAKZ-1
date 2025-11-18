@@ -1,12 +1,19 @@
 const jwt = require('jsonwebtoken');
-const { jwtSecret } = require('../config/jwt.js');
+// --- THIS IS THE FIX ---
+// Changed '../config/jwt.js' to '../config/jwt.config.js'
+const { jwtSecret } = require('../config/jwt.config.js'); 
+// --- END FIX ---
 
 const auth = (req, res, next) => {
-  const token = req.header('x-auth-token');
+  // Get token from header
+  const token = req.header('x-auth-token') || req.header('Authorization')?.replace('Bearer ', '');
+
+  // Check if not token
   if (!token) {
     return res.status(401).json({ msg: 'No token, authorization denied' });
   }
 
+  // Verify token
   try {
     const decoded = jwt.verify(token, jwtSecret);
     req.user = decoded;
@@ -16,12 +23,13 @@ const auth = (req, res, next) => {
   }
 };
 
-// Role-based access
-const requireRole = (roles) => (req, res, next) => {
-  if (!roles.includes(req.user.role)) {
-    return res.status(403).json({ msg: 'Insufficient permissions' });
-  }
-  next();
-};
+const requireRole = (roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ msg: 'Access denied' });
+        }
+        next();
+    }
+}
 
 module.exports = { auth, requireRole };
