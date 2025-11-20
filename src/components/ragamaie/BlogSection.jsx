@@ -1,63 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BlogControls from "./BlogControls";
 import BlogList from "./BlogList";
 
-// import stocksImg from "../../../public/stocksImg.png";
-// import cryptoImg from "../../../public/crypto.png";
-// import budgetImg from "../../../public/budget.png";
-
 const BlogSection = () => {
-  const [blogs] = useState([
-    {
-      title: "The Ultimate Guide to Investing in Stocks",
-      description:
-        "Learn the basics of stock market investing, including how to choose stocks, manage risk, and build a diversified portfolio.",
-      image: "/stocksImg.png",
-      authorType: "user",
-    },
-    {
-      title: "Understanding Cryptocurrency: A Beginner’s Guide",
-      description:
-        "Explore the world of cryptocurrencies, including Bitcoin, Ethereum, and other digital currencies. Learn about blockchain technology, wallets, and trading.",
-      image: "/crypto.png",
-      authorType: "advisor",
-    },
-    {
-      title: "Budgeting 101: How to Create a Budget That Works",
-      description:
-        "Master your personal finances with a step-by-step guide to creating and sticking to a budget that actually works.",
-      image: "/budget.png",
-      authorType: "user",
-    },
-  ]);
-
-  const [filteredBlogs, setFilteredBlogs] = useState(blogs);
+  const [blogs, setBlogs] = useState([]);
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
   const [filters, setFilters] = useState({
     authorType: "all",
-    sortBy: "newest",
+    sortBy: "latest",
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Apply search + filters together
+  // Fetch blogs
+  const fetchBlogs = async () => {
+    try {
+      const res = await fetch("/api/blogs");
+      const data = await res.json();
+
+      // convert backend content → frontend description
+      const mapped = data.map((b) => ({
+        ...b,
+        description: b.content, 
+      }));
+
+      setBlogs(mapped);
+      setFilteredBlogs(mapped);
+    } catch (e) {
+      console.error("Fetch failed:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  // Apply filters
   const applyFilters = (query, filters) => {
-    let result = blogs;
+    let result = [...blogs];
 
-    // search
-    if (query) {
+    if (query)
       result = result.filter((b) =>
-        b.title.toLowerCase().includes(query.toLowerCase()),
+        b.title.toLowerCase().includes(query.toLowerCase())
       );
-    }
 
-    // authorType filter
-    if (filters.authorType && filters.authorType !== "all") {
-      result = result.filter((b) => b.authorType === filters.authorType);
-    }
+    if (filters.authorType !== "all")
+      result = result.filter((b) => b.author_type === filters.authorType);
 
-    // sort (example logic)
-    if (filters.sortBy === "top") {
-      result = [...result].reverse();
-    }
+    if (filters.sortBy === "top")
+      result.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+    else
+      result.sort(
+        (a, b) =>
+          new Date(b.created_at) - new Date(a.created_at)
+      );
 
     setFilteredBlogs(result);
   };
@@ -68,9 +63,9 @@ const BlogSection = () => {
   };
 
   const handleFiltersChange = (newFilters) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    applyFilters(searchQuery, updatedFilters);
+    const updated = { ...filters, ...newFilters };
+    setFilters(updated);
+    applyFilters(searchQuery, updated);
   };
 
   return (
