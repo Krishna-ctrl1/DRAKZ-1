@@ -1,0 +1,84 @@
+/* Account Summary Styles */
+.account-summary-container {
+  background-color: #1e1e2d; /* Dark background matching dashboard */
+  padding: 20px;
+  border-radius: 16px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.account-summary-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.summary-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-circle {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--color) var(--percent), #2d2d3b 0);
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-color: #1e1e2d;
+  border-radius: 50%;
+}
+
+.icon-container {
+  position: relative;
+  z-index: 1;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #888;
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
