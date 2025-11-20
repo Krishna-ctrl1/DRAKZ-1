@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/config/db.config.js');
 const authRoutes = require('./src/routes/auth.route.js');
+const blogRoutes = require('./src/routes/blogs.route.js'); 
 
 // --- ADD THIS LINE ---
 const privilegeRoutes = require('./src/routes/privilege.route.js'); 
@@ -32,6 +33,12 @@ app.use('/api/auth', authRoutes);
 
 // --- AND ADD THIS LINE ---
 app.use('/api/privilege', privilegeRoutes);
+
+//blogs
+const blogRoutes = require("./src/routes/blog.route.js");
+app.use("/api/blogs", blogRoutes);
+
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
