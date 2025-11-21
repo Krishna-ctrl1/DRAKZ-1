@@ -6,32 +6,23 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
   const [showForm, setShowForm] = useState(false);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-  // ✅ Modern unified filter state
+  const dropdownRef = useRef(null);
+
   const [activeFilters, setActiveFilters] = useState({
     authorType: "all",
     sortBy: "latest",
     search: "",
   });
 
-  const dropdownRef = useRef(null);
-
-  // ✅ Blog creation form
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     image: "",
-    author_type: "user",
-    author_id: "",
-    status: "pending",
-    verified_by: null,
-    published_at: null,
   });
 
   const [errors, setErrors] = useState({});
 
-  // -------------------------------
-  // ✅ Close dropdown on outside click
-  // -------------------------------
+  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -42,55 +33,38 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // -------------------------------
-  // ✅ Notify parent on filter change
-  // -------------------------------
-  useEffect(() => {
-    onFiltersChange?.(activeFilters);
-  }, [activeFilters, onFiltersChange]);
-
-  // -------------------------------
-  // ✅ Search handling
-  // -------------------------------
+  // Search
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setActiveFilters((prev) => ({ ...prev, search: value }));
     onSearch?.(value);
   };
 
-  // -------------------------------
-  // ✅ Filter change
-  // -------------------------------
+  // Filter changes
   const handleFilterChange = (key, value) => {
-    setActiveFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    const updated = { ...activeFilters, [key]: value };
+    setActiveFilters(updated);
+    onFiltersChange?.(updated);
     setShowFilterDropdown(false);
   };
 
-  // -------------------------------
-  // ✅ Tab change
-  // -------------------------------
+  // Tabs
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setActiveFilters((prev) => ({
-      ...prev,
+    const updated = {
+      ...activeFilters,
       sortBy: tab === "Latest" ? "latest" : "top",
-    }));
+    };
+    setActiveFilters(updated);
+    onFiltersChange?.(updated);
   };
 
-  // -------------------------------
-  // ✅ Clear filters
-  // -------------------------------
   const clearFilters = () => {
-    setActiveFilters((prev) => ({
-      ...prev,
-      authorType: "all",
-    }));
+    const updated = { ...activeFilters, authorType: "all" };
+    setActiveFilters(updated);
+    onFiltersChange?.(updated);
   };
 
-  // Label for Filter Button
   const getFilterLabel = () =>
     activeFilters.authorType === "user"
       ? "Users"
@@ -98,15 +72,11 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
       ? "Advisors"
       : "Filter";
 
-  // -------------------------------
-  // ✅ Form input handling
-  // -------------------------------
+  // Form input
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // -------------------------------
-  // ✅ Validation
-  // -------------------------------
+  // Validate
   const validate = () => {
     const newErrors = {};
 
@@ -118,9 +88,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
     else if (formData.content.trim().length < 20)
       newErrors.content = "Content must be at least 20 characters.";
 
-    if (!formData.author_id.trim())
-      newErrors.author_id = "Author ID is required.";
-
     if (formData.image.trim()) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       if (!urlRegex.test(formData.image.trim()))
@@ -131,48 +98,33 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // -------------------------------
-  // ✅ Submit Blog
-  // -------------------------------
+  // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    // ✅ Blog creation always starts as pending
     const blogToCreate = {
-      ...formData,
-      status: "pending",
-      verified_by: null,
-      published_at: null,
+      title: formData.title,
+      content: formData.content,
+      image: formData.image,
     };
 
     onBlogCreated?.(blogToCreate);
+    alert("Blog submitted ✅");
 
-    alert("Blog submitted ✅ (awaiting admin approval)");
-
-    // Reset
     setShowForm(false);
     setFormData({
       title: "",
       content: "",
       image: "",
-      author_type: "user",
-      author_id: "",
-      status: "pending",
-      verified_by: null,
-      published_at: null,
     });
     setErrors({});
   };
 
-  // -------------------------------
-  // ✅ UI Rendering
-  // -------------------------------
   return (
     <>
       <div className="blog-controls">
         <div className="left">
-          {/* ✅ Search */}
           <input
             type="text"
             placeholder="🔍 Search blogs..."
@@ -181,7 +133,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
             className="search-input"
           />
 
-          {/* ✅ Filter Dropdown */}
           <div className="filter-dropdown" ref={dropdownRef}>
             <button
               className="filter-btn"
@@ -198,7 +149,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
                     <label key={type}>
                       <input
                         type="radio"
-                        name="author_type"
                         checked={activeFilters.authorType === type}
                         onChange={() => handleFilterChange("authorType", type)}
                       />
@@ -218,7 +168,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
             )}
           </div>
 
-          {/* ✅ Tabs */}
           {["Latest", "Top"].map((tab) => (
             <button
               key={tab}
@@ -237,7 +186,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
         </div>
       </div>
 
-      {/* ✅ Active Filter Tags */}
       {activeFilters.authorType !== "all" && (
         <div className="active-filters">
           <span>Active filter:</span>
@@ -251,7 +199,6 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
         </div>
       )}
 
-      {/* ✅ Modal Form */}
       {showForm && (
         <div className="modal-overlay">
           <div className="modal">
@@ -268,8 +215,8 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
 
               <textarea
                 name="content"
-                placeholder="Content"
                 rows="5"
+                placeholder="Content"
                 value={formData.content}
                 onChange={handleChange}
               />
@@ -284,31 +231,9 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
               />
               {errors.image && <p className="error">{errors.image}</p>}
 
-              <select
-                name="author_type"
-                value={formData.author_type}
-                onChange={handleChange}
-              >
-                <option value="user">User</option>
-                <option value="advisor">Advisor</option>
-              </select>
-
-              <input
-                type="text"
-                name="author_id"
-                placeholder="Author ID"
-                value={formData.author_id}
-                onChange={handleChange}
-              />
-              {errors.author_id && <p className="error">{errors.author_id}</p>}
-
               <div className="button-row">
                 <button type="submit">Submit</button>
-                <button
-                  type="button"
-                  className="cancel"
-                  onClick={() => setShowForm(false)}
-                >
+                <button type="button" className="cancel" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
               </div>

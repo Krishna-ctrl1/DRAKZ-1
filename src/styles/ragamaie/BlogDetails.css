@@ -1,0 +1,28 @@
+.blog-details {
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.details-img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.details-content {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.details-actions {
+  margin-top: 20px;
+}
+
+.comment-btn {
+  background: #eee;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}

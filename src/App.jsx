@@ -20,6 +20,7 @@ import UserManagementPage from "./components/ziko/admin/UserManagementPage";
 import ContentManagementPage from "./components/ziko/admin/ContentManagementPage";
 import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
+import BlogDetails from "./components/ragamaie/BlogDetails";
 function App() {
   return (
     <div className="App">
@@ -51,6 +52,7 @@ function App() {
           <Route element={<RoleRoute allowed={["user"]} />}>
             <Route path="/user/dashboard" element={<Dashboard />} />
             <Route path="/user/blog" element={<Blogs/>} />
+            <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="/user/investments" element={<Investments />} />
             <Route path="/user/finbot" element={<FinBot />} />
             <Route path="/user/privileges" element={<MyPrivilege />} />
