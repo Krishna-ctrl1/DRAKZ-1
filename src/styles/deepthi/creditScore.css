@@ -2,6 +2,7 @@
 
 .creditscore-card {
   box-sizing: border-box;
+  /* margin-top: 20px; REMOVED for grid layout */
   background: linear-gradient(
     180deg,
     rgba(0, 0, 0, 0.96),
@@ -11,7 +12,7 @@
   padding: 18px;
   border-radius: 22px;
   width: 100%;
-  max-width: 540px; /* allow to grow but cap width */
+  /* max-width: 540px; REMOVED for grid layout */
   /* remove min-width to avoid forcing layout breaks */
   box-shadow: 0 8px 25px rgba(19, 33, 99, 0.65);
   font-family:
