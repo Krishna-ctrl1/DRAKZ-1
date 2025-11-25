@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const blogCtrl = require("../controllers/blog.controller.js");
-const isUserAuthenticated = require("../middlewares/authCheck.js");
+const { auth } = require("../middlewares/auth.middleware.js");
 
 
-router.post("/", isUserAuthenticated, blogCtrl.createBlog);
+router.post("/", auth, blogCtrl.createBlog);
 router.get("/", blogCtrl.getBlogs);
-router.post("/:id/like", isUserAuthenticated, blogCtrl.likeBlog);
-router.post("/:id/dislike", isUserAuthenticated, blogCtrl.dislikeBlog);
-router.get("/:id/interactions", isUserAuthenticated, blogCtrl.checkInteractions);
-router.post("/:id/comments", isUserAuthenticated, blogCtrl.addComment);
+router.post("/:id/like", auth, blogCtrl.likeBlog);
+router.post("/:id/dislike", auth, blogCtrl.dislikeBlog);
+router.get("/:id/interactions", auth, blogCtrl.checkInteractions);
+router.post("/:id/comments", auth, blogCtrl.addComment);
 router.get("/:id/comments", blogCtrl.getComments);
-router.delete("/comments/:id", isUserAuthenticated, blogCtrl.deleteComment);
-router.delete("/:id", isUserAuthenticated, blogCtrl.deleteBlog);
+router.delete("/comments/:id", auth, blogCtrl.deleteComment);
+router.delete("/:id", auth, blogCtrl.deleteBlog);
 
 module.exports = router;

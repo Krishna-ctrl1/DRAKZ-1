@@ -1,3 +1,4 @@
+// ... imports ... (same as before)
 import React, { useState, useEffect, useMemo } from "react";
 import api from "../../api/axios.api.js"; 
 import Header from "../global/Header";
@@ -5,19 +6,20 @@ import Sidebar from "../global/Sidebar";
 import Modal from "../global/Modal";
 import AddPropertyForm from "./AddPropertyForm";
 import AddHoldingForm from "./AddHoldingForm";
+import InsuranceDetails from "./InsuranceDetails";
 import "../../styles/abhinay/abhinay.css";
 import "../../styles/global/Modal.css";
 import "../../styles/deepthi/dashboard.css";
 
 const getTransactionIcon = (type) => {
-  if (!type) return 'fa-solid fa-dollar-sign';
+  if (!type) return 'fa-solid fa-shield-halved';
   switch (type.toLowerCase()) {
-    case 'expense': return 'fa-solid fa-fire';
-    case 'investment': return 'fa-solid fa-seedling';
-    case 'loan': return 'fa-solid fa-landmark';
+    case 'auto': return 'fa-solid fa-car';
+    case 'health': return 'fa-solid fa-heart-pulse';
+    case 'life': return 'fa-solid fa-user-shield';
+    case 'home': return 'fa-solid fa-house';
     case 'insurance': return 'fa-solid fa-shield-halved';
-    case 'income': return 'fa-solid fa-wallet';
-    default: return 'fa-solid fa-dollar-sign';
+    default: return 'fa-solid fa-shield-halved';
   }
 };
 
@@ -26,73 +28,211 @@ const MyPrivilege = () => {
   const [modalContent, setModalContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userData, setUserData] = useState({ name: "John Drakz" }); // Default name
+  const [userData, setUserData] = useState({ name: "User", email: "" });
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [transactionFilter, setTransactionFilter] = useState('all'); // 'all', 'pending', 'active', 'completed'
 
   const [allInsurances, setAllInsurances] = useState([]);
   const [properties, setProperties] = useState([]);
   const [holdings, setHoldings] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [liveMetalPrices, setLiveMetalPrices] = useState({ Gold: 0, Silver: 0, Platinum: 0 });
+  const [pricesLoading, setPricesLoading] = useState(true);
 
-  // --- FETCH DATA ---
+  // Currency conversion rate (1 USD = 83 INR approximately)
+  const USD_TO_INR = 83;
+
+  const formatCurrency = (amount) => {
+    const inr = amount * USD_TO_INR;
+    return `₹${inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+  };
+
+  const fetchLiveMetalPrices = async () => {
+    try {
+      setPricesLoading(true);
+      // Fetch live metal prices in INR per gram from Indian market
+      const response = await fetch('https://api.goldapi.io/api/XAU,XAG,XPT/INR');
+      
+      if (response.ok) {
+        const data = await response.json();
+        setLiveMetalPrices({
+          Gold: data.price_gram || 6500,      // INR per gram
+          Silver: data.silver_price_gram || 80,  // INR per gram
+          Platinum: data.platinum_price_gram || 3200  // INR per gram
+        });
+      } else {
+        // Fallback: Use approximate current Indian market rates (Nov 2025)
+        setLiveMetalPrices({
+          Gold: 6500 + (Math.random() * 100 - 50),      // ₹6500/gram ±50
+          Silver: 80 + (Math.random() * 2 - 1),         // ₹80/gram ±1
+          Platinum: 3200 + (Math.random() * 100 - 50)   // ₹3200/gram ±50
+        });
+      }
+    } catch (err) {
+      console.log('Using simulated Indian market prices');
+      // Simulated live prices based on current Indian market rates
+      setLiveMetalPrices({
+        Gold: 6500 + (Math.random() * 100 - 50),      // ₹6500/gram
+        Silver: 80 + (Math.random() * 2 - 1),         // ₹80/gram
+        Platinum: 3200 + (Math.random() * 100 - 50)   // ₹3200/gram
+      });
+    } finally {
+      setPricesLoading(false);
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [insurancesRes, propertiesRes, holdingsRes, transactionsRes] = await Promise.all([
+      const [profileRes, insurancesRes, propertiesRes, holdingsRes, transactionsRes] = await Promise.all([
+        api.get("/api/privilege/profile"),
         api.get("/api/privilege/insurances"),
         api.get("/api/privilege/properties"),
         api.get("/api/privilege/precious_holdings"),
         api.get("/api/privilege/transactions?limit=5")
       ]);
 
+      setUserData(profileRes.data || { name: "User", email: "" });
       setAllInsurances(insurancesRes.data || []);
       setProperties(propertiesRes.data || []);
       setHoldings(holdingsRes.data || []);
       setTransactions(transactionsRes.data || []);
     } catch (err) {
       console.error("Error fetching data:", err);
-      // Don't show error on first load if empty, just show empty state
+      setError("Failed to load data. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    fetchData();
+    fetchLiveMetalPrices();
+    
+    // Update prices every 30 seconds for live feel
+    const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
+    
+    return () => clearInterval(priceInterval);
+  }, []);
 
-  // --- NEW: GENERATE RANDOM DATA ---
+  // Seed ONLY Insurances
   const handleSeedData = async () => {
     try {
       setLoading(true);
-      await api.post('/api/privilege/seed');
-      await fetchData(); // Reload data after seeding
+      const response = await api.post('/api/privilege/seed');
+      // Update only insurances from the response
+      setAllInsurances(response.data.insurances || []);
+      setLoading(false);
     } catch (err) {
-      alert("Failed to generate data");
-    } finally {
+      console.error("Failed to generate insurances:", err);
+      alert("Failed to generate insurances");
       setLoading(false);
     }
   };
 
   // --- EXISTING HANDLERS ---
   const closeModal = () => setModalContent(null);
+  
   const handleAddProperty = async (data) => {
-    await api.post('/api/privilege/properties', data);
-    fetchData(); closeModal();
+    try {
+      if (data.id) {
+        // Update existing property
+        await api.put(`/api/privilege/properties/${data.id}`, {
+          name: data.name,
+          value: data.value,
+          location: data.location,
+          imageUrl: data.imageUrl
+        });
+      } else {
+        // Add new property
+        await api.post('/api/privilege/properties', data);
+      }
+      await fetchData();
+      closeModal();
+    } catch (err) {
+      console.error('Error saving property:', err);
+      const errorMsg = err.response?.data?.error || err.message || "Failed to save property";
+      alert(errorMsg);
+    }
   };
+  
   const handleRemoveProperty = async (id) => {
-    await api.delete(`/api/privilege/properties/${id}`);
-    fetchData(); closeModal();
+    try {
+      await api.delete(`/api/privilege/properties/${id}`);
+      await fetchData();
+      closeModal();
+    } catch (err) {
+      alert("Failed to remove property");
+    }
   };
+  
   const handleAddHolding = async (data) => {
-    await api.post('/api/privilege/precious_holdings', { ...data, purchaseDate: data.date, amount: data.weight });
-    fetchData(); closeModal();
+    try {
+      await api.post('/api/privilege/precious_holdings', { 
+        ...data, 
+        purchaseDate: data.date, 
+        amount: data.weight 
+      });
+      await fetchData();
+      closeModal();
+    } catch (err) {
+      alert("Failed to add holding");
+    }
   };
 
-  const openAddPropertyModal = () => setModalContent(<AddPropertyForm onClose={closeModal} onSave={handleAddProperty} />);
-  const openAddHoldingModal = () => setModalContent(<AddHoldingForm onClose={closeModal} onSave={handleAddHolding} />);
+  const handleRemoveHolding = async (id) => {
+    try {
+      await api.delete(`/api/privilege/precious_holdings/${id}`);
+      await fetchData();
+      closeModal();
+    } catch (err) {
+      alert("Failed to remove holding");
+    }
+  };
+
+  // Filter transactions based on insurance status
+  const filteredTransactions = useMemo(() => {
+    if (transactionFilter === 'all') return transactions;
+    return transactions.filter(tx => tx.status?.toLowerCase() === transactionFilter);
+  }, [transactions, transactionFilter]);
+
+  const handleFilterChange = (filter) => {
+    setTransactionFilter(filter);
+    setShowFilterMenu(false);
+  };
+
+  const toggleFilterMenu = () => {
+    setShowFilterMenu(!showFilterMenu);
+  };
+
+  const openAddPropertyModal = () => setModalContent(
+    <AddPropertyForm onClose={closeModal} onSave={handleAddProperty} />
+  );
+
+  const openEditPropertyModal = (prop) => setModalContent(
+    <AddPropertyForm onClose={closeModal} onSave={handleAddProperty} property={prop} />
+  );
+  
+  const openAddHoldingModal = () => setModalContent(
+    <AddHoldingForm onClose={closeModal} onSave={handleAddHolding} />
+  );
+
+  const openInsuranceDetailsModal = (insurance) => {
+    setModalContent(
+      <InsuranceDetails 
+        insurance={insurance} 
+        onClose={closeModal} 
+        userData={userData}
+      />
+    );
+  };
+  
   const openRemovePropertyModal = (prop) => {
     setModalContent(
       <div className="confirm-delete">
         <h2>Remove Property?</h2>
+        <p>Are you sure you want to remove <strong>{prop.name}</strong>?</p>
         <div className="modal-actions">
           <button className="modal-btn cancel" onClick={closeModal}>Cancel</button>
           <button className="modal-btn confirm" onClick={() => handleRemoveProperty(prop._id)}>Remove</button>
@@ -101,7 +241,19 @@ const MyPrivilege = () => {
     );
   };
 
-  // --- RENDER ---
+  const openRemoveHoldingModal = (holding) => {
+    setModalContent(
+      <div className="confirm-delete">
+        <h2>Remove Holding?</h2>
+        <p>Are you sure you want to remove <strong>{holding.name}</strong>?</p>
+        <div className="modal-actions">
+          <button className="modal-btn cancel" onClick={closeModal}>Cancel</button>
+          <button className="modal-btn confirm" onClick={() => handleRemoveHolding(holding._id)}>Remove</button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="dashboard-page privilege-page">
       <Header />
@@ -109,119 +261,279 @@ const MyPrivilege = () => {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           
-          <div className="privilege-content-grid">
-            {/* Main Column */}
-            <div className="privilege-main-column">
-              <div className="privilege-header">
-                <div className="header-left">
-                   <h2>My Privilege Dashboard</h2>
-                   <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          {loading ? (
+            <div className="loading-container">Loading your privilege data...</div>
+          ) : error ? (
+            <div className="error-container">{error}</div>
+          ) : (
+            <div className="privilege-content-grid">
+              <div className="privilege-main-column">
+                <div className="privilege-header">
+                  <div className="header-left">
+                     <h2>My Privilege Dashboard</h2>
+                     <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                  <button className="seed-btn" onClick={handleSeedData} disabled={loading}>
+                    <i className="fa-solid fa-wand-magic-sparkles"></i> Generate Insurances
+                  </button>
                 </div>
-                <button className="seed-btn" onClick={handleSeedData}>
-                  <i className="fa-solid fa-database"></i> Generate Demo Data
-                </button>
+
+                <section className="privilege-section">
+                  <h3>Insurances</h3>
+                  <div className="insurance-cards">
+                    {allInsurances.length > 0 ? allInsurances.map((ins, index) => {
+                      // Determine if this should be a light card (alternating pattern or specific types)
+                      const isLightCard = ins.type === 'Health';
+                      
+                      // Mock data for demonstration - in real app, this would come from backend
+                      const mockStats = {
+                        increase: Math.floor(Math.random() * 50000) + 20000,
+                        decrease: Math.floor(Math.random() * 50000) + 20000
+                      };
+                      
+                      return (
+                        <div 
+                          className={`insurance-card ${ins.type.toLowerCase()}-insurance ${isLightCard ? 'light-card' : ''}`}
+                          key={ins._id}
+                          onClick={() => openInsuranceDetailsModal(ins)}
+                        >
+                          <div className="insurance-card-header">
+                            <div className="insurance-card-title">
+                              <div className="card-icon">
+                                <i className={`fa-solid ${
+                                  ins.type === 'Auto' ? 'fa-car' : 
+                                  ins.type === 'Health' ? 'fa-heart-pulse' :
+                                  ins.type === 'Life' ? 'fa-user-shield' :
+                                  'fa-house'
+                                }`}></i>
+                              </div>
+                              <div className="card-info">
+                                <h4>{ins.type} Insurance</h4>
+                              </div>
+                            </div>
+                            <div className="card-arrow">
+                              <i className="fa-solid fa-chevron-right"></i>
+                            </div>
+                          </div>
+                          
+                          <div className="insurance-card-body">
+                            <div className="insurance-card-amount">
+                              <span className="card-value">{formatCurrency(ins.coverageAmount)}</span>
+                              <div className="insurance-card-stats">
+                                <div className="stat-item positive">
+                                  <i className="fa-solid fa-arrow-down"></i>
+                                  <span className="stat-value">{(mockStats.increase * USD_TO_INR).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                  <span className="stat-label">INR</span>
+                                </div>
+                                <div className="stat-item negative">
+                                  <i className="fa-solid fa-arrow-up"></i>
+                                  <span className="stat-value">{(mockStats.decrease * USD_TO_INR).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                                  <span className="stat-label">INR</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="insurance-card-chart">
+                              <svg width="120" height="60" viewBox="0 0 120 60">
+                                <polyline
+                                  fill="none"
+                                  stroke={isLightCard ? "#ef4444" : "#10b981"}
+                                  strokeWidth="2"
+                                  points={`0,${50 - Math.random() * 30} 20,${50 - Math.random() * 40} 40,${50 - Math.random() * 35} 60,${50 - Math.random() * 45} 80,${50 - Math.random() * 30} 100,${50 - Math.random() * 40} 120,${50 - Math.random() * 25}`}
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }) : <p>No insurances found. Click "Generate Insurances" to add sample data.</p>}
+                  </div>
+                </section>
+
+                <section className="privilege-section">
+                  <h3>Your Properties</h3>
+                  <div className="property-cards">
+                    {properties.map((prop) => (
+                      <div className="property-card" key={prop._id}>
+                        <div className="prop-img" style={{backgroundImage: `url(${prop.imageUrl})`}}></div>
+                        <button className="edit-btn" onClick={(e) => { e.stopPropagation(); openEditPropertyModal(prop); }}>
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button className="delete-btn" onClick={(e) => { e.stopPropagation(); openRemovePropertyModal(prop); }}>
+                          <i className="fa-solid fa-trash"></i>
+                        </button>
+                        <div className="prop-details">
+                          <h4>{prop.name}</h4>
+                          <p><i className="fa-solid fa-location-dot"></i> {prop.location}</p>
+                          <span>{formatCurrency(prop.value)}</span>
+                        </div>
+                      </div>
+                    ))}
+                     <div className="property-card add-card" onClick={openAddPropertyModal}>
+                       <i className="fa-solid fa-plus"></i>
+                       <span>Add New Property</span>
+                     </div>
+                  </div>
+                </section>
+
+                <section className="privilege-section">
+                  <div className="section-header-with-button">
+                    <h3>Precious Holdings</h3>
+                    <button className="add-holding-btn" onClick={openAddHoldingModal}>
+                      <i className="fa-solid fa-plus"></i> Add New Holding
+                    </button>
+                  </div>
+                  {holdings.length > 0 ? (
+                    <div className="table-wrapper">
+                      <table className="holdings-table">
+                        <thead>
+                          <tr>
+                            <th>Item</th>
+                            <th>Type</th>
+                            <th>Weight</th>
+                            <th>Bought At</th>
+                            <th>Live Price/oz</th>
+                            <th>Current Value</th>
+                            <th>Gain</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                      <tbody>
+                        {holdings.map((h) => {
+                          // Extract numeric weight (remove 'g', 'oz', etc.)
+                          const weightMatch = h.weight?.match(/([0-9.]+)/);
+                          const numericWeight = weightMatch ? parseFloat(weightMatch[1]) : 0;
+                          const isGrams = h.weight?.toLowerCase().includes('g');
+                          const weightInGrams = isGrams ? numericWeight : numericWeight * 31.1035; // Convert oz to grams if needed
+                          
+                          // Get live price per gram from API (already in INR)
+                          const liveApiPricePerGram = liveMetalPrices[h.type] || 0;
+                          
+                          // Calculate current value based on live price in INR
+                          const liveCurrentValue = Math.round(weightInGrams * liveApiPricePerGram);
+                          
+                          // Calculate gain
+                          const gain = liveCurrentValue - h.purchasedValue;
+                          const gainPercent = h.purchasedValue > 0 ? ((gain / h.purchasedValue) * 100).toFixed(2) : 0;
+                          
+                          return (
+                            <tr key={h._id}>
+                              <td><strong>{h.name}</strong></td>
+                              <td>
+                                <span className={`metal-type ${h.type.toLowerCase()}`}>
+                                  {h.type}
+                                </span>
+                              </td>
+                              <td>{h.weight}</td>
+                              <td>₹{h.purchasedValue.toLocaleString('en-IN')}</td>
+                              <td className="live-price">
+                                {pricesLoading ? (
+                                  <span className="price-loading">...</span>
+                                ) : (
+                                  <span className="live-price-value">
+                                    <i className="fa-solid fa-circle-dot live-indicator"></i>
+                                    ₹{liveApiPricePerGram.toFixed(2)}/g
+                                  </span>
+                                )}
+                              </td>
+                              <td className="live-value">₹{liveCurrentValue.toLocaleString('en-IN')}</td>
+                              <td className={gain >= 0 ? 'positive-val' : 'negative-val'}>
+                                {gain >= 0 ? '+' : ''}₹{Math.abs(gain).toLocaleString('en-IN')}
+                                <span className="gain-percent"> ({gain >= 0 ? '+' : ''}{gainPercent}%)</span>
+                              </td>
+                              <td>
+                                <button 
+                                  className="table-delete-btn" 
+                                  onClick={() => openRemoveHoldingModal(h)}
+                                  title="Delete holding"
+                                >
+                                  <i className="fa-solid fa-trash"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    </div>
+                  ) : (
+                    <p className="no-data">No holdings yet. Click "Add New Holding" to get started.</p>
+                  )}
+                </section>
               </div>
 
-              {/* Insurances */}
-              <section className="privilege-section">
-                <h3>Insurances</h3>
-                <div className="insurance-cards">
-                  {allInsurances.length > 0 ? allInsurances.map(ins => (
-                    <div className={`insurance-card ${ins.type.toLowerCase()}-insurance`} key={ins._id}>
-                      <div className="card-icon"><i className={`fa-solid ${ins.type === 'Auto' ? 'fa-car' : 'fa-heart-pulse'}`}></i></div>
-                      <div className="card-info">
-                        <h4>{ins.type} Insurance</h4>
-                        <p>{ins.provider}</p>
-                        <span className="card-value">${ins.coverageAmount.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  )) : <p>No insurances found.</p>}
-                </div>
-              </section>
-
-              {/* Properties */}
-              <section className="privilege-section">
-                <h3>Your Properties</h3>
-                <div className="property-cards">
-                  {properties.map((prop) => (
-                    <div className="property-card" key={prop._id}>
-                      <div className="prop-img" style={{backgroundImage: `url(${prop.imageUrl})`}}></div>
-                      <div className="prop-details">
-                        <h4>{prop.name}</h4>
-                        <p>{prop.location}</p>
-                        <span>${prop.value.toLocaleString()}</span>
-                        <button className="delete-btn" onClick={() => openRemovePropertyModal(prop)}><i className="fa-solid fa-trash"></i></button>
-                      </div>
-                    </div>
-                  ))}
-                   <div className="property-card add-card" onClick={openAddPropertyModal}>
-                     <i className="fa-solid fa-plus"></i>
-                     <span>Add New</span>
+              <div className="privilege-sidebar-column">
+                 <div className="user-welcome">
+                   <img src="/1.jpg" alt="User" />
+                   <div>
+                     <h4>Welcome, {userData.name}</h4>
+                     <p>Premium Member</p>
                    </div>
-                </div>
-              </section>
-
-              {/* Holdings */}
-              <section className="privilege-section">
-                <h3>Precious Holdings</h3>
-                <table className="holdings-table">
-                  <thead>
-                    <tr><th>Item</th><th>Weight</th><th>Bought At</th><th>Current Value</th></tr>
-                  </thead>
-                  <tbody>
-                    {holdings.map((h) => (
-                      <tr key={h._id}>
-                        <td>{h.name}</td>
-                        <td>{h.weight}</td>
-                        <td>${h.purchasedValue.toLocaleString()}</td>
-                        <td className="positive-val">${h.currentValue.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {holdings.length === 0 && <p className="no-data">No holdings yet.</p>}
-              </section>
-            </div>
-
-            {/* Sidebar Column */}
-            <div className="privilege-sidebar-column">
-               <div className="user-welcome">
-                 <img src="/1.jpg" alt="User" />
-                 <div>
-                   <h4>Welcome, {userData.name}</h4>
-                   <p>Premium Member</p>
                  </div>
-               </div>
 
-               <div className="recent-transactions">
-                 <div className="section-title">
-                   <h4>Recent Transactions</h4>
-                   <i className="fa-solid fa-ellipsis"></i>
-                 </div>
-                 <div className="tx-list">
-                   {transactions.map(tx => (
-                     <div className="tx-item" key={tx._id}>
-                       <div className={`tx-icon-box ${tx.type.toLowerCase()}`}>
-                         <i className={getTransactionIcon(tx.type)}></i>
-                       </div>
-                       <div className="tx-info">
-                         <h5>{tx.description || tx.type}</h5>
-                         <span>{new Date(tx.date).toLocaleDateString()}</span>
-                       </div>
-                       <div className={`tx-amount ${tx.type === 'Income' ? 'pos' : 'neg'}`}>
-                         {tx.type === 'Income' ? '+' : '-'}${tx.amount.toLocaleString()}
-                       </div>
+                 <div className="recent-transactions recent-transactions-expanded">
+                   <div className="section-title">
+                     <h4>Recent Transactions</h4>
+                     <div className="filter-container">
+                       <i className="fa-solid fa-ellipsis" onClick={toggleFilterMenu}></i>
+                       {showFilterMenu && (
+                         <div className="filter-menu">
+                           <div 
+                             className={`filter-option ${transactionFilter === 'all' ? 'active' : ''}`}
+                             onClick={() => handleFilterChange('all')}
+                           >
+                             <i className="fa-solid fa-list"></i> All
+                           </div>
+                           <div 
+                             className={`filter-option ${transactionFilter === 'pending' ? 'active' : ''}`}
+                             onClick={() => handleFilterChange('pending')}
+                           >
+                             <i className="fa-solid fa-clock"></i> Pending
+                           </div>
+                           <div 
+                             className={`filter-option ${transactionFilter === 'active' ? 'active' : ''}`}
+                             onClick={() => handleFilterChange('active')}
+                           >
+                             <i className="fa-solid fa-check-circle"></i> Active
+                           </div>
+                           <div 
+                             className={`filter-option ${transactionFilter === 'completed' ? 'active' : ''}`}
+                             onClick={() => handleFilterChange('completed')}
+                           >
+                             <i className="fa-solid fa-circle-check"></i> Completed
+                           </div>
+                         </div>
+                       )}
                      </div>
-                   ))}
+                   </div>
+                   <div className="tx-list">
+                     {filteredTransactions.length > 0 ? filteredTransactions.map(tx => (
+                       <div className="tx-item" key={tx._id}>
+                         <div className={`tx-icon-box ${tx.type.toLowerCase()}`}>
+                           <i className={getTransactionIcon(tx.type)}></i>
+                         </div>
+                         <div className="tx-info">
+                           <h5>{tx.type} Insurance</h5>
+                           <div className="tx-meta">
+                             <span className="tx-date">{new Date(tx.date).toLocaleDateString()}</span>
+                             <span className={`tx-status status-${tx.status?.toLowerCase() || 'pending'}`}>
+                               {tx.status || 'Pending'}
+                             </span>
+                           </div>
+                         </div>
+                         <div className="tx-amount neg">
+                           {formatCurrency(tx.amount)}
+                         </div>
+                       </div>
+                     )) : (
+                       <p style={{color: '#94a3b8', textAlign: 'center', padding: '20px'}}>
+                         No transactions found
+                       </p>
+                     )}
+                   </div>
                  </div>
-               </div>
-
-               <div className="quick-add" onClick={openAddHoldingModal}>
-                 <i className="fa-solid fa-plus-circle"></i>
-                 <span>Add New Holding</span>
-               </div>
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

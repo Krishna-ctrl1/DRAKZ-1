@@ -2,17 +2,49 @@ const Property = require('../models/property.model.js');
 const Insurance = require('../models/insurance.model.js');
 const PreciousHolding = require('../models/preciousHolding.model.js');
 const Transaction = require('../models/transaction.model.js');
+const Person = require('../models/people.model.js');
 
-// --- Existing Controllers ---
+// Get User Profile
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await Person.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Add Property
 const addProperty = async (req, res) => {
   try {
     const { name, value, location, imageUrl } = req.body;
+    
+    // Validate inputs
+    if (!name || !value || !location) {
+      return res.status(400).json({ error: 'Name, value, and location are required' });
+    }
+
+    // Check if imageUrl is too large (MongoDB has 16MB document limit)
+    if (imageUrl && imageUrl.length > 10000000) { // ~10MB limit for base64
+      return res.status(400).json({ error: 'Image size is too large. Please use a smaller image.' });
+    }
+
     const newProperty = new Property({
-      userId: req.user.id, name, value, location, imageUrl: imageUrl || '/1.jpg',
+      userId: req.user.id, 
+      name, 
+      value, 
+      location, 
+      imageUrl: imageUrl || '/1.jpg',
     });
     await newProperty.save();
     res.status(201).json(newProperty);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { 
+    console.error('Add property error:', error);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 const getProperties = async (req, res) => {
@@ -27,6 +59,35 @@ const deleteProperty = async (req, res) => {
     await Property.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
     res.status(200).json({ msg: 'Property removed' });
   } catch (error) { res.status(500).json({ error: error.message }); }
+};
+
+const updateProperty = async (req, res) => {
+  try {
+    const { name, value, location, imageUrl } = req.body;
+    
+    // Validate inputs
+    if (!name || !value || !location) {
+      return res.status(400).json({ error: 'Name, value, and location are required' });
+    }
+
+    // Check if imageUrl is too large
+    if (imageUrl && imageUrl.length > 10000000) { // ~10MB limit for base64
+      return res.status(400).json({ error: 'Image size is too large. Please use a smaller image.' });
+    }
+
+    const property = await Property.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { name, value, location, imageUrl },
+      { new: true, runValidators: true }
+    );
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+    res.status(200).json(property);
+  } catch (error) { 
+    console.error('Update property error:', error);
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
 const getInsurances = async (req, res) => {
@@ -57,50 +118,64 @@ const addPreciousHolding = async (req, res) => {
 
 const getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find({ userId: req.user.id }).sort({ date: -1 }).limit(5);
+    const limit = parseInt(req.query.limit) || 5;
+    const transactions = await Transaction.find({ userId: req.user.id })
+      .sort({ date: -1 })
+      .limit(limit);
     res.status(200).json(transactions);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { 
+    res.status(500).json({ error: error.message }); 
+  }
 };
 
-// --- NEW: RANDOM DATA GENERATOR ---
+// Delete Precious Holding
+const deletePreciousHolding = async (req, res) => {
+  try {
+    const holding = await PreciousHolding.findOneAndDelete({ 
+      _id: req.params.id, 
+      userId: req.user.id 
+    });
+    if (!holding) {
+      return res.status(404).json({ error: 'Holding not found' });
+    }
+    res.status(200).json({ msg: 'Holding removed successfully' });
+  } catch (error) { 
+    res.status(500).json({ error: error.message }); 
+  }
+};
+
+// --- Seed ONLY Insurances with Random Data ---
 const seedData = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // 1. Clear existing data (optional, safest for demo)
-    await Promise.all([
-      Property.deleteMany({ userId }),
-      Insurance.deleteMany({ userId }),
-      PreciousHolding.deleteMany({ userId }),
-      Transaction.deleteMany({ userId })
-    ]);
+    // Only delete existing insurances so we don't get duplicates
+    await Insurance.deleteMany({ userId });
 
-    // 2. Create Insurances
-    const insurances = await Insurance.create([
-      { userId, provider: 'Geico', type: 'Auto', coverageAmount: 25000, premium: 120 },
-      { userId, provider: 'BlueCross', type: 'Health', coverageAmount: 100000, premium: 450 }
-    ]);
+    // Create 2-4 Random Insurances
+    const providers = ['Geico', 'BlueCross', 'StateFarm', 'Allstate', 'Progressive', 'Aetna'];
+    const types = ['Auto', 'Health', 'Life', 'Home'];
+    const insuranceCount = Math.floor(Math.random() * 3) + 2; // 2-4 insurances
+    
+    const randomInsurances = [];
+    for(let i = 0; i < insuranceCount; i++) {
+      const type = types[i % types.length]; // Cycle through types
+      randomInsurances.push({
+        userId,
+        provider: providers[Math.floor(Math.random() * providers.length)],
+        type: type,
+        coverageAmount: Math.floor(Math.random() * 500000) + 50000, // $50k - $550k
+        premium: Math.floor(Math.random() * 500) + 100, // $100 - $600
+        startDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000) // Random date in last year
+      });
+    }
 
-    // 3. Create Properties
-    const properties = await Property.create([
-      { userId, name: 'Sunset Villa', value: 450000, location: 'California', imageUrl: '/1.jpg' },
-      { userId, name: 'Downtown Apt', value: 850000, location: 'New York', imageUrl: '/2.jpg' }
-    ]);
+    const insurances = await Insurance.create(randomInsurances);
 
-    // 4. Create Holdings
-    const holdings = await PreciousHolding.create([
-      { userId, name: 'Gold Bar', type: 'Gold', weight: '50g', purchasedValue: 3000, currentValue: 3200, purchaseDate: new Date() },
-      { userId, name: 'Silver Coin', type: 'Silver', weight: '1kg', purchasedValue: 800, currentValue: 750, purchaseDate: new Date() }
-    ]);
-
-    // 5. Create Transactions
-    const transactions = await Transaction.create([
-      { userId, type: 'Expense', amount: 1200, status: 'Completed', description: 'Rent', date: new Date() },
-      { userId, type: 'Income', amount: 5000, status: 'Completed', description: 'Salary', date: new Date() },
-      { userId, type: 'Investment', amount: 2000, status: 'Pending', description: 'Stock Buy', date: new Date() }
-    ]);
-
-    res.status(200).json({ msg: "Data seeded successfully!", insurances, properties, holdings, transactions });
+    res.status(200).json({ 
+      msg: "Insurances generated successfully!", 
+      insurances 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -108,7 +183,15 @@ const seedData = async (req, res) => {
 };
 
 module.exports = {
-  addProperty, getProperties, deleteProperty,
-  getInsurances, getPreciousHoldings, addPreciousHolding, getTransactions,
-  seedData // Export the new function
+  getUserProfile,
+  addProperty, 
+  getProperties, 
+  deleteProperty,
+  updateProperty,
+  getInsurances, 
+  getPreciousHoldings, 
+  addPreciousHolding,
+  deletePreciousHolding,
+  getTransactions,
+  seedData
 };

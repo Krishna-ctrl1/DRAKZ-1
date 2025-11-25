@@ -16,13 +16,27 @@
   background-color: #1a1a2e; /* Dark background from your theme */
   padding: 2rem;
   border-radius: 1rem;
-  border: 1px solid #3a3a4d;
+  border: none;
   color: #e0e0e0;
   position: relative;
   width: 90%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   animation: slide-in 0.3s ease-out;
+}
+
+/* For larger modals like insurance details */
+.modal-content:has(.insurance-details-modal) {
+  max-width: 650px;
+  padding: 1.5rem;
+  background-color: rgba(26, 29, 46, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: #ffffff;
+  border: none;
+  overflow: hidden;
 }
 
 @keyframes slide-in {
@@ -86,6 +100,11 @@
   font-size: 1rem;
 }
 
+.form-group input[type="file"] {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
 .form-group input:focus {
   outline: none;
   border-color: #5d5fef;
@@ -127,13 +146,16 @@
 /* Confirmation Modal */
 .confirm-delete {
   text-align: center;
+  padding: 20px;
 }
 .confirm-delete h2 {
   color: #f87171; /* Light red */
+  margin-bottom: 15px;
 }
 .confirm-delete p {
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
+  color: #ccc;
 }
 .confirm-delete strong {
   color: #fff;
