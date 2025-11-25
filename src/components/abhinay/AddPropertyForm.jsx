@@ -20,8 +20,19 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
   }, [property]);
 
   const validateName = (text) => {
-    // Allow letters, numbers, spaces, and common characters
-    return text && text.trim().length > 0;
+    // Only allow letters, numbers, and spaces - no special characters except spaces
+    const regex = /^[A-Za-z0-9\s]+$/;
+    if (!text || text.trim().length === 0) {
+      return false;
+    }
+    if (!regex.test(text)) {
+      return false;
+    }
+    // Minimum 3 characters for meaningful names
+    if (text.trim().length < 3) {
+      return false;
+    }
+    return true;
   };
 
   const handleImageUrlChange = (e) => {
@@ -67,15 +78,20 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
     setError('');
 
     if (!validateName(name)) {
-      setError("Property Name is required.");
+      setError("Property Name must be at least 3 characters and contain only letters, numbers, and spaces (no special characters).");
       return;
     }
     if (!validateName(location)) {
-      setError("Location is required.");
+      setError("Location must be at least 3 characters and contain only letters, numbers, and spaces (no special characters).");
       return;
     }
     if (!value || Number(value) <= 0) {
       setError("Please enter a valid property value.");
+      return;
+    }
+    // Minimum property value: $50,000
+    if (Number(value) < 50000) {
+      setError("Property value must be at least $50,000.");
       return;
     }
 
@@ -126,11 +142,26 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
           id="name" type="text" value={name} 
           onChange={(e) => setName(e.target.value)} 
           placeholder="e.g. Sunset Villa" required 
+          minLength="3"
         />
+        <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
+          At least 3 characters, letters and numbers only
+        </small>
       </div>
       <div className="form-group">
         <label htmlFor="value">Property Value ($)</label>
-        <input id="value" type="number" value={value} onChange={(e) => setValue(e.target.value)} required />
+        <input 
+          id="value" 
+          type="number" 
+          value={value} 
+          onChange={(e) => setValue(e.target.value)} 
+          required 
+          min="50000"
+          step="1000"
+        />
+        <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
+          Minimum value: $50,000
+        </small>
       </div>
       <div className="form-group">
         <label htmlFor="location">Location</label>
@@ -138,7 +169,11 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
           id="location" type="text" value={location} 
           onChange={(e) => setLocation(e.target.value)} 
           placeholder="e.g. California" required 
+          minLength="3"
         />
+        <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
+          At least 3 characters, letters and numbers only
+        </small>
       </div>
       <div className="form-group">
         <label htmlFor="imageUrl">Image URL</label>
