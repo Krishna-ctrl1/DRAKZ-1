@@ -3,7 +3,7 @@ import API from "../config/api.config.js";
 import { getToken } from "../auth/auth.js";
 
 const instance = axios.create({
-  baseURL: API.baseURL, // http://localhost:3002
+  baseURL: API.baseURL, // http://localhost:3001
 });
 
 instance.interceptors.request.use((config) => {
