@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
+import CreditScore from "./CreditScore";
+import "../../styles/deepthi/dashboard.css";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
@@ -68,7 +70,11 @@ const Dashboard = () => {
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           <div className="dashboard-content">
-            <div className="dashboard-container">
+            <div
+              className="dashboard-container"
+              style={{ display: "flex", gap: 20 }}
+            >
+              <CreditScore />
               {/* Card Section */}
               <div className="card-section">
                 <div className="virtual-card">
@@ -135,43 +141,54 @@ const Dashboard = () => {
               {/* Tab Content */}
               <div className="tab-content">
                 {activeTab === "overview" && (
-                  <div className="overview-content">
-                    <div className="quick-actions">
-                      <h3>Quick Actions</h3>
-                      <div className="action-buttons">
-                        <button className="action-btn">Transfer Money</button>
-                        <button className="action-btn">Pay Bills</button>
-                        <button className="action-btn">View Statements</button>
-                        <button className="action-btn">Freeze Card</button>
+                  <div
+                    className="overview-content"
+                    style={{ display: "flex", gap: 20 }}
+                  >
+                    {/* Left column: Credit Score + Quick actions */}
+                    <div style={{ flex: 1 }}>
+                      <div className="quick-actions" style={{ marginTop: 20 }}>
+                        <h3>Quick Actions</h3>
+                        <div className="action-buttons">
+                          <button className="action-btn">Transfer Money</button>
+                          <button className="action-btn">Pay Bills</button>
+                          <button className="action-btn">
+                            View Statements
+                          </button>
+                          <button className="action-btn">Freeze Card</button>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="recent-activity">
-                      <h3>Recent Transactions</h3>
-                      <div className="transaction-list">
-                        {transactions.slice(0, 3).map((transaction) => (
-                          <div
-                            key={transaction.id}
-                            className="transaction-item"
-                          >
-                            <div className="transaction-info">
-                              <span className="merchant">
-                                {transaction.merchant}
-                              </span>
-                              <span className="category">
-                                {transaction.category}
-                              </span>
+                    {/* Right column: Transactions preview */}
+                    <div style={{ flex: 1 }}>
+                      <div className="recent-activity">
+                        <h3>Recent Transactions</h3>
+                        <div className="transaction-list">
+                          {transactions.slice(0, 3).map((transaction) => (
+                            <div
+                              key={transaction.id}
+                              className="transaction-item"
+                            >
+                              <div className="transaction-info">
+                                <span className="merchant">
+                                  {transaction.merchant}
+                                </span>
+                                <span className="category">
+                                  {transaction.category}
+                                </span>
+                              </div>
+                              <div className="transaction-details">
+                                <span
+                                  className={`amount ${transaction.amount.startsWith("+") ? "positive" : "negative"}`}
+                                >
+                                  {transaction.amount}
+                                </span>
+                                <span className="date">{transaction.date}</span>
+                              </div>
                             </div>
-                            <div className="transaction-details">
-                              <span
-                                className={`amount ${transaction.amount.startsWith("+") ? "positive" : "negative"}`}
-                              >
-                                {transaction.amount}
-                              </span>
-                              <span className="date">{transaction.date}</span>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
