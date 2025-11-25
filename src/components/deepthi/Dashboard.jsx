@@ -4,6 +4,9 @@ import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 import CreditScore from "./CreditScore";
 import "../../styles/deepthi/dashboard.css";
+import Spendings from "./Spendings";
+import "../../styles/deepthi/spendings.css";
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
@@ -75,6 +78,9 @@ const Dashboard = () => {
               style={{ display: "flex", gap: 20 }}
             >
               <CreditScore />
+              <div style={{ marginTop: 20 }}>
+                <Spendings weeks={5} />
+              </div>
               {/* Card Section */}
               <div className="card-section">
                 <div className="virtual-card">

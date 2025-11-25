@@ -7,6 +7,7 @@ const authRoutes = require("./src/routes/auth.route.js");
 const blogRoutes = require("./src/routes/blog.route.js");
 const privilegeRoutes = require("./src/routes/privilege.route.js");
 //const creditRoutes = require('./src/routes/creditScore.routes');
+const spendingsRoutes = require("./src/routes/spending.routes");
 
 const app = express();
 
@@ -35,7 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/privilege", privilegeRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/credit-score", require("./src/routes/creditScore.routes"));
-
+app.use("/api/spendings", spendingsRoutes);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
