@@ -15,38 +15,35 @@
 /* ---
   Floating Sidebar Container
 --- */
+/* default: expanded */
 .sidebar {
-  /* Positioning: Floating and isolated from the border */
+  width: 250px; /* expanded width by default */
   position: fixed;
   top: 6rem;
   left: 1rem;
-  height: calc(100vh - 7rem); /* Full height minus top/bottom margin */
-
-  /* Layout: Split top and bottom */
+  height: calc(100vh - 7rem);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 0;
-  box-sizing: border-box; /* Ensures padding doesn't affect width/height */
-
-  /* Collapsed (icon-only) state */
-  width: 80px;
-
-  /* Visuals: Rounded corners, background, and subtle shadow */
-  background: linear-gradient(-45deg, #000000, #111827, #0f0c29, #302b63);
+  box-sizing: border-box;
   border-radius: 1.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-
-  /* Animation */
+  background: linear-gradient(-45deg, #000000, #111827, #0f0c29, #302b63);
   transition: width 0.3s ease-in-out;
 }
 
+/* collapsed state: small */
+.sidebar.collapsed {
+  width: 80px;
+  align-items: center;
+}
 /* ---
   Expanded State
 --- */
 .sidebar:not(.collapsed) {
-  width: 220px; /* Width when expanded */
+  width: 250px; /* Width when expanded */
   align-items: flex-start; /* Align text to the left */
 }
 /* Icon image inside button */
