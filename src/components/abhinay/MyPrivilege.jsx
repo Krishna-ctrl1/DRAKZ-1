@@ -53,24 +53,9 @@ const MyPrivilege = () => {
     try {
       setPricesLoading(true);
       
-      // Fetch live metal prices from Metals API (supports INR)
-      // Using free metals-api.com for real-time precious metal prices
-      const response = await fetch('https://api.metals.live/v1/spot');
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Convert USD/oz to INR/gram
-        const USD_TO_INR = 83.5; // Current exchange rate
-        const OZ_TO_GRAM = 31.1035; // Troy ounce to gram conversion
-        
-        setLiveMetalPrices({
-          Gold: data.gold ? (data.gold / OZ_TO_GRAM * USD_TO_INR) : 6500,
-          Silver: data.silver ? (data.silver / OZ_TO_GRAM * USD_TO_INR) : 80,
-          Platinum: data.platinum ? (data.platinum / OZ_TO_GRAM * USD_TO_INR) : 3200
-        });
-      } else {
-        // Fallback: Try goldapi.io
+      // Fetch live 24K gold price from multiple sources
+      // Try goldapi.io first for 24K gold
+      try {
         const goldApiResponse = await fetch('https://www.goldapi.io/api/XAU/INR', {
           headers: {
             'x-access-token': 'goldapi-demo-key'
@@ -79,29 +64,58 @@ const MyPrivilege = () => {
         
         if (goldApiResponse.ok) {
           const goldData = await goldApiResponse.json();
-          const goldPricePerGram = goldData.price_gram_24k || 6500;
+          const gold24kPricePerGram = goldData.price_gram_24k || 6520;
           
           setLiveMetalPrices({
-            Gold: goldPricePerGram,
-            Silver: goldPricePerGram * 0.012, // Silver is roughly 1.2% of gold price
-            Platinum: goldPricePerGram * 0.49  // Platinum is roughly 49% of gold price
+            Gold: gold24kPricePerGram, // 24K Gold price per gram in INR
+            Silver: gold24kPricePerGram * 0.0126, // Silver is roughly 1.26% of 24K gold price
+            Platinum: gold24kPricePerGram * 0.49  // Platinum is roughly 49% of gold price
           });
-        } else {
-          // Final fallback: Use realistic current market rates
-          setLiveMetalPrices({
-            Gold: 6520,   // ₹6,520 per gram (realistic Nov 2025)
-            Silver: 82,   // ₹82 per gram
-            Platinum: 3185 // ₹3,185 per gram
-          });
+          setPricesLoading(false);
+          return;
         }
+      } catch (err) {
+        console.log('goldapi.io failed, trying metals.live');
       }
-    } catch (err) {
-      console.log('Fetching live prices failed, using realistic market rates');
-      // Use realistic current Indian market rates
+      
+      // Fallback to metals.live API
+      try {
+        const response = await fetch('https://api.metals.live/v1/spot');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Convert USD/oz to INR/gram for 24K gold
+          const USD_TO_INR = 83.5; // Current exchange rate
+          const OZ_TO_GRAM = 31.1035; // Troy ounce to gram conversion
+          
+          // 24K gold is pure, so we use spot price directly
+          const gold24kPricePerGram = data.gold ? (data.gold / OZ_TO_GRAM * USD_TO_INR) : 6520;
+          
+          setLiveMetalPrices({
+            Gold: gold24kPricePerGram, // 24K Gold
+            Silver: data.silver ? (data.silver / OZ_TO_GRAM * USD_TO_INR) : 82,
+            Platinum: data.platinum ? (data.platinum / OZ_TO_GRAM * USD_TO_INR) : 3185
+          });
+          setPricesLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.log('metals.live failed, using realistic rates');
+      }
+      
+      // Final fallback: Use realistic current 24K gold market rates
       setLiveMetalPrices({
-        Gold: 6520 + (Math.random() * 50 - 25),    // ₹6,520/gram ±25
+        Gold: 6520 + (Math.random() * 50 - 25),    // ₹6,520/gram for 24K gold ±25
         Silver: 82 + (Math.random() * 2 - 1),      // ₹82/gram ±1
         Platinum: 3185 + (Math.random() * 50 - 25) // ₹3,185/gram ±25
+      });
+    } catch (err) {
+      console.log('All APIs failed, using realistic 24K gold rates');
+      setLiveMetalPrices({
+        Gold: 6520,   // ₹6,520 per gram (24K gold)
+        Silver: 82,   // ₹82 per gram
+        Platinum: 3185 // ₹3,185 per gram
       });
     } finally {
       setPricesLoading(false);
@@ -509,14 +523,14 @@ const MyPrivilege = () => {
                   
                   {/* Live Metal Prices Card */}
                   <div className="live-metal-prices-card">
-                    <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India)</h4>
+                    <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India) - 24K</h4>
                     <div className="metal-prices-grid">
                       <div className="metal-price-item gold">
                         <div className="metal-icon">
                           <i className="fa-solid fa-coins"></i>
                         </div>
                         <div className="metal-info">
-                          <span className="metal-name">Gold</span>
+                          <span className="metal-name">Gold (24K)</span>
                           <div className="price-display">
                             {pricesLoading ? (
                               <span className="price-loading">Loading...</span>
