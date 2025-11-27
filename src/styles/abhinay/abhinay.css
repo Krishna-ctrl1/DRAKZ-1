@@ -1583,16 +1583,20 @@
 
 /* Transaction Payment Modal */
 .transaction-payment-modal {
-  max-width: 600px;
-  width: 100%;
+  max-width: 850px;
+  width: 95%;
+}
+
+.transaction-payment-modal .modal-content {
+  padding: 2.5rem;
 }
 
 .payment-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 20px;
+  gap: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
   position: relative;
 }
@@ -1609,19 +1613,19 @@
 }
 
 .payment-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 2rem;
   flex-shrink: 0;
 }
 
 .payment-title h2 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.8rem;
   color: #ffffff;
   font-weight: 700;
 }
@@ -1629,7 +1633,7 @@
 .payment-subtitle {
   margin: 4px 0 0;
   color: #94a3b8;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 500;
 }
 
@@ -1639,36 +1643,37 @@
 }
 
 .payment-summary {
-  background: rgba(99, 102, 241, 0.1);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.15);
+  backdrop-filter: blur(20px) saturate(200%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
 }
 
 .payment-summary h3 {
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: #ffffff;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
   font-weight: 600;
 }
 
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 20px;
 }
 
 .summary-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
 .summary-label {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1676,13 +1681,13 @@
 }
 
 .summary-value {
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   color: #e2e8f0;
   font-weight: 600;
 }
 
 .summary-value.amount {
-  font-size: 1.2rem;
+  font-size: 1.6rem;
   color: #60a5fa;
   font-weight: 700;
 }
@@ -1690,10 +1695,10 @@
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
@@ -1706,42 +1711,42 @@
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 32px;
 }
 
 .payment-method-selector h3 {
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: #ffffff;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
   font-weight: 600;
 }
 
 .method-buttons {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 
 .method-btn {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px) saturate(180%);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px) saturate(200%);
+  -webkit-backdrop-filter: blur(15px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #94a3b8;
-  padding: 16px 12px;
-  border-radius: 12px;
+  padding: 24px 16px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 12px;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
 .method-btn i {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
 .method-btn:hover {
@@ -1751,10 +1756,10 @@
 }
 
 .method-btn.active {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.6);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
 }
 
 .payment-error {
@@ -1772,13 +1777,13 @@
 .netbanking-details {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .upi-apps {
@@ -1835,16 +1840,16 @@
 .payment-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 16px;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Transaction Receipt Modal */
 .transaction-receipt-modal {
-  max-width: 650px;
-  width: 100%;
+  max-width: 850px;
+  width: 95%;
 }
 
 .receipt-header {
