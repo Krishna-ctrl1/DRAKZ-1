@@ -173,8 +173,8 @@ const seedData = async (req, res) => {
 
     const insurances = await Insurance.create(randomInsurances);
 
-    // Create 8-12 Random Transactions (with more Pending ones for testing)
-    const statuses = ['Pending', 'Pending', 'Pending', 'Pending', 'Active', 'Active', 'Completed', 'Completed'];
+    // Create 8-12 Random Transactions (1 Pending, more Active, some Completed)
+    const statuses = ['Pending', 'Active', 'Active', 'Active', 'Active', 'Active', 'Completed', 'Completed'];
     const transactionCount = Math.floor(Math.random() * 5) + 8; // 8-12 transactions
     
     const randomTransactions = [];
