@@ -115,40 +115,44 @@ const MyPrivilege = () => {
     // Update prices every 30 seconds for live feel
     const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
-    // Function to add a pending transaction
-    const addPendingTransaction = async () => {
+    // Function to add ONE pending transaction if user doesn't have any
+    const ensureOnePendingTransaction = async () => {
       try {
-        const types = ['Auto', 'Health', 'Life', 'Home'];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        const randomAmount = Math.floor(Math.random() * 800) + 200; // $200-$1000
+        // Check if user already has pending transactions
+        const transactionsRes = await api.get("/api/privilege/transactions");
+        const allTransactions = transactionsRes.data || [];
+        const hasPending = allTransactions.some(tx => tx.status?.toLowerCase() === 'pending');
         
-        await api.post('/api/privilege/transactions', {
-          type: randomType,
-          amount: randomAmount,
-          status: 'Pending',
-          description: `${randomType} Insurance Premium`,
-          date: new Date()
-        });
-        
-        // Refresh transactions to show the new one
-        const transactionsRes = await api.get("/api/privilege/transactions?limit=5");
-        setTransactions(transactionsRes.data || []);
-        
-        console.log('✅ New pending transaction added automatically');
+        // Only add one pending if user has none
+        if (!hasPending) {
+          const types = ['Auto', 'Health', 'Life', 'Home'];
+          const randomType = types[Math.floor(Math.random() * types.length)];
+          const randomAmount = Math.floor(Math.random() * 800) + 200; // $200-$1000
+          
+          await api.post('/api/privilege/transactions', {
+            type: randomType,
+            amount: randomAmount,
+            status: 'Pending',
+            description: `${randomType} Insurance Premium`,
+            date: new Date()
+          });
+          
+          // Refresh transactions
+          const updatedRes = await api.get("/api/privilege/transactions?limit=5");
+          setTransactions(updatedRes.data || []);
+          
+          console.log('✅ Added one pending transaction for user');
+        }
       } catch (err) {
-        console.error('Failed to auto-add transaction:', err);
+        console.error('Failed to check/add pending transaction:', err);
       }
     };
     
-    // Add initial pending transaction immediately
-    addPendingTransaction();
-    
-    // Auto-add pending transaction every 3 minutes
-    const transactionInterval = setInterval(addPendingTransaction, 3 * 60 * 1000);
+    // Check and add one pending transaction on mount
+    ensureOnePendingTransaction();
     
     return () => {
       clearInterval(priceInterval);
-      clearInterval(transactionInterval);
     };
   }, []);
 
