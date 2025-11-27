@@ -182,6 +182,31 @@ const seedData = async (req, res) => {
   }
 };
 
+// Update Transaction Status
+const updateTransaction = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    const transaction = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { status },
+      { new: true, runValidators: true }
+    );
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    res.status(200).json(transaction);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getUserProfile,
   addProperty, 
@@ -193,5 +218,6 @@ module.exports = {
   addPreciousHolding,
   deletePreciousHolding,
   getTransactions,
+  updateTransaction,
   seedData
 };

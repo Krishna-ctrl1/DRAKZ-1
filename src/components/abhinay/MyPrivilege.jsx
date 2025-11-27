@@ -7,6 +7,8 @@ import Modal from "../global/Modal";
 import AddPropertyForm from "./AddPropertyForm";
 import AddHoldingForm from "./AddHoldingForm";
 import InsuranceDetails from "./InsuranceDetails";
+import TransactionPayment from "./TransactionPayment";
+import TransactionReceipt from "./TransactionReceipt";
 import "../../styles/abhinay/abhinay.css";
 import "../../styles/global/Modal.css";
 import "../../styles/deepthi/dashboard.css";
@@ -251,6 +253,56 @@ const MyPrivilege = () => {
           <button className="modal-btn confirm" onClick={() => handleRemoveHolding(holding._id)}>Remove</button>
         </div>
       </div>
+    );
+  };
+
+  const handlePaymentComplete = async (transactionId, paymentMethod) => {
+    try {
+      // Update transaction status to completed
+      await api.put(`/api/privilege/transactions/${transactionId}`, {
+        status: 'Completed'
+      });
+      
+      // Refresh transactions
+      await fetchData();
+      
+      // Find the completed transaction
+      const completedTransaction = transactions.find(t => t._id === transactionId);
+      
+      // Show receipt
+      setModalContent(
+        <TransactionReceipt 
+          transaction={{ ...completedTransaction, status: 'Completed' }}
+          onClose={closeModal}
+          userData={userData}
+          paymentMethod={paymentMethod}
+        />
+      );
+    } catch (err) {
+      console.error('Error completing payment:', err);
+      alert('Failed to process payment');
+    }
+  };
+
+  const openTransactionPaymentModal = (transaction) => {
+    setModalContent(
+      <TransactionPayment 
+        transaction={transaction}
+        onClose={closeModal}
+        onPaymentComplete={handlePaymentComplete}
+        userData={userData}
+      />
+    );
+  };
+
+  const openTransactionReceiptModal = (transaction) => {
+    setModalContent(
+      <TransactionReceipt 
+        transaction={transaction}
+        onClose={closeModal}
+        userData={userData}
+        paymentMethod="card"
+      />
     );
   };
 
@@ -507,7 +559,12 @@ const MyPrivilege = () => {
                    </div>
                    <div className="tx-list">
                      {filteredTransactions.length > 0 ? filteredTransactions.map(tx => (
-                       <div className="tx-item" key={tx._id}>
+                       <div 
+                         className="tx-item" 
+                         key={tx._id}
+                         onClick={() => tx.status?.toLowerCase() === 'pending' ? openTransactionPaymentModal(tx) : openTransactionReceiptModal(tx)}
+                         style={{ cursor: 'pointer' }}
+                       >
                          <div className={`tx-icon-box ${tx.type.toLowerCase()}`}>
                            <i className={getTransactionIcon(tx.type)}></i>
                          </div>
@@ -522,6 +579,7 @@ const MyPrivilege = () => {
                          </div>
                          <div className="tx-amount neg">
                            {formatCurrency(tx.amount)}
+                           <i className="fa-solid fa-chevron-right" style={{ marginLeft: '8px', fontSize: '0.8rem', opacity: 0.6 }}></i>
                          </div>
                        </div>
                      )) : (

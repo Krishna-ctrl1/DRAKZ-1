@@ -1,5 +1,6 @@
 import React from 'react';
 import HeroSection from './HeroSection';
+import ThreeDCard from './ThreeDCard';
 import SectionNoFees from './SectionNoFees';
 import StickyScrollSections from './StickyScrollSections';
 import SymbolOfPurchasePowerSection from './SymbolOfPurchasePowerSection';
@@ -11,6 +12,7 @@ import Footer from './Footer';
 const Home = () => {
   return (
     <>
+      <ThreeDCard />
       <HeroSection />
       <SectionNoFees />
       <StickyScrollSections />
