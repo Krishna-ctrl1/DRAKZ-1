@@ -115,7 +115,35 @@ const MyPrivilege = () => {
     // Update prices every 30 seconds for live feel
     const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
-    return () => clearInterval(priceInterval);
+    // Auto-add pending transaction every 5 minutes
+    const transactionInterval = setInterval(async () => {
+      try {
+        const types = ['Auto', 'Health', 'Life', 'Home'];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        const randomAmount = Math.floor(Math.random() * 800) + 200; // $200-$1000
+        
+        await api.post('/api/privilege/transactions', {
+          type: randomType,
+          amount: randomAmount,
+          status: 'Pending',
+          description: `${randomType} Insurance Premium`,
+          date: new Date()
+        });
+        
+        // Refresh transactions to show the new one
+        const transactionsRes = await api.get("/api/privilege/transactions?limit=5");
+        setTransactions(transactionsRes.data || []);
+        
+        console.log('✅ New pending transaction added automatically');
+      } catch (err) {
+        console.error('Failed to auto-add transaction:', err);
+      }
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    
+    return () => {
+      clearInterval(priceInterval);
+      clearInterval(transactionInterval);
+    };
   }, []);
 
   // Seed ONLY Insurances
