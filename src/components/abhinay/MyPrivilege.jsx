@@ -1,5 +1,5 @@
 // ... imports ... (same as before)
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import api from "../../api/axios.api.js"; 
 import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
@@ -25,6 +25,12 @@ const getTransactionIcon = (type) => {
   }
 };
 
+const FALLBACK_METAL_PRICES = {
+  Gold: 6610,
+  Silver: 83,
+  Platinum: 3290,
+};
+
 const MyPrivilege = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -38,8 +44,12 @@ const MyPrivilege = () => {
   const [properties, setProperties] = useState([]);
   const [holdings, setHoldings] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [liveMetalPrices, setLiveMetalPrices] = useState({ Gold: 0, Silver: 0, Platinum: 0 });
+  const [liveMetalPrices, setLiveMetalPrices] = useState({ ...FALLBACK_METAL_PRICES });
   const [pricesLoading, setPricesLoading] = useState(true);
+  const [metalPriceSource, setMetalPriceSource] = useState(null);
+  const [metalPriceUpdatedAt, setMetalPriceUpdatedAt] = useState(null);
+  const [metalPriceError, setMetalPriceError] = useState(null);
+  const lastKnownPricesRef = useRef({ ...FALLBACK_METAL_PRICES });
 
   // Currency conversion rate (1 USD = 83 INR approximately)
   const USD_TO_INR = 83;
@@ -49,74 +59,51 @@ const MyPrivilege = () => {
     return `₹${inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
   };
 
+  const sanitizePrice = (value, fallbackValue, metalKey) => {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return Number(parsed.toFixed(2));
+    }
+    const fallbackParsed = Number(fallbackValue);
+    if (Number.isFinite(fallbackParsed) && fallbackParsed > 0) {
+      return Number(fallbackParsed.toFixed(2));
+    }
+    return FALLBACK_METAL_PRICES[metalKey];
+  };
+
+  const applyLivePriceSnapshot = (prices = {}, sourceLabel, updatedAtLabel) => {
+    const previous = lastKnownPricesRef.current;
+    const normalized = {
+      Gold: sanitizePrice(prices.Gold ?? prices.gold, previous.Gold, 'Gold'),
+      Silver: sanitizePrice(prices.Silver ?? prices.silver, previous.Silver, 'Silver'),
+      Platinum: sanitizePrice(prices.Platinum ?? prices.platinum, previous.Platinum, 'Platinum'),
+    };
+    lastKnownPricesRef.current = normalized;
+    setLiveMetalPrices(normalized);
+    setMetalPriceSource(sourceLabel || 'Live market feed');
+    setMetalPriceUpdatedAt(updatedAtLabel || new Date().toISOString());
+  };
+
   const fetchLiveMetalPrices = async () => {
     try {
       setPricesLoading(true);
-      
-      // Fetch live 24K gold price from multiple sources
-      // Try goldapi.io first for 24K gold
-      try {
-        const goldApiResponse = await fetch('https://www.goldapi.io/api/XAU/INR', {
-          headers: {
-            'x-access-token': 'goldapi-demo-key'
-          }
-        });
-        
-        if (goldApiResponse.ok) {
-          const goldData = await goldApiResponse.json();
-          const gold24kPricePerGram = goldData.price_gram_24k || 6520;
-          
-          setLiveMetalPrices({
-            Gold: gold24kPricePerGram, // 24K Gold price per gram in INR
-            Silver: gold24kPricePerGram * 0.0126, // Silver is roughly 1.26% of 24K gold price
-            Platinum: gold24kPricePerGram * 0.49  // Platinum is roughly 49% of gold price
-          });
-          setPricesLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.log('goldapi.io failed, trying metals.live');
-      }
-      
-      // Fallback to metals.live API
-      try {
-        const response = await fetch('https://api.metals.live/v1/spot');
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Convert USD/oz to INR/gram for 24K gold
-          const USD_TO_INR = 83.5; // Current exchange rate
-          const OZ_TO_GRAM = 31.1035; // Troy ounce to gram conversion
-          
-          // 24K gold is pure, so we use spot price directly
-          const gold24kPricePerGram = data.gold ? (data.gold / OZ_TO_GRAM * USD_TO_INR) : 6520;
-          
-          setLiveMetalPrices({
-            Gold: gold24kPricePerGram, // 24K Gold
-            Silver: data.silver ? (data.silver / OZ_TO_GRAM * USD_TO_INR) : 82,
-            Platinum: data.platinum ? (data.platinum / OZ_TO_GRAM * USD_TO_INR) : 3185
-          });
-          setPricesLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.log('metals.live failed, using realistic rates');
-      }
-      
-      // Final fallback: Use realistic current 24K gold market rates
-      setLiveMetalPrices({
-        Gold: 6520 + (Math.random() * 50 - 25),    // ₹6,520/gram for 24K gold ±25
-        Silver: 82 + (Math.random() * 2 - 1),      // ₹82/gram ±1
-        Platinum: 3185 + (Math.random() * 50 - 25) // ₹3,185/gram ±25
-      });
+      const response = await api.get('/api/privilege/live-metal-prices');
+      applyLivePriceSnapshot(
+        response.data?.prices || {},
+        response.data?.source || 'Live market feed',
+        response.data?.updatedAt
+      );
+      setMetalPriceError(null);
     } catch (err) {
-      console.log('All APIs failed, using realistic 24K gold rates');
-      setLiveMetalPrices({
-        Gold: 6520,   // ₹6,520 per gram (24K gold)
-        Silver: 82,   // ₹82 per gram
-        Platinum: 3185 // ₹3,185 per gram
-      });
+      console.error('Failed to fetch live metal prices', err);
+      
+      // Apply last known values with error message
+      applyLivePriceSnapshot(
+        lastKnownPricesRef.current,
+        metalPriceSource || 'Fallback snapshot',
+        metalPriceUpdatedAt || new Date().toISOString()
+      );
+      setMetalPriceError('Unable to refresh live market rates right now. Showing last known values.');
     } finally {
       setPricesLoading(false);
     }
@@ -151,8 +138,8 @@ const MyPrivilege = () => {
     fetchData();
     fetchLiveMetalPrices();
     
-    // Update prices every 30 seconds for live feel
-    const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
+    // Update prices every 1 minute (60 seconds) for India region
+    const priceInterval = setInterval(fetchLiveMetalPrices, 60000);
     
     // Function to add ONE pending transaction if user doesn't have any
     const ensureOnePendingTransaction = async () => {
@@ -524,6 +511,19 @@ const MyPrivilege = () => {
                   {/* Live Metal Prices Card */}
                   <div className="live-metal-prices-card">
                     <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India) - 24K</h4>
+                    <div className="metal-price-meta">
+                      <span className="price-source-tag">
+                        Source: {metalPriceSource || 'Fetching...' }
+                      </span>
+                      {metalPriceUpdatedAt && (
+                        <span className="price-updated-tag">
+                          Updated {new Date(metalPriceUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+                    {metalPriceError && (
+                      <p className="price-error-text">{metalPriceError}</p>
+                    )}
                     <div className="metal-prices-grid">
                       <div className="metal-price-item gold">
                         <div className="metal-icon">
@@ -595,7 +595,7 @@ const MyPrivilege = () => {
                             <th>Bought At</th>
                             <th>Live Price/oz</th>
                             <th>Current Value</th>
-                            <th>Gain</th>
+                            <th>Gain/Loss</th>
                             <th>Actions</th>
                           </tr>
                         </thead>

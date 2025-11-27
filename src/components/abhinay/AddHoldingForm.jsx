@@ -5,7 +5,6 @@ const AddHoldingForm = ({ onClose, onSave }) => {
   const [type, setType] = useState('Gold'); 
   const [weight, setWeight] = useState('');
   const [purchaseValue, setPurchaseValue] = useState('');
-  const [currentValue, setCurrentValue] = useState('');
   const [date, setDate] = useState('');
   const [error, setError] = useState('');
 
@@ -26,7 +25,7 @@ const AddHoldingForm = ({ onClose, onSave }) => {
     onSave({ 
       name, type, weight, 
       purchasedValue: Number(purchaseValue), 
-      currentValue: Number(currentValue),
+      currentValue: Number(purchaseValue), // Use purchase value as initial current value
       date: date || new Date().toISOString()
     });
   };
@@ -56,10 +55,6 @@ const AddHoldingForm = ({ onClose, onSave }) => {
       <div className="form-group">
         <label htmlFor="purchaseValue">Purchased Value ($)</label>
         <input id="purchaseValue" type="number" value={purchaseValue} onChange={(e) => setPurchaseValue(e.target.value)} required />
-      </div>
-      <div className="form-group">
-        <label htmlFor="currentValue">Current Value ($)</label>
-        <input id="currentValue" type="number" value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} required />
       </div>
       <div className="form-group">
         <label htmlFor="date">Purchase Date</label>
