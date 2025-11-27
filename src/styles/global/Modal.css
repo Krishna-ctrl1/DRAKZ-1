@@ -29,6 +29,15 @@
   animation: slide-in 0.3s ease-out;
 }
 
+.modal-content::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* For larger modals like insurance details */
 .modal-content:has(.insurance-details-modal) {
   max-width: 650px;
