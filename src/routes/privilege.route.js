@@ -13,6 +13,7 @@ const {
   getTransactions,
   updateTransaction,
   createTransaction,
+  getLiveMetalPrices,
   seedData
 } = require('../controllers/privilege.controller.js');
 
@@ -39,6 +40,9 @@ router.delete('/precious_holdings/:id', auth, deletePreciousHolding);
 router.get('/transactions', auth, getTransactions);
 router.post('/transactions', auth, createTransaction);
 router.put('/transactions/:id', auth, updateTransaction);
+
+// Live metal prices
+router.get('/live-metal-prices', auth, getLiveMetalPrices);
 
 // Seed Random Insurance Data Only
 router.post('/seed', auth, seedData);

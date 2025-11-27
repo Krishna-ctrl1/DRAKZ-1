@@ -641,13 +641,13 @@
   color: #ffffff;
 }
 
-.positive-val {
-  color: #4ade80; /* Green */
+.holdings-table .positive-val {
+  color: #4ade80 !important; /* Green */
   font-weight: 600;
 }
 
-.negative-val {
-  color: #f87171; /* Red */
+.holdings-table .negative-val {
+  color: #f87171 !important; /* Red */
   font-weight: 600;
 }
 
@@ -828,6 +828,29 @@
   color: #ffd700;
 }
 
+.metal-price-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.price-source-tag,
+.price-updated-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.price-error-text {
+  color: #fbbf24;
+  font-size: 0.85rem;
+  margin: 0 0 12px 0;
+}
+
 .metal-prices-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -852,6 +875,14 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
+.metal-price-item:hover .metal-icon {
+  transform: scale(1.1);
+}
+
+.metal-price-item:active {
+  transform: translateY(-2px);
+}
+
 .metal-price-item.gold {
   border-left: 3px solid #ffd700;
 }
@@ -873,6 +904,7 @@
   justify-content: center;
   font-size: 1.5rem;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
 
 .metal-price-item.gold .metal-icon {
