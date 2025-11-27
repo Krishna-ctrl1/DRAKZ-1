@@ -115,8 +115,8 @@ const MyPrivilege = () => {
     // Update prices every 30 seconds for live feel
     const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
-    // Auto-add pending transaction every 5 minutes
-    const transactionInterval = setInterval(async () => {
+    // Function to add a pending transaction
+    const addPendingTransaction = async () => {
       try {
         const types = ['Auto', 'Health', 'Life', 'Home'];
         const randomType = types[Math.floor(Math.random() * types.length)];
@@ -138,7 +138,13 @@ const MyPrivilege = () => {
       } catch (err) {
         console.error('Failed to auto-add transaction:', err);
       }
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    };
+    
+    // Add initial pending transaction immediately
+    addPendingTransaction();
+    
+    // Auto-add pending transaction every 3 minutes
+    const transactionInterval = setInterval(addPendingTransaction, 3 * 60 * 1000);
     
     return () => {
       clearInterval(priceInterval);
