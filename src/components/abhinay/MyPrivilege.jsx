@@ -481,6 +481,70 @@ const MyPrivilege = () => {
                       <i className="fa-solid fa-plus"></i> Add New Holding
                     </button>
                   </div>
+                  
+                  {/* Live Metal Prices Card */}
+                  <div className="live-metal-prices-card">
+                    <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India)</h4>
+                    <div className="metal-prices-grid">
+                      <div className="metal-price-item gold">
+                        <div className="metal-icon">
+                          <i className="fa-solid fa-coins"></i>
+                        </div>
+                        <div className="metal-info">
+                          <span className="metal-name">Gold</span>
+                          <div className="price-display">
+                            {pricesLoading ? (
+                              <span className="price-loading">Loading...</span>
+                            ) : (
+                              <>
+                                <span className="price-per-gram">₹{liveMetalPrices.Gold.toFixed(2)}/g</span>
+                                <span className="price-per-kg">₹{(liveMetalPrices.Gold * 1000).toLocaleString('en-IN')}/kg</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="metal-price-item silver">
+                        <div className="metal-icon">
+                          <i className="fa-solid fa-gem"></i>
+                        </div>
+                        <div className="metal-info">
+                          <span className="metal-name">Silver</span>
+                          <div className="price-display">
+                            {pricesLoading ? (
+                              <span className="price-loading">Loading...</span>
+                            ) : (
+                              <>
+                                <span className="price-per-gram">₹{liveMetalPrices.Silver.toFixed(2)}/g</span>
+                                <span className="price-per-kg">₹{(liveMetalPrices.Silver * 1000).toLocaleString('en-IN')}/kg</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="metal-price-item platinum">
+                        <div className="metal-icon">
+                          <i className="fa-solid fa-medal"></i>
+                        </div>
+                        <div className="metal-info">
+                          <span className="metal-name">Platinum</span>
+                          <div className="price-display">
+                            {pricesLoading ? (
+                              <span className="price-loading">Loading...</span>
+                            ) : (
+                              <>
+                                <span className="price-per-gram">₹{liveMetalPrices.Platinum.toFixed(2)}/g</span>
+                                <span className="price-per-kg">₹{(liveMetalPrices.Platinum * 1000).toLocaleString('en-IN')}/kg</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {holdings.length > 0 ? (
                     <div className="table-wrapper">
                       <table className="holdings-table">
