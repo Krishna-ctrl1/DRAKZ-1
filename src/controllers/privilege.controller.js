@@ -144,13 +144,14 @@ const deletePreciousHolding = async (req, res) => {
   }
 };
 
-// --- Seed ONLY Insurances with Random Data ---
+// --- Seed Insurances and Transactions with Random Data ---
 const seedData = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Only delete existing insurances so we don't get duplicates
+    // Delete existing insurances and transactions
     await Insurance.deleteMany({ userId });
+    await Transaction.deleteMany({ userId });
 
     // Create 2-4 Random Insurances
     const providers = ['Geico', 'BlueCross', 'StateFarm', 'Allstate', 'Progressive', 'Aetna'];
@@ -172,9 +173,42 @@ const seedData = async (req, res) => {
 
     const insurances = await Insurance.create(randomInsurances);
 
+    // Create 8-12 Random Transactions (with more Pending ones for testing)
+    const statuses = ['Pending', 'Pending', 'Pending', 'Pending', 'Active', 'Active', 'Completed', 'Completed'];
+    const transactionCount = Math.floor(Math.random() * 5) + 8; // 8-12 transactions
+    
+    const randomTransactions = [];
+    for(let i = 0; i < transactionCount; i++) {
+      const type = types[Math.floor(Math.random() * types.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const daysAgo = Math.floor(Math.random() * 60); // Last 60 days
+      
+      randomTransactions.push({
+        userId,
+        type: type,
+        amount: Math.floor(Math.random() * 800) + 200, // $200 - $1000
+        status: status,
+        description: `${type} Insurance Premium`,
+        date: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000)
+      });
+    }
+
+    const transactions = await Transaction.create(randomTransactions);
+
+    // Count by status
+    const pendingCount = transactions.filter(t => t.status === 'Pending').length;
+    const activeCount = transactions.filter(t => t.status === 'Active').length;
+    const completedCount = transactions.filter(t => t.status === 'Completed').length;
+
     res.status(200).json({ 
-      msg: "Insurances generated successfully!", 
-      insurances 
+      msg: "Data generated successfully!", 
+      insurances,
+      transactions: {
+        total: transactions.length,
+        pending: pendingCount,
+        active: activeCount,
+        completed: completedCount
+      }
     });
   } catch (error) {
     console.error(error);

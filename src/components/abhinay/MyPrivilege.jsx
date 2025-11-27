@@ -193,10 +193,19 @@ const MyPrivilege = () => {
     }
   };
 
-  // Filter transactions based on insurance status
+  // Filter transactions based on insurance status and show newest pending first for quick payments
   const filteredTransactions = useMemo(() => {
-    if (transactionFilter === 'all') return transactions;
-    return transactions.filter(tx => tx.status?.toLowerCase() === transactionFilter);
+    const statusOrder = { pending: 0, active: 1, completed: 2 };
+    const normalizeStatus = (status) => status?.toLowerCase() || 'pending';
+    const baseList = transactionFilter === 'all'
+      ? [...transactions]
+      : transactions.filter(tx => normalizeStatus(tx.status) === transactionFilter);
+
+    return baseList.sort((a, b) => {
+      const statusDiff = statusOrder[normalizeStatus(a.status)] - statusOrder[normalizeStatus(b.status)];
+      if (statusDiff !== 0) return statusDiff;
+      return new Date(b.date) - new Date(a.date);
+    });
   }, [transactions, transactionFilter]);
 
   const handleFilterChange = (filter) => {
