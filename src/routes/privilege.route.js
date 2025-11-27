@@ -12,6 +12,7 @@ const {
   deletePreciousHolding,
   getTransactions,
   updateTransaction,
+  createTransaction,
   seedData
 } = require('../controllers/privilege.controller.js');
 
@@ -36,6 +37,7 @@ router.delete('/precious_holdings/:id', auth, deletePreciousHolding);
 
 // Transactions
 router.get('/transactions', auth, getTransactions);
+router.post('/transactions', auth, createTransaction);
 router.put('/transactions/:id', auth, updateTransaction);
 
 // Seed Random Insurance Data Only

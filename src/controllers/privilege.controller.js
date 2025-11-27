@@ -241,6 +241,26 @@ const updateTransaction = async (req, res) => {
   }
 };
 
+// Create New Transaction
+const createTransaction = async (req, res) => {
+  try {
+    const { type, amount, status, description, date } = req.body;
+    
+    const transaction = await Transaction.create({
+      userId: req.user.id,
+      type,
+      amount,
+      status: status || 'Pending',
+      description: description || `${type} Insurance Premium`,
+      date: date || new Date()
+    });
+
+    res.status(201).json(transaction);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getUserProfile,
   addProperty, 
@@ -253,5 +273,6 @@ module.exports = {
   deletePreciousHolding,
   getTransactions,
   updateTransaction,
+  createTransaction,
   seedData
 };
