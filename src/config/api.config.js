@@ -1,13 +1,11 @@
-const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-const API = {
-  baseURL: baseURL, // This is http://localhost:3001
-  
-  // Your login page will call http://localhost:3001/api/auth/login
-  login: `${baseURL}/api/auth/login`, 
-  
-  // Note: Your privilege page calls /api/privilege/*
-  // This is handled by api.get() in the component itself
+export const API = {
+  base: BASE,
+  login: `${BASE}/api/auth/login`,
+  register: `${BASE}/api/auth/register`,
+  // ... other routes ...
+  advisorClients: `${BASE}/api/advisor/clients`,
 };
 
 export default API;
