@@ -4,11 +4,13 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./components/ziko/Home";
 import LoginPage from "./components/ziko/LoginPage";
 import Dashboard from "./components/deepthi/Dashboard";
-import AdvisorDashboard from "./components/gupta/AdvisorDashboard";
+import AdvisorDashboard from "./components/gupta/AdvisorDashboard"; 
+import AdvisorVideo from "./components/gupta/AdvisorVideo";       
+//import UserVideo from "./components/gupta/UserVideo";            
 import FinBot from "./components/gupta/Finbot";
 import MyPrivilege from "./components/abhinay/MyPrivilege";
-import Blogs from "./components/ragamaie/BlogPage"
-import Investments from "./components/ragamaie/InvestmentsPage"
+import Blogs from "./components/ragamaie/BlogPage";
+import Investments from "./components/ragamaie/InvestmentsPage";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -20,6 +22,7 @@ import UserManagementPage from "./components/ziko/admin/UserManagementPage";
 import ContentManagementPage from "./components/ziko/admin/ContentManagementPage";
 import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
+
 function App() {
   return (
     <div className="App">
@@ -31,9 +34,11 @@ function App() {
 
         {/* Auth required */}
         <Route element={<ProtectedRoute />}>
+          
           {/* Role: advisor-only */}
           <Route element={<RoleRoute allowed={["advisor"]} />}>
             <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
+            <Route path="/advisor/video" element={<AdvisorVideo />} /> {/* <--- ADDED */}
           </Route>
 
           {/* Role: admin-only */}
@@ -54,7 +59,9 @@ function App() {
             <Route path="/user/investments" element={<Investments />} />
             <Route path="/user/finbot" element={<FinBot />} />
             <Route path="/user/privileges" element={<MyPrivilege />} />
+            {/* <Route path="/user/video" element={<UserVideo />} /> */}
           </Route>
+
         </Route>
       </Routes>
     </div>
