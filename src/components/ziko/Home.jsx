@@ -8,6 +8,7 @@ import FastTransaction from './FastTransaction';
 import FinalSection from './FinalSection';
 import ContactUs from './ContactUs';
 import Footer from './Footer';
+import '../../styles/ziko/ziko.css'
 
 const Home = () => {
   return (

@@ -1,76 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import API from '../../config/api.config.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchClients, selectClient } from '../../redux/slices/advisorSlice';
 import '../../styles/gupta/AdvisorDashboard.css';
 
 const AdvisorDashboard = () => {
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  
+  // Get data from Redux Store
+  const { clients, loading, error, selectedClient } = useSelector((state) => state.advisor);
+  
+  const [showModal, setShowModal] = useState(false);
+  // Add Client local state (for form only)
+  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', phone: '' });
 
-  // 1. Fetch real clients from DB on load
+  // Fetch real data on mount
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        // You might need to send the token if your route is protected
-        // const token = localStorage.getItem('token');
-        // const config = { headers: { Authorization: `Bearer ${token}` } };
-        
-        const response = await axios.get(API.advisorClients); 
-        setClients(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching clients:", err);
-        setError("Failed to load client data.");
-        setLoading(false);
-      }
-    };
+    dispatch(fetchClients());
+  }, [dispatch]);
 
-    fetchClients();
-  }, []);
+  const handleClientClick = (client) => {
+    dispatch(selectClient(client));
+  };
 
-  if (loading) return <div className="loading-container">Loading Database Records...</div>;
-  if (error) return <div className="loading-container" style={{color:'red'}}>{error}</div>;
+  // Note: This needs a backend endpoint to persist. 
+  // For now, we just log it as we are removing mock data logic.
+  const handleAddClient = (e) => {
+    e.preventDefault();
+    alert("Backend endpoint for 'Add Client' is needed to save: " + formData.email);
+    setShowModal(false);
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const PLACEHOLDER_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 120 120" fill="%23cccccc"><rect width="100%" height="100%" /><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="20">User</text></svg>';
+
+  if (loading && clients.length === 0) return <div style={{padding:'20px', color:'white'}}>Loading Clients from Database...</div>;
+  if (error) return <div style={{padding:'20px', color:'red'}}>Error: {error}</div>;
 
   return (
     <div className="dashboard-container">
-      {/* --- HEADER --- */}
       <header>
-        <div className="logo-area">
-          <h2 style={{color:'white', margin:0}}>DRAKZ <span style={{color:'#3b82f6'}}>Advisor</span></h2>
-        </div>
         <nav>
-          <Link to="/advisor/dashboard" className="active">Overview</Link>
-          <Link to="/advisor/video">Live Session</Link>
+          <Link to="/advisor/dashboard" className="active">Your Clients</Link>
+          <Link to="/advisor/video">Session Room</Link>
         </nav>
-        <div className="user-icon">A</div>
+        <div className="header-right">
+          <div className="user-icon">A</div>
+        </div>
       </header>
 
-      <main className="dashboard-main">
-        {/* --- SIDEBAR: REAL DB CLIENTS --- */}
+      <div className="dashboard-main">
+        {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-header">
-            <h2>Client List</h2>
-            <button className="add-btn" title="Add Client">+</button>
+            <h2>Clients ({clients.length})</h2>
+            <button className="add-btn" onClick={() => setShowModal(true)}>+</button>
           </div>
           <div id="clientList">
             {clients.length === 0 ? (
-              <div className="empty-state" style={{height:'100px'}}>No clients found.</div>
+              <div style={{color:'#888', padding:'10px'}}>No clients found in DB.</div>
             ) : (
               clients.map(client => (
                 <div 
                   key={client._id} 
                   className={`client-item ${selectedClient?._id === client._id ? 'active' : ''}`}
-                  onClick={() => setSelectedClient(client)}
+                  onClick={() => handleClientClick(client)}
                 >
                   <div className="client-avatar">
                     {client.name ? client.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="client-info-list">
-                    <span className="client-name">{client.name || 'Unnamed User'}</span>
-                    <span className="client-email">{client.email}</span>
+                    <span className="client-name">{client.name || 'Unknown User'}</span>
+                    <span style={{fontSize:'0.8rem', color:'#aaa'}}>{client.email}</span>
                   </div>
                 </div>
               ))
@@ -78,71 +82,70 @@ const AdvisorDashboard = () => {
           </div>
         </aside>
 
-        {/* --- MAIN CONTENT --- */}
-        <section className="content">
+        {/* MAIN CONTENT */}
+        <div className="content">
           {!selectedClient ? (
             <div className="empty-state">
-              <div className="empty-icon">📊</div>
-              <h3>Select a client to analyze portfolio</h3>
-              <p>Select a user from the list to view database records.</p>
+              <h3>Select a client to view details</h3>
             </div>
           ) : (
             <div className="client-details">
-              {/* Header with Name and ID */}
               <div className="client-header">
                 <div className="client-profile">
                   <div className="profile-pic-large">
-                    {selectedClient.name ? selectedClient.name.charAt(0).toUpperCase() : 'U'}
+                     {selectedClient.name ? selectedClient.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="profile-info">
-                    <h1>{selectedClient.name || 'Unnamed User'}</h1>
-                    <span className="role-badge">Role: {selectedClient.role}</span>
-                    <p style={{color:'#888', marginTop:'5px', fontSize:'0.9rem'}}>
-                      ID: {selectedClient._id}
-                    </p>
+                    <h1>{selectedClient.name}</h1>
+                    <span className="role-badge">{selectedClient.role}</span>
+                    <p style={{color:'#888', fontSize:'0.9rem'}}>ID: {selectedClient._id}</p>
                   </div>
                 </div>
-                <div>
-                   <button className="btn-primary">
-                     Start Video Call
-                   </button>
-                </div>
+                {/* Send User to Video Page with this client selected */}
+                <Link to="/advisor/video" className="btn-primary" style={{textDecoration:'none'}}>
+                  Start Session
+                </Link>
               </div>
 
-              {/* Dummy Stats for Visuals (Real DB might not have this yet) */}
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-label">Total Portfolio</div>
-                  <div className="stat-value">$0.00</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Risk Profile</div>
-                  <div className="stat-value" style={{color:'#f59e0b'}}>Moderate</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Active Goals</div>
-                  <div className="stat-value">2</div>
-                </div>
-              </div>
-
-              {/* Detailed Info */}
-              <h4 className="section-title">Account Details</h4>
               <div className="info-grid">
                 <div className="info-row">
-                  <label>Email Address</label>
+                  <label>Email</label>
                   <p>{selectedClient.email}</p>
                 </div>
                 <div className="info-row">
-                  <label>Joined Date</label>
+                  <label>Joined</label>
                   <p>{new Date(selectedClient.created_at).toLocaleDateString()}</p>
                 </div>
-                {/* You can add more fields here if your DB has them */}
+                {/* Add more real DB fields here */}
               </div>
-
             </div>
           )}
-        </section>
-      </main>
+        </div>
+      </div>
+
+      {/* MODAL */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <span className="close-btn" onClick={() => setShowModal(false)}>&times;</span>
+            <h3>Add New Client</h3>
+            <form onSubmit={handleAddClient}>
+              <div className="form-group">
+                <label>First Name</label>
+                <input id="firstName" onChange={handleInputChange} required />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input id="email" type="email" onChange={handleInputChange} required />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="add-client-btn">Add (Mock)</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
