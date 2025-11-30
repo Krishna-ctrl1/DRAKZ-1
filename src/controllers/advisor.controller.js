@@ -2,9 +2,10 @@ const Person = require('../models/people.model.js');
 
 exports.getClients = async (req, res) => {
   try {
-    // Find all people with role 'user'. 
-    // specific fields like password are excluded (-password)
-    const clients = await Person.find({ role: 'user' }).select('-password');
+    // Fetch users and include the new financial fields
+    const clients = await Person.find({ role: 'user' })
+      .select('-password') // Don't send passwords
+      .sort({ created_at: -1 }); // Newest first
     
     res.json(clients);
   } catch (err) {
