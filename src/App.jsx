@@ -6,7 +6,7 @@ import LoginPage from "./components/ziko/LoginPage";
 import Dashboard from "./components/deepthi/Dashboard";
 import AdvisorDashboard from "./components/gupta/AdvisorDashboard"; 
 import AdvisorVideo from "./components/gupta/AdvisorVideo";       
-//import UserVideo from "./components/gupta/UserVideo";            
+import UserVideo from "./components/gupta/UserVideo"; // <--- IMPORTED
 import FinBot from "./components/gupta/Finbot";
 import MyPrivilege from "./components/abhinay/MyPrivilege";
 import Blogs from "./components/ragamaie/BlogPage";
@@ -38,7 +38,7 @@ function App() {
           {/* Role: advisor-only */}
           <Route element={<RoleRoute allowed={["advisor"]} />}>
             <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
-            <Route path="/advisor/video" element={<AdvisorVideo />} /> {/* <--- ADDED */}
+            <Route path="/advisor/video" element={<AdvisorVideo />} />
           </Route>
 
           {/* Role: admin-only */}
@@ -59,7 +59,7 @@ function App() {
             <Route path="/user/investments" element={<Investments />} />
             <Route path="/user/finbot" element={<FinBot />} />
             <Route path="/user/privileges" element={<MyPrivilege />} />
-            {/* <Route path="/user/video" element={<UserVideo />} /> */}
+            <Route path="/user/video" element={<UserVideo />} /> {/* <--- ROUTE ENABLED */}
           </Route>
 
         </Route>
