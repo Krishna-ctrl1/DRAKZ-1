@@ -1,77 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import API from '../../config/api.config.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchClients, selectClient } from '../../redux/slices/advisorSlice';
 import '../../styles/gupta/AdvisorDashboard.css';
 
 const AdvisorDashboard = () => {
-  const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { clients, loading, selectedClient } = useSelector((state) => state.advisor);
+  
+  useEffect(() => {
+    if (clients.length === 0) dispatch(fetchClients());
+  }, [dispatch, clients.length]);
 
-  // Helper to format currency
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-IN', { 
-      style: 'currency', 
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val || 0);
+  const handleClientClick = (client) => {
+    dispatch(selectClient(client));
   };
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get(API.advisorClients);
-        setClients(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching clients:", err);
-        setLoading(false);
-      }
-    };
-    fetchClients();
-  }, []);
+  const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
 
   return (
-    <div className="dashboard-container">
-      {/* HEADER */}
-      <header>
-        <div className="logo-area">
-          <h2>DRAKZ <span style={{color:'var(--accent-blue)'}}>Advisor</span></h2>
+    // Unique Wrapper Class prevents breaking other pages
+    <div className="advisor-wrapper">
+      
+      {/* Header */}
+      <header className="advisor-header">
+        <div className="advisor-brand">
+          <h2>DRAKZ <span className="advisor-highlight">Advisor</span></h2>
         </div>
-        <nav>
-          <Link to="/advisor/dashboard" className="active">Overview</Link>
-          <Link to="/advisor/video">Live Session</Link>
+        <nav className="advisor-nav">
+          <Link to="/advisor/dashboard" className="advisor-link active">Overview</Link>
+          <Link to="/advisor/video" className="advisor-link">Live Session</Link>
         </nav>
-        <div className="user-icon">A</div>
+        <div className="user-badge">A</div>
       </header>
 
-      <main className="dashboard-main">
-        {/* SIDEBAR */}
-        <aside className="sidebar">
-          <div className="sidebar-header">
-            <h2>Clients ({clients.length})</h2>
-            <button className="add-btn" title="Add Client">+</button>
+      <div className="advisor-layout">
+        {/* Sidebar */}
+        <aside className="advisor-sidebar">
+          <div className="sidebar-top">
+            <h3>Clients ({clients.length})</h3>
+            <button className="sidebar-add-btn" title="Add Client">+</button>
           </div>
-          
-          <div id="clientList">
+          <div className="client-list">
             {loading ? (
-              <p style={{color: '#aaa', textAlign:'center', marginTop:'20px'}}>Loading...</p>
+              <p style={{textAlign:'center', color:'#666', padding:'20px'}}>Loading...</p>
             ) : clients.length === 0 ? (
-              <div className="empty-state">No clients found.</div>
+              <p style={{textAlign:'center', color:'#666', padding:'20px'}}>No clients found.</p>
             ) : (
               clients.map(client => (
                 <div 
                   key={client._id} 
-                  className={`client-item ${selectedClient?._id === client._id ? 'active' : ''}`}
-                  onClick={() => setSelectedClient(client)}
+                  className={`client-card ${selectedClient?._id === client._id ? 'active' : ''}`}
+                  onClick={() => handleClientClick(client)}
                 >
                   <div className="client-avatar">
-                    {client.name ? client.name.charAt(0).toUpperCase() : 'U'}
+                    {client.name ? client.name[0].toUpperCase() : 'U'}
                   </div>
-                  <div className="client-info-list">
-                    <span className="client-name">{client.name || 'Unnamed User'}</span>
-                    <span className="client-email">{client.email}</span>
+                  <div className="client-info">
+                    <p className="client-name">{client.name}</p>
+                    <p className="client-email">{client.email}</p>
                   </div>
                 </div>
               ))
@@ -79,82 +66,66 @@ const AdvisorDashboard = () => {
           </div>
         </aside>
 
-        {/* MAIN CONTENT */}
-        <section className="content">
+        {/* Main Content */}
+        <main className="advisor-content">
           {!selectedClient ? (
             <div className="empty-state">
-              <div className="empty-icon">📊</div>
-              <h3>Welcome, Advisor</h3>
-              <p>Select a client from the left to view their portfolio.</p>
+              <p>Select a client from the sidebar to view details.</p>
             </div>
           ) : (
-            <div className="client-details">
-              {/* Profile Header */}
-              <div className="client-header">
-                <div className="client-profile">
-                  <div className="profile-pic-large">
-                    {selectedClient.name ? selectedClient.name.charAt(0).toUpperCase() : 'U'}
+            <div className="client-detail-view">
+              {/* Header Card */}
+              <div className="detail-header">
+                <div className="profile-large">
+                  <div className="avatar-large">
+                    {selectedClient.name ? selectedClient.name[0].toUpperCase() : 'U'}
                   </div>
-                  <div className="profile-info">
+                  <div className="profile-text">
                     <h1>{selectedClient.name}</h1>
-                    <span className="role-badge">{selectedClient.role?.toUpperCase()}</span>
+                    <span className="role-tag">{selectedClient.role?.toUpperCase()}</span>
                   </div>
                 </div>
-                <div>
-                   <Link to="/advisor/video" className="btn-primary">
-                     Start Video Call
-                   </Link>
+                <Link to="/advisor/video" className="start-session-btn">
+                  Start Session
+                </Link>
+              </div>
+
+              {/* Stats Row */}
+              <div className="stats-row">
+                <div className="stat-box">
+                  <span>Total Portfolio</span>
+                  <strong style={{color: '#10b981'}}>{formatCurrency(selectedClient.portfolioValue)}</strong>
+                </div>
+                <div className="stat-box">
+                  <span>Risk Profile</span>
+                  <strong style={{color: '#f59e0b'}}>{selectedClient.riskProfile || 'Moderate'}</strong>
+                </div>
+                <div className="stat-box">
+                  <span>Active Goals</span>
+                  <strong>{selectedClient.activeGoals || 0}</strong>
                 </div>
               </div>
 
-              {/* Financial Stats (Real DB Data) */}
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-label">Total Portfolio</div>
-                  <div className="stat-value" style={{color: '#10b981'}}>
-                    {formatCurrency(selectedClient.portfolioValue)}
-                  </div>
+              {/* Info Panel */}
+              <div className="info-panel">
+                <h4>Account Information</h4>
+                <div className="data-row">
+                  <span className="label">Email</span>
+                  <span className="value">{selectedClient.email}</span>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-label">Risk Profile</div>
-                  <div className="stat-value" style={{color: '#f59e0b'}}>
-                    {selectedClient.riskProfile || 'N/A'}
-                  </div>
+                <div className="data-row">
+                  <span className="label">Joined</span>
+                  <span className="value">{new Date(selectedClient.created_at).toLocaleDateString()}</span>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-label">Active Goals</div>
-                  <div className="stat-value">
-                    {selectedClient.activeGoals || 0}
-                  </div>
-                </div>
-              </div>
-
-              {/* Account Info */}
-              <h4 className="section-title">Client Details</h4>
-              <div className="info-grid">
-                <div className="info-row">
-                  <label>Email Address</label>
-                  <p>{selectedClient.email}</p>
-                </div>
-                <div className="info-row">
-                  <label>Client ID</label>
-                  <p style={{fontSize: '0.9rem', fontFamily: 'monospace', color:'var(--text-muted)'}}>
-                    {selectedClient._id}
-                  </p>
-                </div>
-                <div className="info-row">
-                  <label>Joined Date</label>
-                  <p>{selectedClient.created_at ? new Date(selectedClient.created_at).toLocaleDateString() : 'N/A'}</p>
-                </div>
-                <div className="info-row">
-                  <label>Status</label>
-                  <p style={{color: '#10b981'}}>Active</p>
+                <div className="data-row">
+                  <span className="label">Client ID</span>
+                  <span className="value" style={{color: '#666'}}>{selectedClient._id}</span>
                 </div>
               </div>
             </div>
           )}
-        </section>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
