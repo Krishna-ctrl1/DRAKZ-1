@@ -1,0 +1,152 @@
+/* src/styles/gupta/UserVideo.css */
+.user-video-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #0f172a; /* Dark background */
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.uv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 60px;
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.uv-nav a {
+  color: #94a3b8;
+  text-decoration: none;
+  margin-right: 20px;
+  font-weight: 500;
+}
+
+.uv-nav a.active {
+  color: #3b82f6; /* Blue active state */
+}
+
+.uv-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 3fr 1fr; /* Video area vs Chat */
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Main Video Area */
+.uv-video-area {
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.uv-main-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  position: relative;
+}
+
+.uv-main-screen video, 
+.uv-main-screen iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensure video fits */
+}
+
+.uv-placeholder {
+  text-align: center;
+  color: #64748b;
+}
+
+/* Picture-in-Picture Local Video */
+.uv-local-video {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 180px;
+  height: 120px;
+  background: #333;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.uv-local-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Chat Section */
+.uv-chat-section {
+  background: #1e293b;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.uv-chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.uv-msg {
+  padding: 8px 12px;
+  border-radius: 8px;
+  max-width: 85%;
+  font-size: 0.9rem;
+}
+
+.uv-msg.them { align-self: flex-start; background: #334155; color: #fff; }
+.uv-msg.me { align-self: flex-end; background: #3b82f6; color: #fff; }
+
+.uv-chat-input {
+  display: flex;
+  padding: 10px;
+  background: #0f172a;
+  border-top: 1px solid #334155;
+}
+
+.uv-chat-input input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: white;
+  outline: none;
+}
+
+.uv-chat-input button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .uv-container { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+}
