@@ -13,4 +13,7 @@ router.get("/weekly", auth, controller.getWeeklySummary);
 // recent list
 router.get("/list", auth, controller.getRecentSpendings);
 
+// expense distribution pie chart data (past 30 days default)
+router.get("/distribution-pie", auth, controller.getExpenseDistributionPie);
+
 module.exports = router;

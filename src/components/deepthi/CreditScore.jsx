@@ -21,12 +21,18 @@ const CreditScore = () => {
   const [error, setError] = useState(null);
   const [revealed, setRevealed] = useState(false);
 
-  useEffect(() => {
+  const fetchScore = () => {
+    setLoading(true);
+    setError(null);
     const token = localStorage.getItem("token");
     getMyCreditScore(token)
       .then((data) => setCredit(data?.credit ?? null))
       .catch((e) => setError(e.message || "Failed to fetch credit score"))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchScore();
   }, []);
 
   useEffect(() => {
@@ -42,7 +48,23 @@ const CreditScore = () => {
     );
   if (error)
     return (
-      <div className="creditscore-card creditscore-error">Error: {error}</div>
+      <div className="creditscore-card creditscore-error">
+        <p>Error: {error}</p>
+        <button
+          onClick={fetchScore}
+          style={{
+            marginTop: "10px",
+            padding: "6px 12px",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "#fff",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Retry
+        </button>
+      </div>
     );
   if (!credit)
     return (
