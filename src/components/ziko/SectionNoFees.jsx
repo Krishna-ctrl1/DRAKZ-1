@@ -51,23 +51,21 @@ const SectionNoFees = () => {
 
   return (
     <section className="section-no-fees">
-      <div className="no-fees-overlap-wrapper">
-        <div className="no-fees-container">
-          <div className={`text-column ${isVisible ? 'fade-in' : 'fade-out'}`}>
-            <h2>
-              <span className="line-1">{currentFeature.title}</span>
-              <span className="line-2">{currentFeature.subtitle}</span>
-            </h2>
-            <p>{currentFeature.description}</p>
-          </div>
-          <div className="image-column">
-            <div className="credit-card-tilted">
-              <img 
-                src="/card.png" 
-                alt="The Only Card Credit Card" 
-                className="card-image-tilted"
-              />
-            </div>
+      <div className="no-fees-container">
+        <div className={`text-column ${isVisible ? 'fade-in' : 'fade-out'}`}>
+          <h2>
+            <span className="line-1">{currentFeature.title}</span>
+            <span className="line-2">{currentFeature.subtitle}</span>
+          </h2>
+          <p>{currentFeature.description}</p>
+        </div>
+        <div className="image-column">
+          <div className="credit-card-tilted">
+            <img 
+              src="/card.png" 
+              alt="The Only Card Credit Card" 
+              className="card-image-tilted"
+            />
           </div>
         </div>
       </div>

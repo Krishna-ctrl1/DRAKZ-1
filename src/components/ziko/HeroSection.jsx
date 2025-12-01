@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroText from './HeroText';
-import CardModel from './CardModel';
+import CreditCard from './CreditCard';
 import CTAButton from './CTAButton';
 
 const HeroSection = () => {
@@ -15,10 +15,7 @@ const HeroSection = () => {
       
       <div className="hero-content">
         <HeroText />
-        {/* Wrapper for the 3D Canvas. CSS to size and position it. */}
-        <div className="card-3d-wrapper">
-          <CardModel />
-        </div>
+        <CreditCard />
         <CTAButton />
       </div>
     </section>

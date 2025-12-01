@@ -19,7 +19,7 @@ const FinalSection = () => {
           <button className="final-cta-button" onClick={handleGetCard}>Get Started</button>
         </div>
         <div className="final-card-image">
-          <img src="/card.png" className="final-card-img" alt="final card" />
+          <img src="/card.png" alt="Credit Card" className="final-card-img" />
         </div>
       </div>
     </div>
