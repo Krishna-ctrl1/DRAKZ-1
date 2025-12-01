@@ -37,10 +37,20 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
     console.log(`[fetchWithRetry] Response received: ${res.status}`);
 
     if (!res.ok) {
-      const errorData = await res
-        .json()
-        .catch(() => ({ error: "Unknown error" }));
-      const errorMsg = errorData.error || `HTTP ${res.status}`;
+      // Try to read JSON error first, else fall back to text
+      let errorMsg = `HTTP ${res.status}`;
+      try {
+        const errorData = await res.json();
+        errorMsg = errorData?.error || errorData?.message || errorMsg;
+      } catch (_) {
+        try {
+          const text = await res.text();
+          // Use first 200 chars to avoid huge HTML
+          errorMsg = text ? text.slice(0, 200) : errorMsg;
+        } catch (_) {
+          // keep default
+        }
+      }
       console.error(`[fetchWithRetry] Error response: ${errorMsg}`);
       throw new Error(errorMsg);
     }
@@ -110,4 +120,17 @@ export async function deleteCard(cardId, { token } = {}) {
     },
   });
   return res;
+}
+
+export async function revealCardNumber(cardId, password, { token } = {}) {
+  const authToken = token || localStorage.getItem("token");
+  const res = await fetchWithRetry(`/api/cards/${cardId}/reveal`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: authToken ? `Bearer ${authToken}` : "",
+    },
+    body: JSON.stringify({ password }),
+  });
+  return res; // { number }
 }

@@ -1,9 +1,12 @@
 // src/controllers/cardController.js
 const Card = require("../models/Card");
 const mongoose = require("mongoose");
+const Person = require("../models/people.model.js");
+const bcrypt = require("bcryptjs");
+const { encryptGCM, decryptGCM } = require("../utils/crypto.util");
 
 function getUserId(req) {
-  return (req.user && (req.user.id || req.user._id)) || null;
+  return (req.user && (req.user.id || req.user._id || req.user.userId)) || null;
 }
 
 async function listCards(req, res) {
@@ -96,6 +99,17 @@ async function createCard(req, res) {
       .match(/.{1,4}/g)
       .join(" ");
 
+    // Encrypt full PAN for secure reveal later
+    let encryptedNumber, encryptedIv, encryptedTag;
+    try {
+      const enc = encryptGCM(digits);
+      encryptedNumber = enc.cipherText;
+      encryptedIv = enc.iv;
+      encryptedTag = enc.tag;
+    } catch (e) {
+      return res.status(500).json({ error: "Encryption failed" });
+    }
+
     const card = await Card.create({
       user: new mongoose.Types.ObjectId(userId),
       holderName,
@@ -103,6 +117,9 @@ async function createCard(req, res) {
       brand: brand || "Unknown",
       last4,
       masked,
+      encryptedNumber,
+      encryptedIv,
+      encryptedTag,
       expiryMonth,
       expiryYear,
       colorTheme: colorTheme || "#4fd4c6",
@@ -113,6 +130,45 @@ async function createCard(req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  }
+}
+async function revealCardNumber(req, res) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { password } = req.body || {};
+    if (!password) return res.status(400).json({ error: "Password required" });
+
+    const user = await Person.findById(userId).select("password role email name").lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ error: "Invalid password" });
+
+    const cardId = req.params.cardId;
+    const card = await Card.findById(cardId).lean();
+    if (!card) return res.status(404).json({ error: "Card not found" });
+    if (String(card.user) !== String(userId)) return res.status(403).json({ error: "Forbidden" });
+
+    if (!card.encryptedNumber || !card.encryptedIv || !card.encryptedTag) {
+      console.warn("[revealCardNumber] Missing encrypted fields for card", cardId);
+      return res.status(400).json({ error: "Card number not available for this card (legacy or not encrypted)" });
+    }
+
+    let pan;
+    try {
+      pan = decryptGCM(card.encryptedNumber, card.encryptedIv, card.encryptedTag);
+    } catch (e) {
+      console.error("[revealCardNumber] Decryption failed:", e.message);
+      return res.status(500).json({ error: "Decryption failed. Ensure CARD_ENC_KEY is set and unchanged since card creation." });
+    }
+
+    // Return only for immediate display; do not store client-side
+    return res.json({ number: pan });
+  } catch (err) {
+    console.error("[revealCardNumber] Unexpected error:", err);
+    return res.status(500).json({ error: err.message || "Server error" });
   }
 }
 
@@ -155,4 +211,4 @@ function luhnCheck(num) {
   return sum % 10 === 0;
 }
 
-module.exports = { listCards, createCard, deleteCard };
+module.exports = { listCards, createCard, deleteCard, revealCardNumber };
