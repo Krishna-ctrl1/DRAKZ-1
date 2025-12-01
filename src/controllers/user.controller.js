@@ -1,6 +1,7 @@
-// src/controllers/user.controller.js
+const mongoose = require('mongoose');
 const Person = require('../models/people.model.js');
 const bcrypt = require('bcryptjs');
+const os = require('os');
 
 // 1. GET ALL USERS
 exports.getAllUsers = async (req, res) => {
@@ -84,6 +85,93 @@ exports.deleteUser = async (req, res) => {
     res.json({ msg: 'User deleted' });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+};
+
+// 5. GET DASHBOARD STATS
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // A. Total Users
+    const totalUsers = await Person.countDocuments();
+
+    // B. New Users Today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const newUsersToday = await Person.countDocuments({
+      created_at: { $gte: startOfDay }
+    });
+
+    const dbStats = await mongoose.connection.db.stats();
+    const dataSizeBytes = dbStats.dataSize; // Size in bytes
+    
+    // Convert bytes to readable format (KB or MB)
+    let dataUsedString = "0 KB";
+    if (dataSizeBytes > 1024 * 1024) {
+      dataUsedString = `${(dataSizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+    } else {
+      dataUsedString = `${(dataSizeBytes / 1024).toFixed(2)} KB`;
+    }
+
+    res.json({
+      totalUsers,
+      newUsersToday,
+      dataUsed: dataUsedString
+    });
+
+  } catch (err) {
+    console.error("Dashboard Stats Error:", err);
+    res.status(500).json({ msg: 'Server Error fetching stats' });
+  }
+};
+
+function getCpuInfo() {
+  const cpus = os.cpus();
+  let user = 0, nice = 0, sys = 0, idle = 0, irq = 0;
+
+  for (const cpu of cpus) {
+    user += cpu.times.user;
+    nice += cpu.times.nice;
+    sys += cpu.times.sys;
+    idle += cpu.times.idle;
+    irq += cpu.times.irq;
+  }
+
+  return {
+    idle,
+    total: user + nice + sys + idle + irq
+  };
+}
+
+// 6. GET REAL SERVER METRICS (Improved Sensitivity)
+exports.getServerMetrics = async (req, res) => {
+  try {
+    // 1. Take initial snapshot
+    const start = getCpuInfo();
+
+    // 2. Wait 500ms (Half a second) to capture more activity
+    // This makes the API slower but the data much more accurate
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 3. Take second snapshot
+    const end = getCpuInfo();
+
+    // 4. Calculate difference
+    const idleDiff = end.idle - start.idle;
+    const totalDiff = end.total - start.total;
+
+    // 5. Calculate Percentage
+    // (1 - fraction_idle) * 100
+    const rawPercentage = totalDiff === 0 ? 0 : ((1 - (idleDiff / totalDiff)) * 100);
+
+    // 6. Formatting
+    // Return 2 decimal places (e.g., 1.25) so it doesn't just show 0
+    const formattedPercentage = parseFloat(rawPercentage.toFixed(2));
+
+    res.json({ cpuUsage: formattedPercentage });
+  } catch (err) {
+    console.error("Metric Error:", err);
     res.status(500).json({ msg: 'Server Error' });
   }
 };

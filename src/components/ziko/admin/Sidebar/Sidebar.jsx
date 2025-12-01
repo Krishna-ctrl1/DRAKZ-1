@@ -23,8 +23,8 @@ const Sidebar = () => {
     { path: "/admin/dashboard", icon: <MdDashboard />, label: "Dashboard" },
     { path: "/admin/users", icon: <MdPeople />, label: "Users" },
     { path: "/admin/content", icon: <MdArticle />, label: "Content" },
-    { path: "/admin/settings", icon: <MdSettings />, label: "Settings" },
-    { path: "/admin/logs", icon: <MdListAlt />, label: "Logs" },
+    // { path: "/admin/settings", icon: <MdSettings />, label: "Settings" },
+    // { path: "/admin/logs", icon: <MdListAlt />, label: "Logs" },
   ];
 
   return (

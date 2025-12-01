@@ -4,6 +4,8 @@ const userController = require('../controllers/user.controller');
 
 // Read
 router.get('/users', userController.getAllUsers);
+router.get('/dashboard-stats', userController.getDashboardStats);
+router.get('/server-metrics', userController.getServerMetrics);
 
 // Create
 router.post('/users', userController.createUser);
