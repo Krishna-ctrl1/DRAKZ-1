@@ -1,71 +1,128 @@
 // scripts/seed_consistent_data.js
-const path = require('path');
-// 👇 THIS LINE FIXES THE "UNDEFINED" ERROR
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-
 const mongoose = require('mongoose');
 const Person = require('../src/models/people.model');
 const bcrypt = require('bcryptjs');
 
-// Fallback if .env fails (Use local DB)
-const MONGO_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/drakz_db";
+// ✅ Direct Cloud Connection
+const MONGO_URI = "mongodb+srv://ziko120204:Zulqar120204@cluster0.lbqv1.mongodb.net/fdfed2";
 
 const seed = async () => {
   try {
-    console.log('🔌 Connecting to:', MONGO_URI);
+    console.log('------------------------------------------------');
+    console.log('🔌 Connecting to Cloud DB...');
+    
     await mongoose.connect(MONGO_URI);
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected.');
 
-    // 1. Create a standard password hash
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash('123456', salt); 
+    // Helper to hash passwords individually
+    const hashPwd = async (pwd) => await bcrypt.hash(pwd, 10);
 
-    // 2. Define "Consistent" Users
+    // Define Users with ORIGINAL Passwords & Rich Data
     const users = [
+      // --- ADVISORS (Restoring Passwords) ---
+      {
+        name: "Advisor 1",
+        email: "advisor1@drakz.com",
+        password: await hashPwd("Advisor1@123"), // ✅ Original Password
+        role: "advisor"
+      },
+      {
+        name: "Advisor 2",
+        email: "advisor2@drakz.com",
+        password: await hashPwd("Advisor2@123"), // ✅ Original Password
+        role: "advisor"
+      },
+
+      // --- USERS (Restoring Passwords + Rich Data) ---
       {
         name: "User 1",
         email: "user1@drakz.com",
-        password: hash,
+        password: await hashPwd("User1@123"), // ✅ User1@123
         role: "user",
-        // These fields will now match your dashboard
-        portfolioValue: 1250000, 
+        portfolioValue: 2500000, 
         riskProfile: "Aggressive",
-        activeGoals: 3
+        activeGoals: 5,
+        monthlyIncome: 150000,
+        totalDebt: 45000,
+        creditScore: 780,
+        occupation: "Software Architect",
+        phone: "+91 98765 43210"
       },
       {
         name: "User 2",
         email: "user2@drakz.com",
-        password: hash,
+        password: await hashPwd("User2@123"), // ✅ User2@123
         role: "user",
         portfolioValue: 450000,
         riskProfile: "Conservative",
-        activeGoals: 1
+        activeGoals: 2,
+        monthlyIncome: 65000,
+        totalDebt: 12000,
+        creditScore: 820,
+        occupation: "Government Teacher",
+        phone: "+91 91234 56789"
       },
       {
         name: "User 3",
         email: "user3@drakz.com",
-        password: hash,
+        password: await hashPwd("User3@123"), // ✅ User3@123
         role: "user",
         portfolioValue: 875000,
         riskProfile: "Moderate",
-        activeGoals: 2
+        activeGoals: 3,
+        monthlyIncome: 95000,
+        totalDebt: 250000,
+        creditScore: 690,
+        occupation: "Marketing Manager",
+        phone: "+91 88888 77777"
+      },
+      {
+        name: "User 4",
+        email: "user4@drakz.com",
+        password: await hashPwd("User4@123"), // ✅ User4@123
+        role: "user",
+        portfolioValue: 25000,
+        riskProfile: "Aggressive",
+        activeGoals: 1,
+        monthlyIncome: 25000,
+        totalDebt: 5000,
+        creditScore: 650,
+        occupation: "Freelancer",
+        phone: "+91 77777 66666"
+      },
+      {
+        name: "User 5",
+        email: "user5@drakz.com",
+        password: await hashPwd("User5@123"), // ✅ User5@123
+        role: "user",
+        portfolioValue: 5500000,
+        riskProfile: "Conservative",
+        activeGoals: 0,
+        monthlyIncome: 120000,
+        totalDebt: 0,
+        creditScore: 850,
+        occupation: "Retired Officer",
+        phone: "+91 99999 11111"
       }
     ];
 
-    // 3. Upsert Users (Update if exists, Create if not)
+    // Upsert (Update existing, Create new)
     for (const u of users) {
-      await Person.findOneAndUpdate(
+      const result = await Person.findOneAndUpdate(
         { email: u.email }, 
-        u, 
+        { $set: u }, 
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
-      console.log(`👤 Processed: ${u.name}`);
+      console.log(`👤 Updated: ${result.name} (${result.email})`);
     }
 
-    console.log('🎉 DONE: Database seeded with User 1, User 2, and User 3.');
+    console.log('------------------------------------------------');
+    console.log('🎉 SUCCESS: Passwords restored & Data updated.');
+    console.log('------------------------------------------------');
+    
     process.exit();
   } catch (err) {
-    console.error('❌ Error seeding data:', err);
+    console.error('❌ Error:', err);
     process.exit(1);
   }
 };

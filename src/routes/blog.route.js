@@ -27,5 +27,6 @@ router.post("/:id/comments", auth, blogCtrl.addComment);
 router.get("/:id/comments", blogCtrl.getComments);
 router.delete("/comments/:id", auth, blogCtrl.deleteComment);
 router.delete("/:id", auth, blogCtrl.deleteBlog);
+router.delete("/admin/:id", auth, blogCtrl.deleteBlogByAdmin);
 
 module.exports = router;
