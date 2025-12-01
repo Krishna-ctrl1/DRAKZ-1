@@ -1,87 +1,113 @@
+// src/styles/ziko/admin/Sidebar.styles.js
 import styled from "styled-components";
-import { Link } from "react-router-dom"; // Assuming react-router-dom for navigation
+import { Link } from "react-router-dom";
 
 export const SidebarContainer = styled.aside`
   width: 250px;
-  background-color: var(--card-background);
-  color: var(--text-color);
-  padding: 30px 0;
+  /* Floating geometry matching Sidebar.css */
   position: fixed;
-  height: 100%;
+  top: 1.5rem;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  height: calc(100vh - 3rem);
+  
+  /* Deep Night Gradient from Sidebar.css */
+  background: linear-gradient(-45deg, #000000, #111827, #0f0c29, #302b63);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  border-radius: 24px; /* Rounded corners */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  
   display: flex;
   flex-direction: column;
-  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-  border-right: 1px solid var(--border-color);
+  padding: 30px 15px;
   z-index: 1000;
+  transition: width 0.3s ease-in-out;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Hide Scrollbar */
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
 `;
 
 export const Logo = styled.div`
   font-size: 1.8rem;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
   margin-bottom: 40px;
-  color: var(--primary-purple);
+  /* Gradient Text Effect */
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+  text-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
 `;
 
 export const NavList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
-  flex-grow: 1; /* Pushes content down if needed */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between pills */
 `;
 
 export const NavItem = styled.li`
-  margin-bottom: 8px;
+  width: 100%;
 `;
 
 export const NavLink = styled(Link)`
   display: flex;
   align-items: center;
-  padding: 15px 30px;
-  color: var(--text-color);
+  padding: 12px 24px;
+  color: #94a3b8; /* Muted gray by default */
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  transition: background-color 0.3s ease, color 0.3s ease,
-    transform 0.2s ease;
-  border-left: 5px solid transparent;
+  border-radius: 16px; /* Slightly softer corners like the screenshot */
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
 
   & svg {
-    margin-right: 15px;
-    font-size: 1.3rem;
-    color: rgba(255, 255, 255, 0.7);
+    margin-right: 12px;
+    font-size: 1.2rem;
+    color: #94a3b8;
     transition: color 0.3s ease;
   }
 
+  /* Hover State */
   &:hover {
-    background-color: var(--accent-blue);
-    border-left-color: var(--primary-purple);
-    transform: translateX(5px);
-    color: var(--primary-purple);
-
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    
     & svg {
-      color: var(--primary-purple);
+      color: #ffffff;
     }
   }
 
+  /* ACTIVE STATE - MATCHING THE SCREENSHOT */
   &.active {
-    background-color: var(--accent-blue);
-    border-left-color: var(--primary-purple);
-    color: var(--primary-purple);
+    /* Solid, bright gradient matching the 'Privileges' button */
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); 
+    color: #ffffff;
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); /* Purple Glow */
 
     & svg {
-      color: var(--primary-purple);
+      color: #ffffff;
     }
   }
 `;
 
 export const FooterText = styled.div`
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
   text-align: center;
-  margin-top: 30px;
-  padding: 0 20px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 `;
