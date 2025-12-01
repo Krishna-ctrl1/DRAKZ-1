@@ -1,7 +1,11 @@
 /* Deepthi's CSS Styles - Dashboard */
 
 .app {
-  background: #0f0f1a;
+  background-image: url('/Premiumbackgorund.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: white;
   min-height: 100vh;
 }
@@ -11,15 +15,29 @@
   padding: 20px;
   margin-left: 250px;
   margin-top: 5rem;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: url('/Premiumbackgorund.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: calc(100vw - 250px);
 }
 
 .main-content-collapsed {
   flex: 1;
   padding: 20px;
-  margin-left: 110px;
-  margin-top: 5rem; /* This was missing */
-  transition: margin-left 0.3s ease;
+  margin-left: 90px;
+  margin-top: 5rem;
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: url('/Premiumbackgorund.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: calc(100vw - 90px);
 }
 .dashboard-page {
   min-height: 100vh;
@@ -33,25 +51,25 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1001; /* High z-index to stay on top */
-
-  /* REMOVED padding-left to make the header full width */
-
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  z-index: 1000;
+  background: #0f1425;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1rem 2.5rem 1rem 0.75rem;
+  margin-left: -200px;
   backdrop-filter: blur(10px);
+  height: auto;
+  box-sizing: border-box;
+  transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  /* ADDED: Explicit height to match sidebar and content margins */
-  height: 5rem;
-  box-sizing: border-box; /* Ensures padding is included in the height */
+.dashboard-header.expanded {
+  padding-left: calc(250px + 0.75rem);
 }
 
 /* REMOVED: .dashboard-header.collapsed is no longer needed */
 
 .header-content {
-  padding: 0 2rem;
+  padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -64,17 +82,19 @@
 }
 
 .dashboard-logo {
-  font-size: 2rem;
-  font-weight: bold;
-  background: linear-gradient(45deg, #3b82f6, #60a5fa);
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: 0.5px;
 }
 
 .dashboard-subtitle {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .header-actions {
@@ -84,17 +104,21 @@
 }
 
 .welcome-text {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.65rem 1.5rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .logout-btn:hover {

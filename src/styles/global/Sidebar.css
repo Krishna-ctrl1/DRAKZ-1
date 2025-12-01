@@ -3,13 +3,13 @@
   Easily change your app's entire look here.
 --- */
 :root {
-  --page-bg: #0d0d1a; /* Dark background for the page body */
-  --sidebar-bg: #1c1c2e; /* Sidebar background */
-  --icon-color: #8a8a9e; /* Default icon color (grey) */
-  --icon-hover-color: #4a90e2; /* Icon color on hover (dark blue) */
-  --active-bg: #5d5fef; /* Background of the active item (rounded box) */
-  --active-icon-color: #ffffff; /* Icon color of the active item (white) */
-  --text-color: #d1d5db; /* Text color for labels */
+  --page-bg: #050b16; /* Dark navy background for the page body */
+  --sidebar-bg: #071a2e; /* Sidebar background */
+  --icon-color: #c7d4ec; /* Default icon color */
+  --icon-hover-color: #5fe1ff; /* Icon color on hover */
+  --active-bg: linear-gradient(120deg, #22d3ee, #3b82f6); /* Active pill background */
+  --active-icon-color: #041120; /* Icon/text color inside active pill */
+  --text-color: #e5edf6; /* Text color for labels */
 }
 
 /* ---
@@ -28,16 +28,22 @@
   align-items: center;
   padding: 1.5rem 0;
   box-sizing: border-box;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(-45deg, #000000, #111827, #0f0c29, #302b63);
+  border-radius: 2.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: width 0.3s ease-in-out;
 }
 
 /* collapsed state: small */
 .sidebar.collapsed {
-  width: 80px;
+  width:  90px;
   align-items: center;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
 /* ---
   Expanded State
@@ -75,6 +81,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-bottom: -60px;
 }
 
 /* ---
@@ -87,7 +94,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem; /* Space between items */
+  gap: 0.8rem; /* Space between items */
   width: 100%;
 }
 
@@ -96,17 +103,21 @@
   align-items: center;
   justify-content: center; /* Center icons when collapsed */
   height: 50px;
-  width: calc(100% - 2rem); /* Full width minus some padding */
-  margin: 0 1rem;
+  width: calc(100% - 1.5rem); /* Full width minus some padding */
+  margin: 0 0.75rem;
   padding: 0;
+  margin-top: 35px;
   cursor: pointer;
-  border-radius: 0.75rem; /* Rounded box for the active state */
+  border-radius: 1.3rem; /* Rounded box for the active state */
   transition: background-color 0.3s ease;
   position: relative;
+  color: var(--icon-color);
 }
 .sidebar-link {
-  display: block; /* Makes the link fill the entire <li> */
-
+  display: flex; /* Makes the link fill the entire <li> */
+  align-items: center;
+  width: 100%;
+  height: 100%;
   text-decoration: none; /* <-- FIX: Removes the underline */
   color: inherit; /* <-- FIX: Makes text color match the parent */
 }
@@ -179,6 +190,10 @@
   Hover Effect (Icon turns blue)
 --- */
 
+.sidebar-list li:not(.active):hover {
+  background: rgba(35, 211, 238, 0.12);
+}
+
 .sidebar-list li:not(.active):hover i {
   color: var(--icon-hover-color);
 }
@@ -187,7 +202,7 @@
   Active Effect (Rounded box)
 --- */
 .sidebar-list li.active {
-  background-color: var(--active-bg);
+  background: var(--active-bg);
 }
 
 .sidebar-list li.active i {
@@ -198,22 +213,66 @@
   color: var(--active-icon-color);
 }
 
+/* Highlight the icon when the sidebar is collapsed so the active page stays obvious */
+.sidebar.collapsed .sidebar-list li.active {
+  background: transparent;
+}
+
+.sidebar.collapsed .sidebar-list li.active i {
+  color: var(--icon-hover-color);
+}
+
 /* ---
-  Collapse Button
+  Collapse Button - Top Right Position
 --- */
 .collapse-btn {
-  background: transparent;
-  border: none;
+  position: absolute;
+  top: 1.5rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--icon-color);
-  font-size: 1.25rem;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 0.75rem;
-  margin-top: 1.5rem;
+  padding: 0;
+  border-radius: 1rem;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  z-index: 100;
+}
+
+/* Adjust position when collapsed - center it */
+.sidebar.collapsed .collapse-btn {
+  right: 50%;
+  transform: translateX(50%);
 }
 
 .collapse-btn:hover {
-  color: var(--icon-hover-color);
-  background-color: rgba(74, 144, 226, 0.1); /* Faint blue background */
+  background: rgba(95, 225, 255, 0.15);
+  border-color: rgba(95, 225, 255, 0.3);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(95, 225, 255, 0.2);
+}
+
+.sidebar.collapsed .collapse-btn:hover {
+  transform: translateX(50%) scale(1.05);
+}
+
+.collapse-btn:active {
+  transform: scale(0.95);
+}
+
+.sidebar.collapsed .collapse-btn:active {
+  transform: translateX(50%) scale(0.95);
+}
+
+/* Adjust sidebar top padding to accommodate button */
+.sidebar-top {
+  padding-top: 4.5rem;
+  width: 100%;
 }

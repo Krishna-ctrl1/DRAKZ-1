@@ -58,7 +58,7 @@
 .chatbot-container {
   width: 100%;
   height: calc(100vh - 6rem);
-  background-color: var(--finbot-bg);
+  background-color: transparent;
   color: var(--finbot-text-primary);
   padding: 1.5rem;
   box-sizing: border-box;
@@ -81,7 +81,10 @@
 /* Tab navigation bar */
 .tab-navigation {
   display: flex;
-  background-color: transparent;
+  background-image: url('/Premium.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-bottom: 1px solid var(--finbot-border);
   padding: 0 1.5rem;
   flex-shrink: 0;
@@ -132,6 +135,10 @@
 .section-content.active {
   display: flex; /* Use flexbox for advisor layout */
   flex-direction: column; /* Stack chat vertically */
+  background-image: url('/Premium.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .section-content h2 {
@@ -188,10 +195,11 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), 0 0 40px rgba(255, 255, 255, 0.05);
 }
 .section-card:hover {
   transform: translateY(-8px);
-  box-shadow: var(--finbot-shadow-lg);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), 0 0 60px rgba(255, 255, 255, 0.1), var(--finbot-shadow-lg);
   border-color: var(--finbot-primary);
   background-color: rgba(93, 95, 239, 0.05);
 }
