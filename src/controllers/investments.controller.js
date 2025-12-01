@@ -211,4 +211,4 @@ exports.getInvestmentHistory = async (req, res) => {
     console.error("Error building investment history:", err);
     return res.status(500).json({ error: "Server error" });
   }
-};
+};s
