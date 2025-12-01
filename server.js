@@ -11,6 +11,7 @@ const blogRoutes = require("./src/routes/blog.route.js");
 const privilegeRoutes = require("./src/routes/privilege.route.js");
 const spendingsRoutes = require("./src/routes/spending.routes");
 const advisorRoutes = require("./src/routes/advisor.route.js");
+const userRoutes = require('./src/routes/user.routes');
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server
@@ -80,6 +81,7 @@ app.get("/api/test-all", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use('/api', userRoutes);
 app.use("/api/privilege", privilegeRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/credit-score", require("./src/routes/creditScore.routes"));

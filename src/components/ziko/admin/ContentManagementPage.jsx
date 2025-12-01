@@ -1,34 +1,92 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Title, Subtitle } from '../../../styles/ziko/admin/SharedStyles';
-import { Section, FullWidthBox } from '../../../styles/ziko/admin/AdminLayout.styles';
-// We can reuse the table styles from the UserTable for consistency
+import { Section } from '../../../styles/ziko/admin/AdminLayout.styles';
 import { StyledTable, ActionButton, UserTableContainer } from '../../../styles/ziko/admin/UserTable.styles';
 
-// Mock data for demonstration
-const dummyPendingBlogs = [
-  { id: 'p1', title: 'My First Investment', author: 'user@example.com', submitted: '2025-11-09' },
-  { id: 'p2', title: 'Understanding ETFs', author: 'jane@example.com', submitted: '2025-11-08' },
-];
-
-const dummyPublishedBlogs = [
-  { id: 'b1', title: 'Why You Need a FinBot', author: 'advisor@example.com', published: '2025-11-05' },
-  { id: 'b2', title: 'Top 5 Stocks for Q4', author: 'admin@example.com', published: '2025-11-01' },
-];
-
 const ContentManagementPage = () => {
-  // Placeholder functions for actions
-  const handleApprove = (id) => console.log('Approve blog:', id);
-  const handleReject = (id) => console.log('Reject blog:', id);
-  const handleRead = (id) => console.log('Read blog:', id);
-  const handleRemove = (id) => console.log('Remove blog:', id);
+  const [pendingBlogs, setPendingBlogs] = useState([]);
+  const [publishedBlogs, setPublishedBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Helper function to get token
+  const getToken = () => localStorage.getItem("token");
+
+  // Fetch blogs
+  const fetchData = async () => {
+    try {
+      const token = getToken();
+      if (!token) {
+        console.warn("No token found! Admin panel requires login.");
+        return;
+      }
+
+      const headers = { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+
+      const API_URL = "http://localhost:3001/api/blogs"; 
+
+      console.log("Fetching pending blogs...");
+      
+      // 1. Fetch Pending
+      const pendingRes = await fetch(`${API_URL}/admin/list?status=pending`, { headers });
+      if (!pendingRes.ok) throw new Error(`Pending fetch failed: ${pendingRes.status}`);
+      const pendingData = await pendingRes.json();
+      setPendingBlogs(Array.isArray(pendingData) ? pendingData : []);
+
+      // 2. Fetch Approved
+      const approvedRes = await fetch(`${API_URL}/admin/list?status=approved`, { headers });
+      if (!approvedRes.ok) throw new Error(`Approved fetch failed: ${approvedRes.status}`);
+      const approvedData = await approvedRes.json();
+      setPublishedBlogs(Array.isArray(approvedData) ? approvedData : []);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading admin data:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Handle Approve/Reject
+  const handleStatusChange = async (blogId, newStatus) => {
+    try {
+      const token = getToken();
+      const API_URL = "http://localhost:3001/api/blogs";
+
+      const res = await fetch(`${API_URL}/admin/${blogId}/status`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (res.ok) {
+        // Refresh the lists instantly
+        fetchData();
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  if (loading) return <div style={{padding: "20px"}}>Loading Admin Panel...</div>;
 
   return (
     <>
       <Title>Content Management (Blogs)</Title>
 
-      {/* Section for Pending Blogs */}
+      {/* PENDING SECTION */}
       <Section>
-        <UserTableContainer> {/* Reusing this container for the nice box style */}
+        <UserTableContainer>
           <Subtitle style={{ padding: '24px 24px 0' }}>Pending Approval</Subtitle>
           <StyledTable>
             <thead>
@@ -40,24 +98,27 @@ const ContentManagementPage = () => {
               </tr>
             </thead>
             <tbody>
-              {dummyPendingBlogs.map((blog) => (
-                <tr key={blog.id}>
-                  <td>{blog.title}</td>
-                  <td>{blog.author}</td>
-                  <td>{blog.submitted}</td>
-                  <td>
-                    <ActionButton onClick={() => handleApprove(blog.id)}>Approve</ActionButton>
-                    <ActionButton secondary onClick={() => handleReject(blog.id)}>Reject</ActionButton>
-                    <ActionButton secondary onClick={() => handleRead(blog.id)}>Read</ActionButton>
-                  </td>
-                </tr>
-              ))}
+              {pendingBlogs.length === 0 ? (
+                <tr><td colSpan="4" style={{textAlign:"center"}}>No pending blogs found</td></tr>
+              ) : (
+                pendingBlogs.map((blog) => (
+                  <tr key={blog._id}>
+                    <td>{blog.title}</td>
+                    <td>{blog.author_id?.email || "User"}</td>
+                    <td>{new Date(blog.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <ActionButton onClick={() => handleStatusChange(blog._id, 'approved')}>Approve</ActionButton>
+                      <ActionButton secondary onClick={() => handleStatusChange(blog._id, 'rejected')}>Reject</ActionButton>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </StyledTable>
         </UserTableContainer>
       </Section>
 
-      {/* Section for Published Blogs */}
+      {/* PUBLISHED SECTION */}
       <Section>
         <UserTableContainer>
           <Subtitle style={{ padding: '24px 24px 0' }}>Published Blogs</Subtitle>
@@ -67,19 +128,14 @@ const ContentManagementPage = () => {
                 <th>Title</th>
                 <th>Author</th>
                 <th>Published</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {dummyPublishedBlogs.map((blog) => (
-                <tr key={blog.id}>
+              {publishedBlogs.map((blog) => (
+                <tr key={blog._id}>
                   <td>{blog.title}</td>
-                  <td>{blog.author}</td>
-                  <td>{blog.published}</td>
-                  <td>
-                    <ActionButton secondary onClick={() => handleRead(blog.id)}>Read</ActionButton>
-                    <ActionButton secondary onClick={() => handleRemove(blog.id)}>Remove</ActionButton>
-                  </td>
+                  <td>{blog.author_id?.email || "User"}</td>
+                  <td>{new Date(blog.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

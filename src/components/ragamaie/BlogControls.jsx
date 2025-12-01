@@ -88,23 +88,47 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit Blog
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  // Inside BlogControls.jsx
 
-    const blogToCreate = {
-      ...formData,
-      status: "pending",
-      verified_by: null,
-      published_at: null,
-    };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    onBlogCreated?.(blogToCreate);
-    alert("Blog submitted ✅ (awaiting admin approval)");
-    setShowForm(false);
-    setFormData({ ...formData, title: "", content: "", image: "" });
-  };
+  try {
+    const token = localStorage.getItem("token"); // Get the logged-in user's token
+    if (!token) {
+      alert("You must be logged in to post.");
+      return;
+    }
+
+    // 1. Send the data to the Backend
+    const response = await fetch("http://localhost:3001/api/blogs", { // ⚠️ Check your port number!
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify({
+        title: formData.title,
+        content: formData.content,
+        image: formData.image
+      })
+    });
+
+    // 2. Handle the response
+    if (response.ok) {
+      alert("Blog submitted successfully! ⏳ It is now pending Admin approval.");
+      setShowForm(false);
+      setFormData({ ...formData, title: "", content: "", image: "" });
+    } else {
+      const errorData = await response.json();
+      alert(`Failed: ${errorData.message}`);
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    alert("Could not connect to the server.");
+  }
+};
 
   const getFilterLabel = () =>
     activeFilters.authorType === "user"

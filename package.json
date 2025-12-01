@@ -3,15 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-<<<<<<< Updated upstream
     "@react-three/drei": "^9.92.7",
     "@react-three/fiber": "^8.15.12",
     "@reduxjs/toolkit": "^2.11.0",
-=======
-    "@gsap/react": "^2.1.2",
-    "@react-three/drei": "^9.77.0",
-    "@react-three/fiber": "^8.15.13",
->>>>>>> Stashed changes
     "axios": "^1.13.0",
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.5.1",
@@ -31,15 +25,10 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.5",
     "recharts": "^3.2.1",
-<<<<<<< Updated upstream
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.19",
     "three": "^0.160.0"
-=======
-    "styled-components": "^6.1.19",
-    "three": "^0.152.0"
->>>>>>> Stashed changes
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
