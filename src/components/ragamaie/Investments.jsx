@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -7,62 +7,57 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import "../../styles/ragamaie/Investments.css";
+import "../../styles/ragamaie/investments.css";
+
+const API_BASE = "http://localhost:3001";
 
 export default function Investments() {
   const [range, setRange] = useState("6M");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // 1M (daily, with realistic ups/downs)
-  const oneMonthData = [
-    { name: "Nov 01", value: 4680 },
-    { name: "Nov 05", value: 4720 },
-    { name: "Nov 10", value: 4785 },
-    { name: "Nov 15", value: 4750 },
-    { name: "Nov 20", value: 4825 },
-    { name: "Nov 25", value: 4895 },
-    { name: "Nov 30", value: 4925 },
-  ];
+  useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      setError("");
 
-  // 6M (monthly, smooth long-term growth)
-  const sixMonthData = [
-    { name: "Jun", value: 4200 },
-    { name: "Jul", value: 4350 },
-    { name: "Aug", value: 4430 },
-    { name: "Sep", value: 4550 },
-    { name: "Oct", value: 4730 },
-    { name: "Nov", value: 4925 },
-  ];
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/investment-history?range=${range}`,
+          { credentials: "include" }
+        );
 
-  // 1Y (full-year realistic fluctuations)
-  const oneYearData = [
-    { name: "Jan", value: 3980 },
-    { name: "Feb", value: 4120 },
-    { name: "Mar", value: 4300 },
-    { name: "Apr", value: 4225 },
-    { name: "May", value: 4400 },
-    { name: "Jun", value: 4200 },
-    { name: "Jul", value: 4350 },
-    { name: "Aug", value: 4430 },
-    { name: "Sep", value: 4550 },
-    { name: "Oct", value: 4730 },
-    { name: "Nov", value: 4925 },
-    { name: "Dec", value: 5050 },
-  ];
+        if (!res.ok) {
+          throw new Error("Failed to fetch investment history");
+        }
 
-  const getData = () => {
-    switch (range) {
-      case "1M":
-        return oneMonthData;
-      case "6M":
-        return sixMonthData;
-      case "1Y":
-        return oneYearData;
-      default:
-        return sixMonthData;
-    }
-  };
+        const apiData = await res.json();
 
-  const data = getData();
+        // expecting [{ name: "Nov", value: 4925 }, ...]
+        if (Array.isArray(apiData)) {
+          setData(apiData);
+        } else {
+          setData([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Could not load investment data.");
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [range]);
+
+  const lastValue =
+    data && data.length > 0 ? data[data.length - 1].value : 0;
+
+  // you can later also calculate this from backend; for now keep fixed
+  const growthPercent =
+    range === "1M" ? "1.8" : range === "6M" ? "6.9" : "12.5";
 
   return (
     <div className="investment-container">
@@ -81,11 +76,33 @@ export default function Investments() {
         </div>
       </div>
 
-      {data.length > 0 ? (
+      {loading ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px 0",
+            color: "#9ca3af",
+            fontSize: "0.95rem",
+          }}
+        >
+          Loading investment data...
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px 0",
+            color: "#f87171",
+            fontSize: "0.95rem",
+          }}
+        >
+          {error}
+        </div>
+      ) : data.length > 0 ? (
         <>
           <p className="investment-value">
-            ₹{data[data.length - 1].value.toLocaleString()}{" "}
-            <span className="growth-text">(+{range === "1M" ? "1.8" : range === "6M" ? "6.9" : "12.5"}%)</span>
+            ₹{lastValue.toLocaleString()}{" "}
+            <span className="growth-text">(+{growthPercent}%)</span>
           </p>
 
           <ResponsiveContainer width="100%" height={220}>
