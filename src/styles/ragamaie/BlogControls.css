@@ -8,6 +8,7 @@
   font-family: sans-serif;
   flex-wrap: wrap;
   gap: 15px;
+  border-radius: 20px;
 }
 
 .blog-controls .left {
