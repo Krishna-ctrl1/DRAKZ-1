@@ -1,39 +1,223 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 import {
   UserTableContainer,
   StyledTable,
   ActionButton,
   AddUserButtonWrapper,
-} from "../../../../styles/ziko/admin/UserTable.styles"; // Adjusted import path
-import { Title, Button } from "../../../../styles/ziko/admin/SharedStyles"; // Adjusted import path
+} from "../../../../styles/ziko/admin/UserTable.styles";
+import { Title, Button } from "../../../../styles/ziko/admin/SharedStyles";
 
-const usersData = [
-  { id: 1, name: "John Doe", email: "john@example.com", role: "Admin", status: "Active" },
-  { id: 2, name: "Jane Smith", email: "jane@example.com", role: "Editor", status: "Inactive" },
-  { id: 3, name: "Peter Jones", email: "peter@example.com", role: "Viewer", status: "Active" },
-  { id: 4, name: "Alice Brown", email: "alice@example.com", role: "Editor", status: "Active" },
-  { id: 5, name: "Bob White", email: "bob@example.com", role: "Admin", status: "Inactive" },
-];
+// --- 1. DARK THEME MODAL STYLES ---
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7); /* Darker dim for better contrast */
+  backdrop-filter: blur(5px);      /* Modern glassmorphism effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
 
+const ModalContent = styled.div`
+  background: #1e1e2f; /* Matches your dashboard card background */
+  color: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  width: 450px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #2e2e48;
+`;
+
+const ModalHeader = styled.h2`
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 24px;
+  color: #fff;
+  border-bottom: 1px solid #2e2e48;
+  padding-bottom: 15px;
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  
+  label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #a0a0b0; /* Light grey text */
+  }
+
+  input, select {
+    padding: 12px;
+    background: #141423; /* Darker input background */
+    border: 1px solid #2e2e48;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #ffffff;
+    outline: none;
+    transition: 0.3s;
+
+    &:focus {
+      border-color: #764ba2; /* Purple focus color */
+      box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+    }
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  /* Primary (Save) - Purple Gradient to match your screenshot */
+  ${props => props.primary && `
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    color: white;
+  `}
+
+  /* Secondary (Cancel) - Dark Grey */
+  ${props => props.secondary && `
+    background: #2e2e48;
+    color: #a0a0b0;
+    &:hover { background: #3e3e5e; color: white; }
+  `}
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+// --- MAIN COMPONENT ---
 const UserTable = () => {
-  const handleEdit = (userId) => {
-    console.log("Edit user:", userId);
-    // Implement actual edit logic (e.g., open a modal, navigate to edit page)
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null); 
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "Viewer",
+    password: "",
+  });
+
+  const API_URL = "http://localhost:3001/api/users";
+
+  // --- FETCH USERS ---
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      if (response.ok) setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (userId) => {
-    console.log("Delete user:", userId);
-    // Implement actual delete logic (e.g., show confirmation dialog, API call)
+  // --- OPEN MODAL FOR ADD ---
+  const openAddModal = () => {
+    setEditingId(null);
+    setFormData({ name: "", email: "", role: "Viewer", password: "" });
+    setIsModalOpen(true);
   };
 
-  const handleAddUser = () => {
-    console.log("Add new user");
-    // Implement actual add user logic
+  // --- OPEN MODAL FOR EDIT (PRE-FILL DATA) ---
+  const openEditModal = (user) => {
+    setEditingId(user._id);
+    // Pre-fill the form with the clicked user's data
+    setFormData({
+      name: user.name,
+      email: user.email,
+      role: user.role, // Assuming role is lowercase in DB, standardizing display handled in Select
+      password: "", // Always empty for security
+    });
+    setIsModalOpen(true);
   };
+
+  // --- SUBMIT FORM ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      let response;
+      const headers = { "Content-Type": "application/json" };
+      
+      if (editingId) {
+        // Update Logic
+        response = await fetch(`${API_URL}/${editingId}`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // Create Logic
+        response = await fetch(API_URL, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(formData),
+        });
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (editingId) {
+          setUsers(users.map((u) => (u._id === editingId ? data : u)));
+        } else {
+          setUsers([...users, data]);
+        }
+        setIsModalOpen(false);
+      } else {
+        alert("Error: " + data.msg);
+      }
+    } catch (error) {
+      console.error("Error saving user:", error);
+    }
+  };
+
+  // --- DELETE USER ---
+  const handleDelete = async (userId) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const response = await fetch(`${API_URL}/${userId}`, { method: "DELETE" });
+      if (response.ok) {
+        setUsers(users.filter((u) => u._id !== userId));
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+    }
+  };
+
+  if (loading) return <p style={{ padding: "24px", color: "white" }}>Loading users...</p>;
 
   return (
     <UserTableContainer>
       <Title style={{ padding: "24px 24px 0" }}>User Management</Title>
+      
       <StyledTable>
         <thead>
           <tr>
@@ -45,31 +229,95 @@ const UserTable = () => {
           </tr>
         </thead>
         <tbody>
-          {usersData.map((user) => (
-            <tr key={user.id}>
+          {users.map((user) => (
+            <tr key={user._id}>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
               <td>
                 <span className={user.status === "Active" ? "status-active" : "status-inactive"}>
-                  {user.status}
+                  {user.status || "Active"}
                 </span>
               </td>
               <td>
-                <ActionButton onClick={() => handleEdit(user.id)}>
-                  Edit
-                </ActionButton>
-                <ActionButton secondary onClick={() => handleDelete(user.id)}>
-                  Delete
-                </ActionButton>
+                <ActionButton onClick={() => openEditModal(user)}>Edit</ActionButton>
+                <ActionButton secondary onClick={() => handleDelete(user._id)}>Delete</ActionButton>
               </td>
             </tr>
           ))}
         </tbody>
       </StyledTable>
+
       <AddUserButtonWrapper>
-        <Button onClick={handleAddUser}>Add New User</Button>
+        <Button onClick={openAddModal}>Add New User</Button>
       </AddUserButtonWrapper>
+
+      {/* --- DARK THEME MODAL --- */}
+      {isModalOpen && (
+        <ModalOverlay onClick={() => setIsModalOpen(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>{editingId ? "Edit User Details" : "Add New User"}</ModalHeader>
+            <form onSubmit={handleSubmit}>
+              
+              <FormGroup>
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>User Role</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                >
+                  <option value="admin">Admin</option>
+                  <option value="editor">Advisor</option>
+                  <option value="user">User</option>
+                </select>
+              </FormGroup>
+
+              <FormGroup>
+                <label>
+                  Password {editingId ? <span style={{fontSize:'12px', opacity: 0.6}}>(Leave blank to keep current)</span> : "*"}
+                </label>
+                <input
+                  type="password"
+                  placeholder={editingId ? "••••••" : "Enter secure password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required={!editingId} // Only required when creating
+                />
+              </FormGroup>
+
+              <ModalActions>
+                <ModalButton type="button" secondary onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </ModalButton>
+                <ModalButton type="submit" primary>
+                  {editingId ? "Save Changes" : "Create User"}
+                </ModalButton>
+              </ModalActions>
+
+            </form>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
     </UserTableContainer>
   );
 };
