@@ -6,10 +6,18 @@ const PersonSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'advisor', 'user'], default: 'user' },
   
-  // --- NEW FIELDS FOR ADVISOR DASHBOARD ---
+  // --- EXPANDED FIELDS FOR ADVISOR DASHBOARD ---
   portfolioValue: { type: Number, default: 0 },
   riskProfile: { type: String, default: 'Moderate' },
   activeGoals: { type: Number, default: 0 },
+  
+  // New Data Points
+  monthlyIncome: { type: Number, default: 0 },
+  totalDebt: { type: Number, default: 0 },
+  creditScore: { type: Number, default: 750 },
+  occupation: { type: String, default: 'Unspecified' },
+  phone: { type: String, default: 'N/A' },
+  
   lastActive: { type: Date, default: Date.now },
   // ----------------------------------------
 

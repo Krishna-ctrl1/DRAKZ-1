@@ -10,9 +10,9 @@ exports.createBlog = async (req, res) => {
     const blog = new Blog({
       title,
       content,
-      // image, // Uncomment if you are saving image URLs
+      // image,
       author_id,
-      status: "pending", // <--- FORCE PENDING
+      status: "pending",
       likes: [],
       dislikes: [],
       comments: []
@@ -22,6 +22,34 @@ exports.createBlog = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to create blog" });
+  }
+};
+
+// controllers/blog.controller.js
+
+exports.getComments = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 1. Find the blog
+    // 2. Populate the 'user_id' inside the 'comments' array
+    const blog = await Blog.findById(id)
+      .populate({
+        path: "comments.user_id", 
+        model: "Person",           
+        select: "name email"       
+      });
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // 3. Return the comments array
+    res.json(blog.comments);
+
+  } catch (err) {
+    console.error("Error fetching comments:", err);
+    res.status(500).json({ message: "Server error loading comments" });
   }
 };
 
@@ -228,6 +256,24 @@ exports.deleteBlog = async (req, res) => {
     await blog.remove();
     res.json({ message: "Blog deleted" });
   } catch (err) {
+    res.status(500).json({ message: "Failed to delete blog" });
+  }
+};
+
+exports.deleteBlogByAdmin = async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // Using findByIdAndDelete to remove it directly without author checks
+    const blog = await Blog.findByIdAndDelete(id);
+    
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.json({ message: "Blog permanently deleted by Admin" });
+  } catch (err) {
+    console.error("Admin delete error:", err);
     res.status(500).json({ message: "Failed to delete blog" });
   }
 };

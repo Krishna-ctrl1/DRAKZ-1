@@ -99,27 +99,43 @@ const ContentManagementPage = () => {
     }
   };
 
-  // 3. HANDLE DELETE (Optional, for published blogs)
-  const handleDelete = async (blogId) => {
+ const handleDelete = async (blogId) => {
     if(!window.confirm("Are you sure you want to permanently delete this blog?")) return;
 
     try {
       const token = getToken();
-      const res = await fetch(`${API_URL}/${blogId}`, {
+      // We are trying the admin route. If this fails with 404, the route doesn't exist.
+      const url = `${API_URL}/admin/${blogId}`;
+
+      console.log(`[DEBUG] Deleting: ${url}`);
+
+      const res = await fetch(url, {
         method: "DELETE",
         headers: { 
-          "Authorization": `Bearer ${token}` 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       });
 
       if (res.ok) {
-        alert("Blog deleted.");
-        fetchData();
+        alert("✅ Blog deleted successfully.");
+        fetchData(); 
       } else {
-        alert("Failed to delete blog.");
+        // 🔍 DEBUGGING: Read raw text to see if it's an HTML error page
+        const text = await res.text();
+        console.error("❌ Server Error Raw Text:", text);
+        
+        // Try to parse it as JSON, otherwise show the status
+        try {
+          const json = JSON.parse(text);
+          alert(`Failed: ${json.message}`);
+        } catch (e) {
+          alert(`Error ${res.status}: The server returned a non-JSON response. Check the Console for details.`);
+        }
       }
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error("Network Error:", error);
+      alert(error.message);
     }
   };
 
