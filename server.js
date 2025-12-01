@@ -11,8 +11,10 @@ const blogRoutes = require("./src/routes/blog.route.js");
 const privilegeRoutes = require("./src/routes/privilege.route.js");
 const spendingsRoutes = require("./src/routes/spending.routes");
 const advisorRoutes = require("./src/routes/advisor.route.js");
-const userRoutes = require('./src/routes/user.routes');
+const userRoutes = require("./src/routes/user.routes");
 const investmentsRoutes = require("./src/routes/investments.routes.js");
+const accountSummaryRoutes = require("./src/routes/accountSummary.routes.js");
+const settingsRoutes = require("./src/routes/settings.routes.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -25,7 +27,7 @@ app.use(
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  })
+  }),
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
@@ -49,7 +51,7 @@ io.on("connection", (socket) => {
   socket.on("broadcast_video", (data) => {
     console.log("📢 Advisor broadcasting video to ALL users");
     // Emits to every connected socket (all users)
-    io.emit("receive_video", data); 
+    io.emit("receive_video", data);
   });
 
   socket.on("disconnect", () => {
@@ -59,13 +61,16 @@ io.on("connection", (socket) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use('/api', userRoutes);
+app.use("/api", userRoutes);
 app.use("/api/privilege", privilegeRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/credit-score", require("./src/routes/creditScore.routes"));
 app.use("/api/spendings", spendingsRoutes);
+app.use("/api/cards", require("./src/routes/card.routes"));
 app.use("/api/advisor", advisorRoutes);
 app.use("/api", investmentsRoutes);
+app.use("/api/account-summary", accountSummaryRoutes);
+app.use("/api/settings", settingsRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
