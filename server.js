@@ -12,6 +12,7 @@ const privilegeRoutes = require("./src/routes/privilege.route.js");
 const spendingsRoutes = require("./src/routes/spending.routes");
 const advisorRoutes = require("./src/routes/advisor.route.js");
 const userRoutes = require('./src/routes/user.routes');
+const investmentsRoutes = require("./src/routes/investments.routes.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/credit-score", require("./src/routes/creditScore.routes"));
 app.use("/api/spendings", spendingsRoutes);
 app.use("/api/advisor", advisorRoutes);
+app.use("/api", investmentsRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
