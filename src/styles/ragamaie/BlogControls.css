@@ -246,10 +246,12 @@
 .modal button.cancel {
   background: #333;
   color: #aaa;
+  margin-left: 10px;
 }
 .modal button.cancel:hover {
   background: #444;
   color: #ddd;
+  margin-left: 10px;
 }
 
 
