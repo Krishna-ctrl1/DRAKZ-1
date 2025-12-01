@@ -11,7 +11,6 @@ const ContentManagementPage = () => {
   // Helper: Get Token safely
   const getToken = () => localStorage.getItem("token");
 
-  // Helper: Base API URL (Adjust port if needed, e.g., 3001 vs 5000)
   const API_URL = "http://localhost:3001/api/blogs"; 
 
   // 1. FETCH DATA
