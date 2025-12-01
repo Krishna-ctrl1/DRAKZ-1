@@ -1,9 +1,4 @@
 // src/controllers/investments.controller.js
-const mongoose = require("mongoose");
-
-// We don't need User here anymore for now, so you can remove it
-// const User = require("../models/user.model");
-const UserStock = require("../models/userStock.model");
 const Loan = require("../models/loan.model");
 const Transaction = require("../models/transaction.model");
 
@@ -18,52 +13,111 @@ exports.getStockApiKey = (req, res) => {
 
 /*
 |--------------------------------------------------------------------------
-| 2. Get User Stocks  (For Your Stocks + Stock Table)
-|   For now: return ALL stocks in DB (dummy data per project spec)
+| 2. Get User Stocks (Your Stocks + Stock Chart)
+|   For this project we ALWAYS return a fixed list with prices & changes.
 |--------------------------------------------------------------------------
 */
 exports.getUserStocks = async (req, res) => {
   try {
-    // ❌ OLD:
-    // if (!req.session || !req.session.userId) { ... }
+    const stocks = [
+      {
+        name: "Apple",
+        symbol: "AAPL",
+        current_price: 178.61,
+        change_pct: "+1.5%",
+      },
+      {
+        name: "Netflix",
+        symbol: "NFLX",
+        current_price: 416.03,
+        change_pct: "+3.37%",
+      },
+      {
+        name: "Meta",
+        symbol: "META",
+        current_price: 285.5,
+        change_pct: "-0.44%",
+      },
+      {
+        name: "Amazon",
+        symbol: "AMZN",
+        current_price: 316.02,
+        change_pct: "+2.09%",
+      },
+    ];
 
-    // ✅ NEW: just fetch all stocks (or later filter by user)
-    const stocks = await UserStock.find({}).lean();
     return res.json(stocks);
   } catch (err) {
     console.error("Error fetching user stocks:", err);
-    return res.status(500).json({ error: "Database error" });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
 /*
 |--------------------------------------------------------------------------
-| 3. Get User Loans (For Your Loans section)
-|   For now: return ALL loans in DB
+| 3. Get User Loans (Your Loans)
+|   If DB empty -> return dummy loans
 |--------------------------------------------------------------------------
 */
 exports.getUserLoans = async (req, res) => {
   try {
-    // ❌ OLD session check removed
+    let loans = await Loan.find({}).lean();
 
-    const loans = await Loan.find({}).lean();
+    if (!loans || loans.length === 0) {
+      loans = [
+        {
+          type: "Home Loan",
+          principal: 2000000,
+          balance: 1450000,
+          dateTaken: "2022-03-15",
+          status: "ACTIVE",
+          interestRate: 7.5,
+          term: 10,
+          emi: 23740,
+          nextDue: "2024-12-10",
+          totalPaid: 550000,
+        },
+        {
+          type: "Car Loan",
+          principal: 1000000,
+          balance: 300000,
+          dateTaken: "2021-01-10",
+          status: "PAID",
+          interestRate: 8.0,
+          term: 5,
+          emi: 18000,
+          totalPaid: 700000,
+        },
+        {
+          type: "Education Loan",
+          principal: 800000,
+          balance: 250000,
+          dateTaken: "2020-07-05",
+          status: "OVERDUE",
+          interestRate: 6.8,
+          term: 8,
+          emi: 15500,
+          nextDue: "2024-12-05",
+          totalPaid: 550000,
+        },
+      ];
+    }
+
     return res.json(loans);
   } catch (err) {
     console.error("Error fetching user loans:", err);
-    return res.status(500).json({ error: "Database error" });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
 /*
 |--------------------------------------------------------------------------
-| 4. Get Investment History (Graph data for Total Investment)
-|   For now: aggregate ALL investment transactions (no user filter)
-|   Output: [ { name: "Jan", value: 4500 }, ... ]
+| 4. Get Investment History (Total Investment graph)
+|   If DB empty -> return dummy graph data
 |--------------------------------------------------------------------------
 */
 exports.getInvestmentHistory = async (req, res) => {
   try {
-    // ❌ OLD: session + User + people_id
     const range = req.query.range || "6M";
 
     let monthsBack = 6;
@@ -73,12 +127,11 @@ exports.getInvestmentHistory = async (req, res) => {
     const fromDate = new Date();
     fromDate.setMonth(fromDate.getMonth() - monthsBack);
 
-    // Match all "investment" transactions from last N months
-    const data = await Transaction.aggregate([
+    let data = await Transaction.aggregate([
       {
         $match: {
+          category: "investment",
           date: { $gte: fromDate },
-          category: "investment", // adjust if your field value differs
         },
       },
       {
@@ -90,12 +143,59 @@ exports.getInvestmentHistory = async (req, res) => {
           total: { $sum: "$amount" },
         },
       },
-      { $sort: { "_id.year": 1, "_id.month": 1 } },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 },
+      },
     ]);
 
+    if (!data || data.length === 0) {
+      const dummy = {
+        "1M": [
+          { name: "Week 1", value: 4800 },
+          { name: "Week 2", value: 4950 },
+          { name: "Week 3", value: 5100 },
+          { name: "Week 4", value: 5250 },
+        ],
+        "6M": [
+          { name: "Jun", value: 4200 },
+          { name: "Jul", value: 4350 },
+          { name: "Aug", value: 4430 },
+          { name: "Sep", value: 4550 },
+          { name: "Oct", value: 4730 },
+          { name: "Nov", value: 4925 },
+        ],
+        "1Y": [
+          { name: "Jan", value: 3980 },
+          { name: "Feb", value: 4120 },
+          { name: "Mar", value: 4300 },
+          { name: "Apr", value: 4225 },
+          { name: "May", value: 4400 },
+          { name: "Jun", value: 4200 },
+          { name: "Jul", value: 4350 },
+          { name: "Aug", value: 4430 },
+          { name: "Sep", value: 4550 },
+          { name: "Oct", value: 4730 },
+          { name: "Nov", value: 4925 },
+          { name: "Dec", value: 5050 },
+        ],
+      };
+
+      return res.json(dummy[range] || dummy["6M"]);
+    }
+
     const monthNamesShort = [
-      "Jan","Feb","Mar","Apr","May","Jun",
-      "Jul","Aug","Sep","Oct","Nov","Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     const chartData = data.map((item) => {
@@ -109,6 +209,6 @@ exports.getInvestmentHistory = async (req, res) => {
     return res.json(chartData);
   } catch (err) {
     console.error("Error building investment history:", err);
-    return res.status(500).json({ error: "Database error" });
+    return res.status(500).json({ error: "Server error" });
   }
 };
