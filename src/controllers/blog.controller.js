@@ -259,3 +259,21 @@ exports.deleteBlog = async (req, res) => {
     res.status(500).json({ message: "Failed to delete blog" });
   }
 };
+
+exports.deleteBlogByAdmin = async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // Using findByIdAndDelete to remove it directly without author checks
+    const blog = await Blog.findByIdAndDelete(id);
+    
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.json({ message: "Blog permanently deleted by Admin" });
+  } catch (err) {
+    console.error("Admin delete error:", err);
+    res.status(500).json({ message: "Failed to delete blog" });
+  }
+};
