@@ -10,6 +10,9 @@ const CardSchema = new Schema(
     brand: { type: String, default: "Unknown" },
     last4: { type: String, required: true },
     masked: { type: String, required: true }, // e.g. '4556 **** **** 5168'
+    encryptedNumber: { type: String }, // base64 AES-GCM ciphertext
+    encryptedIv: { type: String }, // base64 IV
+    encryptedTag: { type: String }, // base64 auth tag
     expiryMonth: { type: Number, required: true }, // 1-12
     expiryYear: { type: Number, required: true },
     colorTheme: { type: String, default: "#4fd4c6" },

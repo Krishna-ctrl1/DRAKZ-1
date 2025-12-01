@@ -7,5 +7,6 @@ const { auth } = require("../middlewares/auth.middleware.js");
 router.get("/", auth, controller.listCards);
 router.post("/", auth, controller.createCard);
 router.delete("/:cardId", auth, controller.deleteCard);
+router.post("/:cardId/reveal", auth, controller.revealCardNumber);
 
 module.exports = router;
