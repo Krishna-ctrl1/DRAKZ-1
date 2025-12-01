@@ -4,7 +4,7 @@ import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 import "../../styles/gupta/Finbot.css";
 
-// Register Chart.js components
+// Register Chart.js components (Still needed for Planning/Recommendations tabs)
 Chart.register(...registerables);
 
 const FinBot = () => {
@@ -47,7 +47,6 @@ const FinBot = () => {
   const [isBotTyping, setIsBotTyping] = useState(false);
 
   // --- Refs ---
-  const stockChartRef = useRef(null);
   const financialChartRef = useRef(null);
   const incomeExpenseBarChartRef = useRef(null);
   const variableCostsBarChartRef = useRef(null);
@@ -133,7 +132,7 @@ const FinBot = () => {
     });
   };
 
-  // --- FINNHUB API LOGIC ---
+  // --- FINNHUB API LOGIC (Optimized: No Candles) ---
   const handleGetStockDetails = async () => {
     if (!stockSymbol) {
       setStockError("Please enter a stock symbol.");
@@ -143,33 +142,24 @@ const FinBot = () => {
     setStockResults(null);
     setIsStockLoading(true);
 
-    // Using the Finnhub key you provided
     const apiKey = "d4mts41r01qsn6g8d4p0d4mts41r01qsn6g8d4pg"; 
 
     try {
       console.log("Fetching Finnhub data for:", stockSymbol);
 
-      // 1. Fetch Basic Data
-      const [quoteRes, profileRes, peersRes] = await Promise.all([
+      // Fetch Quote, Profile, Peers, and Metrics
+      const [quoteRes, profileRes, peersRes, metricRes] = await Promise.all([
         fetch(`https://finnhub.io/api/v1/quote?symbol=${stockSymbol}&token=${apiKey}`),
         fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${stockSymbol}&token=${apiKey}`),
-        fetch(`https://finnhub.io/api/v1/stock/peers?symbol=${stockSymbol}&token=${apiKey}`)
+        fetch(`https://finnhub.io/api/v1/stock/peers?symbol=${stockSymbol}&token=${apiKey}`),
+        fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${stockSymbol}&metric=all&token=${apiKey}`)
       ]);
 
       const quote = await quoteRes.json();
       const profile = await profileRes.json();
       const peers = await peersRes.json();
+      const metrics = await metricRes.json();
 
-      // 2. Fetch Historical Candles (Past 1 Year)
-      const toDate = Math.floor(Date.now() / 1000);
-      const fromDate = toDate - (365 * 24 * 60 * 60); // 365 Days of past data
-      
-      const candleRes = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${stockSymbol}&resolution=D&from=${fromDate}&to=${toDate}&token=${apiKey}`);
-      const candles = await candleRes.json();
-
-      console.log("Candle Data:", candles); 
-
-      // Check if critical data is missing
       if (!quote.c && quote.c !== 0) {
         throw new Error("Symbol not found or API limit reached.");
       }
@@ -193,15 +183,7 @@ const FinBot = () => {
           changesPercentage: quote.dp,
           pe: "N/A"
         },
-        timeSeries: {
-          // Robust mapping: Check if status is 'ok' AND 't' (time) array exists
-          historical: (candles.s === "ok" && candles.t) 
-            ? candles.t.map((ts, i) => ({
-                date: new Date(ts * 1000).toISOString().split('T')[0],
-                close: candles.c[i]
-              })) 
-            : [] 
-        },
+        stats: metrics.metric || {},
         peers: peers || []
       });
 
@@ -253,66 +235,9 @@ const FinBot = () => {
     }
   };
 
-  // --- CHART EFFECTS ---
+  // --- CHART EFFECTS (Only for Planning & Recommendations) ---
 
-  // 1. Stock Chart (Historical)
-  useEffect(() => {
-    // Only proceed if we have results and the ref exists
-    if (!stockResults || !stockChartRef.current) return;
-
-    const canvas = stockChartRef.current;
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) existingChart.destroy();
-
-    const history = stockResults.timeSeries?.historical || [];
-
-    // If no history data, we stop here (the UI handles the "No Data" message)
-    if (history.length === 0) return;
-
-    new Chart(canvas, {
-      type: "line",
-      data: {
-        labels: history.map((d) => d.date),
-        datasets: [{
-          label: `${stockResults.symbol} Price History (1 Year)`,
-          data: history.map((d) => d.close),
-          borderColor: "#5d5fef",
-          backgroundColor: "rgba(93, 95, 239, 0.1)",
-          fill: true,
-          tension: 0.2, // Slightly smoother lines
-          pointRadius: 0, // Hide points for cleaner look on long history
-          pointHoverRadius: 5,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false,
-        },
-        plugins: { 
-          legend: { labels: { color: "#e0e0e0" } },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        scales: {
-          x: { 
-            ticks: { color: "#8a8a9e", maxTicksLimit: 12 }, // Limit x-axis labels
-            grid: { color: "rgba(255,255,255,0.05)" } 
-          },
-          y: { 
-            ticks: { color: "#8a8a9e" }, 
-            grid: { color: "rgba(255,255,255,0.05)" } 
-          },
-        },
-      },
-    });
-  }, [stockResults]);
-
-  // 2. Financial Breakdown (Doughnut)
+  // 1. Financial Breakdown (Doughnut)
   useEffect(() => {
     if (!summary || !financialChartRef.current) return;
     const canvas = financialChartRef.current;
@@ -340,7 +265,7 @@ const FinBot = () => {
     });
   }, [summary]);
 
-  // 3. Income vs Expense (Bar)
+  // 2. Income vs Expense (Bar)
   useEffect(() => {
     if (!summary || !incomeExpenseBarChartRef.current) return;
     const canvas = incomeExpenseBarChartRef.current;
@@ -369,7 +294,7 @@ const FinBot = () => {
     });
   }, [summary]);
 
-  // 4. Variable Costs (Bar)
+  // 3. Variable Costs (Bar)
   useEffect(() => {
     if (!summary || !hasVariableCosts || !variableCostsBarChartRef.current) return;
     const canvas = variableCostsBarChartRef.current;
@@ -397,7 +322,7 @@ const FinBot = () => {
     });
   }, [summary, variableCosts, hasVariableCosts]);
 
-  // 5. Recommendations Chart
+  // 4. Recommendations Chart
   useEffect(() => {
     if (activeSection !== "investment" || !summary || !recommendationChartRef.current) return;
     const canvas = recommendationChartRef.current;
@@ -589,7 +514,7 @@ const FinBot = () => {
                 </div>
               )}
 
-              {/* STOCK ANALYSIS SECTION */}
+              {/* STOCK ANALYSIS SECTION (Details Only Mode) */}
               {activeSection === "stock-analysis" && (
                 <div className="section-content active">
                   <h2>Market Analysis</h2>
@@ -604,70 +529,100 @@ const FinBot = () => {
                   
                   {stockResults && (
                     <div className="stock-analysis-results">
-                      {/* Top Info Card */}
+                      {/* Company Header */}
                       <div className="company-info" style={{marginBottom: '20px', padding: '20px', border: '1px solid var(--finbot-border)', borderRadius: '12px'}}>
-                        <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px'}}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px'}}>
                            {stockResults.overview.image && (
-                             <img src={stockResults.overview.image} alt="logo" style={{width: '50px', borderRadius: '50%'}} />
+                             <img src={stockResults.overview.image} alt="logo" style={{width: '60px', borderRadius: '50%'}} />
                            )}
                            <div>
-                             <h3 style={{margin: 0}}>{stockResults.overview.companyName} ({stockResults.symbol})</h3>
-                             <p style={{margin: '5px 0 0 0', color: '#8a8a9e'}}>{stockResults.overview.exchange} | {stockResults.overview.currency}</p>
+                             <h3 style={{margin: 0, fontSize: '1.5rem'}}>{stockResults.overview.companyName}</h3>
+                             <div style={{display: 'flex', gap: '10px', alignItems: 'center', marginTop: '5px'}}>
+                               <span style={{background: '#5d5fef', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem'}}>{stockResults.symbol}</span>
+                               <span style={{color: '#8a8a9e'}}>{stockResults.overview.exchange}</span>
+                             </div>
                            </div>
                         </div>
-                        <p>{stockResults.overview.description}</p>
-                        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px'}}>
-                           <div><strong>Sector:</strong> {stockResults.overview.sector}</div>
-                           <div><strong>Industry:</strong> {stockResults.overview.industry}</div>
-                           <div><strong>Market Cap:</strong> {formatLargeNumber(stockResults.overview.mktCap)}</div>
-                        </div>
                       </div>
 
-                      {/* Chart Area with Empty Data Check */}
-                      <div className="stock-graph" style={{ position: 'relative', width: '100%', height: '350px' }}>
-                        {(!stockResults.timeSeries?.historical || stockResults.timeSeries.historical.length === 0) ? (
-                           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#8a8a9e', flexDirection: 'column'}}>
-                             <p>No historical data available for this symbol.</p>
-                             <small style={{opacity: 0.7}}>(API might be limited or market closed)</small>
+                      {/* MAIN DETAILS GRID (Covers the Page) */}
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                        gap: '20px', 
+                        marginTop: '20px' 
+                      }}>
+                         {/* Card 1: Price */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">Current Price</div>
+                           <div className="metric-value" style={{fontSize: '2rem'}}>${stockResults.price.price}</div>
+                           <div style={{
+                             color: stockResults.price.changesPercentage >= 0 ? '#2ecc71' : '#e74c3c', 
+                             marginTop: '5px', fontWeight: 'bold'
+                           }}>
+                             {stockResults.price.changesPercentage > 0 ? '▲' : '▼'} {stockResults.price.changesPercentage.toFixed(2)}%
                            </div>
-                        ) : (
-                          <canvas ref={stockChartRef}></canvas>
-                        )}
+                         </div>
+
+                         {/* Card 2: Market Cap */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">Market Cap</div>
+                           <div className="metric-value">{formatLargeNumber(stockResults.overview.mktCap)}</div>
+                           <div style={{fontSize: '0.9rem', color: '#8a8a9e', marginTop: '5px'}}>Currency: {stockResults.overview.currency}</div>
+                         </div>
+
+                         {/* Card 3: 52W High */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">52-Week High</div>
+                           <div className="metric-value" style={{color: '#2ecc71'}}>{stockResults.stats['52WeekHigh'] || 'N/A'}</div>
+                         </div>
+
+                         {/* Card 4: 52W Low */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">52-Week Low</div>
+                           <div className="metric-value" style={{color: '#e74c3c'}}>{stockResults.stats['52WeekLow'] || 'N/A'}</div>
+                         </div>
+
+                         {/* Card 5: Valuation/Beta */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">Beta (Volatility)</div>
+                           <div className="metric-value">{stockResults.stats['beta'] || 'N/A'}</div>
+                           <div style={{fontSize: '0.9rem', color: '#8a8a9e', marginTop: '5px'}}>
+                             {stockResults.stats['beta'] > 1 ? 'High Volatility' : 'Low Volatility'}
+                           </div>
+                         </div>
+
+                         {/* Card 6: Volume */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px'}}>
+                           <div className="metric-label">10-Day Avg Volume</div>
+                           <div className="metric-value">{formatLargeNumber(stockResults.stats['10DayAverageTradingVolume'])}</div>
+                         </div>
+
+                         {/* Card 7: Sector/Ind */}
+                         <div className="metric-card" style={{background: 'rgba(255,255,255,0.03)', padding: '25px', gridColumn: 'span 2'}}>
+                           <div className="metric-label">Industry Profile</div>
+                           <div style={{marginTop: '10px', fontSize: '1.1rem', color: '#e0e0e0'}}>
+                             <strong>Sector:</strong> {stockResults.overview.sector}<br/>
+                             <strong>Industry:</strong> {stockResults.overview.industry}
+                           </div>
+                         </div>
                       </div>
 
-                      {/* Key Metrics */}
-                      <div className="key-metrics">
-                        <div className="metric-card">
-                          <div className="metric-label">Price</div>
-                          <div className="metric-value">${stockResults.price.price}</div>
-                        </div>
-                        <div className="metric-card">
-                          <div className="metric-label">Change</div>
-                          <div className={`metric-value ${stockResults.price.changesPercentage >= 0 ? "positive" : "negative"}`}>
-                            {stockResults.price.changesPercentage.toFixed(2)}%
-                          </div>
-                        </div>
-                        <div className="metric-card">
-                          <div className="metric-label">Market Cap</div>
-                          <div className="metric-value">
-                            {formatLargeNumber(stockResults.overview.mktCap)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Peers */}
+                      {/* Peers Section */}
                       {stockResults.peers && stockResults.peers.length > 0 && (
-                         <div className="peers-section" style={{marginTop: '20px'}}>
-                           <h4>Similar Companies (Peers)</h4>
-                           <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px'}}>
+                         <div className="peers-section" style={{marginTop: '30px'}}>
+                           <h4 style={{marginBottom: '15px'}}>Competitors</h4>
+                           <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                               {stockResults.peers.map((peer, idx) => (
                                 <span key={idx} style={{
-                                  background: 'rgba(255,255,255,0.05)', 
-                                  padding: '8px 12px', 
-                                  borderRadius: '20px',
-                                  fontSize: '0.9rem',
+                                  background: 'rgba(93, 95, 239, 0.1)', 
+                                  color: '#5d5fef',
+                                  padding: '10px 18px', 
+                                  borderRadius: '25px',
+                                  fontSize: '1rem',
                                   cursor: 'pointer',
-                                  border: '1px solid var(--finbot-border)'
+                                  fontWeight: 'bold',
+                                  border: '1px solid rgba(93, 95, 239, 0.3)'
                                 }} onClick={() => setStockSymbol(peer)}>
                                   {peer}
                                 </span>
