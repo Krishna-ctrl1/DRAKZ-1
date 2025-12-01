@@ -8,15 +8,19 @@ const ContentManagementPage = () => {
   const [publishedBlogs, setPublishedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper function to get token
+  // Helper: Get Token safely
   const getToken = () => localStorage.getItem("token");
 
-  // Fetch blogs
+  // Helper: Base API URL (Adjust port if needed, e.g., 3001 vs 5000)
+  const API_URL = "http://localhost:3001/api/blogs"; 
+
+  // 1. FETCH DATA
   const fetchData = async () => {
     try {
       const token = getToken();
       if (!token) {
         console.warn("No token found! Admin panel requires login.");
+        setLoading(false);
         return;
       }
 
@@ -25,38 +29,50 @@ const ContentManagementPage = () => {
         "Content-Type": "application/json"
       };
 
-      const API_URL = "http://localhost:3001/api/blogs"; 
+      console.log("🔄 Fetching admin blog lists...");
 
-      console.log("Fetching pending blogs...");
-      
-      // 1. Fetch Pending
+      // Fetch Pending
       const pendingRes = await fetch(`${API_URL}/admin/list?status=pending`, { headers });
-      if (!pendingRes.ok) throw new Error(`Pending fetch failed: ${pendingRes.status}`);
-      const pendingData = await pendingRes.json();
-      setPendingBlogs(Array.isArray(pendingData) ? pendingData : []);
+      if (pendingRes.ok) {
+        const pendingData = await pendingRes.json();
+        setPendingBlogs(Array.isArray(pendingData) ? pendingData : []);
+      } else {
+        console.error("Failed to fetch pending blogs:", pendingRes.status);
+      }
 
-      // 2. Fetch Approved
+      // Fetch Approved
       const approvedRes = await fetch(`${API_URL}/admin/list?status=approved`, { headers });
-      if (!approvedRes.ok) throw new Error(`Approved fetch failed: ${approvedRes.status}`);
-      const approvedData = await approvedRes.json();
-      setPublishedBlogs(Array.isArray(approvedData) ? approvedData : []);
+      if (approvedRes.ok) {
+        const approvedData = await approvedRes.json();
+        setPublishedBlogs(Array.isArray(approvedData) ? approvedData : []);
+      } else {
+        console.error("Failed to fetch published blogs:", approvedRes.status);
+      }
 
       setLoading(false);
     } catch (error) {
-      console.error("Error loading admin data:", error);
+      console.error("❌ Network Error loading admin data:", error);
       setLoading(false);
     }
   };
 
+  // Initial Load
   useEffect(() => {
     fetchData();
   }, []);
 
-  // Handle Approve/Reject
+  // 2. HANDLE APPROVE / REJECT
   const handleStatusChange = async (blogId, newStatus) => {
+    if (!window.confirm(`Are you sure you want to ${newStatus} this blog?`)) return;
+
     try {
       const token = getToken();
-      const API_URL = "http://localhost:3001/api/blogs";
+      if (!token) {
+        alert("Authentication Error: You are not logged in.");
+        return;
+      }
+
+      console.log(`Sending PATCH request to: ${API_URL}/admin/${blogId}/status`);
 
       const res = await fetch(`${API_URL}/admin/${blogId}/status`, {
         method: "PATCH",
@@ -67,14 +83,43 @@ const ContentManagementPage = () => {
         body: JSON.stringify({ status: newStatus })
       });
 
+      // Handle Response
       if (res.ok) {
-        // Refresh the lists instantly
-        fetchData();
+        alert(`✅ Success! Blog has been ${newStatus}.`);
+        fetchData(); // Refresh the tables instantly
       } else {
-        alert("Failed to update status");
+        // Try to get the error message from the server
+        const errorData = await res.json();
+        console.error("Server Error:", errorData);
+        alert(`❌ Failed: ${res.status} - ${errorData.message || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Network Error:", error);
+      alert(`❌ Network Error: Is the backend running? ${error.message}`);
+    }
+  };
+
+  // 3. HANDLE DELETE (Optional, for published blogs)
+  const handleDelete = async (blogId) => {
+    if(!window.confirm("Are you sure you want to permanently delete this blog?")) return;
+
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_URL}/${blogId}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${token}` 
+        }
+      });
+
+      if (res.ok) {
+        alert("Blog deleted.");
+        fetchData();
+      } else {
+        alert("Failed to delete blog.");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
     }
   };
 
@@ -84,7 +129,7 @@ const ContentManagementPage = () => {
     <>
       <Title>Content Management (Blogs)</Title>
 
-      {/* PENDING SECTION */}
+      {/* PENDING APPROVAL SECTION */}
       <Section>
         <UserTableContainer>
           <Subtitle style={{ padding: '24px 24px 0' }}>Pending Approval</Subtitle>
@@ -93,22 +138,27 @@ const ContentManagementPage = () => {
               <tr>
                 <th>Title</th>
                 <th>Author</th>
-                <th>Submitted</th>
+                <th>Submitted Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {pendingBlogs.length === 0 ? (
-                <tr><td colSpan="4" style={{textAlign:"center"}}>No pending blogs found</td></tr>
+                <tr><td colSpan="4" style={{textAlign:"center", color: "#666"}}>No pending blogs found</td></tr>
               ) : (
                 pendingBlogs.map((blog) => (
                   <tr key={blog._id}>
                     <td>{blog.title}</td>
-                    <td>{blog.author_id?.email || "User"}</td>
+                    {/* Safe check for author existence */}
+                    <td>{blog.author_id?.email || blog.author_id?.name || "Unknown"}</td>
                     <td>{new Date(blog.createdAt).toLocaleDateString()}</td>
                     <td>
-                      <ActionButton onClick={() => handleStatusChange(blog._id, 'approved')}>Approve</ActionButton>
-                      <ActionButton secondary onClick={() => handleStatusChange(blog._id, 'rejected')}>Reject</ActionButton>
+                      <ActionButton onClick={() => handleStatusChange(blog._id, 'approved')}>
+                        Approve
+                      </ActionButton>
+                      <ActionButton secondary onClick={() => handleStatusChange(blog._id, 'rejected')}>
+                        Reject
+                      </ActionButton>
                     </td>
                   </tr>
                 ))
@@ -127,15 +177,25 @@ const ContentManagementPage = () => {
               <tr>
                 <th>Title</th>
                 <th>Author</th>
-                <th>Published</th>
+                <th>Published Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {publishedBlogs.map((blog) => (
                 <tr key={blog._id}>
                   <td>{blog.title}</td>
-                  <td>{blog.author_id?.email || "User"}</td>
-                  <td>{new Date(blog.createdAt).toLocaleDateString()}</td>
+                  <td>{blog.author_id?.email || blog.author_id?.name || "Unknown"}</td>
+                  <td>
+                    {blog.published_at 
+                      ? new Date(blog.published_at).toLocaleDateString() 
+                      : new Date(blog.updatedAt).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <ActionButton secondary onClick={() => handleDelete(blog._id)}>
+                      Remove
+                    </ActionButton>
+                  </td>
                 </tr>
               ))}
             </tbody>
