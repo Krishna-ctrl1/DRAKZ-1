@@ -104,7 +104,7 @@ const handleSubmit = async (e) => {
           </div>
 
           <div className="login-visual">
-            <img src="/card.png" alt="Card" className="login-card-img" />
+            <img src="/login-card.png" className="login-card-img" alt="login card" />
             <div className="features-list">
               <div className="feature-item"><span>Check</span> No Hidden Fees</div>
               <div className="feature-item"><span>Check</span> Instant Approval</div>

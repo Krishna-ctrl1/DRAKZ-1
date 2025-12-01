@@ -67,7 +67,7 @@ const StickyScrollSections = () => {
             <div className="credit-card-overlay">
               <img 
                 src="/card.png" 
-                alt="The Only Card Credit Card" 
+                alt="sticky card overlay" 
                 className="card-overlay-img"
               />
             </div>
