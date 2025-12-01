@@ -19,7 +19,6 @@ const AdvisorDashboard = () => {
   const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
 
   return (
-    // Unique Wrapper Class prevents breaking other pages
     <div className="advisor-wrapper">
       
       {/* Header */}
@@ -83,6 +82,7 @@ const AdvisorDashboard = () => {
                   <div className="profile-text">
                     <h1>{selectedClient.name}</h1>
                     <span className="role-tag">{selectedClient.role?.toUpperCase()}</span>
+                    <span style={{marginLeft:'10px', fontSize:'0.9rem', color:'#aaa'}}>Last Active: {new Date(selectedClient.lastActive).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <Link to="/advisor/video" className="start-session-btn">
@@ -90,37 +90,64 @@ const AdvisorDashboard = () => {
                 </Link>
               </div>
 
-              {/* Stats Row */}
+              {/* Key Stats Row */}
               <div className="stats-row">
                 <div className="stat-box">
                   <span>Total Portfolio</span>
                   <strong style={{color: '#10b981'}}>{formatCurrency(selectedClient.portfolioValue)}</strong>
                 </div>
                 <div className="stat-box">
-                  <span>Risk Profile</span>
-                  <strong style={{color: '#f59e0b'}}>{selectedClient.riskProfile || 'Moderate'}</strong>
+                  <span>Monthly Income</span>
+                  <strong style={{color: '#3b82f6'}}>{formatCurrency(selectedClient.monthlyIncome)}</strong>
                 </div>
                 <div className="stat-box">
-                  <span>Active Goals</span>
-                  <strong>{selectedClient.activeGoals || 0}</strong>
+                  <span>Total Debt</span>
+                  <strong style={{color: '#ef4444'}}>{formatCurrency(selectedClient.totalDebt)}</strong>
                 </div>
               </div>
 
-              {/* Info Panel */}
-              <div className="info-panel">
-                <h4>Account Information</h4>
-                <div className="data-row">
-                  <span className="label">Email</span>
-                  <span className="value">{selectedClient.email}</span>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
+                
+                {/* Financial Health Panel */}
+                <div className="info-panel">
+                  <h4>Financial Health</h4>
+                  <div className="data-row">
+                    <span className="label">Credit Score</span>
+                    <span className="value" style={{fontWeight:'bold', color: selectedClient.creditScore > 700 ? '#10b981' : '#f59e0b'}}>
+                      {selectedClient.creditScore || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Risk Profile</span>
+                    <span className="value" style={{color: '#f59e0b'}}>{selectedClient.riskProfile || 'Moderate'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Active Goals</span>
+                    <span className="value">{selectedClient.activeGoals || 0}</span>
+                  </div>
                 </div>
-                <div className="data-row">
-                  <span className="label">Joined</span>
-                  <span className="value">{new Date(selectedClient.created_at).toLocaleDateString()}</span>
+
+                {/* Personal Details Panel */}
+                <div className="info-panel">
+                  <h4>Personal Details</h4>
+                  <div className="data-row">
+                    <span className="label">Occupation</span>
+                    <span className="value">{selectedClient.occupation || 'Unspecified'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Email</span>
+                    <span className="value">{selectedClient.email}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Phone</span>
+                    <span className="value">{selectedClient.phone || 'N/A'}</span>
+                  </div>
+                  <div className="data-row">
+                    <span className="label">Client ID</span>
+                    <span className="value" style={{fontSize:'0.8rem', color:'#666'}}>{selectedClient._id}</span>
+                  </div>
                 </div>
-                <div className="data-row">
-                  <span className="label">Client ID</span>
-                  <span className="value" style={{color: '#666'}}>{selectedClient._id}</span>
-                </div>
+
               </div>
             </div>
           )}
