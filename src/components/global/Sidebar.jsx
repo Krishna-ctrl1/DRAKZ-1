@@ -1,10 +1,38 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "../../styles/global/Sidebar.css";
 import { Link, useLocation } from "react-router-dom";
 
-export default function Sidebar({ collapsed, setCollapsed }) {
+// MODIFIED: Accepts state and setter as props
+// Using the same props as your original file
+export default function Sidebar({ collapsed = true, setCollapsed }) {
+  // const [active, setActive] = useState("dashboard"); // Kept local active state
   const location = useLocation();
+  const hoverTimerRef = useRef(null);
+  const wasCollapsedRef = useRef(collapsed);
+  
+  // Get the current path from the location object
   const currentPath = location.pathname;
+  
+  useEffect(() => {
+    wasCollapsedRef.current = collapsed;
+  }, [collapsed]);
+  
+  const handleMouseEnter = () => {
+    if (collapsed) {
+      hoverTimerRef.current = setTimeout(() => {
+        setCollapsed(false);
+      }, 0);
+    }
+  };
+  
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    // Always collapse when mouse leaves
+    setCollapsed(true);
+  };
   
   const isAdvisor = currentPath.includes("advisor");
   const sessionLink = isAdvisor ? "/advisor/video" : "/user/video";
@@ -24,19 +52,47 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   const settingsItem = { id: "settings", label: "Settings", icon: "fa-solid fa-gear", path: "/user/settings" };
 
   return (
-    <div className={collapsed ? "sidebar collapsed" : "sidebar"}>
+    <div 
+      className={collapsed ? "sidebar collapsed" : "sidebar"}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Collapse/Expand button at top right */}
+      <button
+        className="collapse-btn"
+        onClick={() => setCollapsed(!collapsed)}
+        aria-label="Toggle Sidebar"
+      >
+        <img
+          src={collapsed ? "/sidebaropen.png" : "/sidebarclose.png"}
+          alt="toggle sidebar"
+          className="toggle-icon"
+        />
+      </button>
+
+      {/* This div wraps the top logo and main menu */}
       <div className="sidebar-top">
         <ul className="sidebar-list">
           {topMenuItems.map((item) => (
-            <li key={item.id} className={currentPath === item.path ? "active" : ""}>
-              <Link to={item.path} className="sidebar-link" title={item.label}>
+            // --- FIX IS HERE ---
+            // LI is the direct child of UL
+            <li
+              key={item.id}
+              className={currentPath === item.path ? "active" : ""}
+              aria-label={item.label}
+              data-tooltip={item.label}
+            >
+              {/* LINK is inside the LI */}
+              <Link to={item.path} className="sidebar-link">
                 <i className={item.icon}></i>
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             </li>
+            // --- END OF FIX ---
           ))}
         </ul>
       </div>
+
       <div className="sidebar-bottom">
         <ul className="sidebar-list">
           <li className={currentPath === settingsItem.path ? "active" : ""}>
@@ -46,9 +102,6 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             </Link>
           </li>
         </ul>
-        <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)}>
-          <img src={collapsed ? "/sidebaropen.png" : "/sidebarclose.png"} alt="toggle" className="toggle-icon" />
-        </button>
       </div>
     </div>
   );
