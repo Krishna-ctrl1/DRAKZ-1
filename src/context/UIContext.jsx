@@ -8,7 +8,7 @@ export function UIProvider({ children }) {
 
   const value = useMemo(
     () => ({ collapsed, setCollapsed, theme, setTheme }),
-    [collapsed, theme]
+    [collapsed, theme],
   );
 
   return <UIContext.Provider value={value}>{children}</UIContext.Provider>;

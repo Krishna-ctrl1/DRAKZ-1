@@ -1,6 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit';
-import advisorReducer from './slices/advisorSlice';
-import authReducer from './slices/authSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import advisorReducer from "./slices/advisorSlice";
+import authReducer from "./slices/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,19 +15,19 @@ store.subscribe(() => {
     const state = store.getState();
     const { token, role, user } = state.auth || {};
     if (token) {
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
     } else {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     }
     if (role) {
-      localStorage.setItem('role', role);
+      localStorage.setItem("role", role);
     } else {
-      localStorage.removeItem('role');
+      localStorage.removeItem("role");
     }
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
     }
   } catch {}
 });

@@ -1,6 +1,11 @@
 // src/components/deepthi/CardsCarousel.jsx
 import React, { useEffect, useState } from "react";
-import { getCards, addCard, deleteCard, revealCardNumber } from "./api/getCards";
+import {
+  getCards,
+  addCard,
+  deleteCard,
+  revealCardNumber,
+} from "./api/getCards";
 import "../../styles/deepthi/cardsCarousel.css";
 import { toCSV, downloadCSV } from "../../utils/csv.util";
 
@@ -393,7 +398,14 @@ export default function CardsCarousel() {
                           </div>
 
                           {/* Card number + Reveal */}
-                          <div className="card-number" style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <div
+                            className="card-number"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
                             <span>{card.masked}</span>
                             <button
                               className="reveal-btn"
@@ -405,13 +417,13 @@ export default function CardsCarousel() {
                               title="Reveal full number"
                               aria-label="Reveal full number"
                               style={{
-                                padding:'4px 8px',
-                                fontSize:12,
-                                border:'1px solid rgba(255,255,255,0.5)',
-                                background:'rgba(0,0,0,0.15)',
-                                color:'#fff',
-                                borderRadius:6,
-                                cursor:'pointer'
+                                padding: "4px 8px",
+                                fontSize: 12,
+                                border: "1px solid rgba(255,255,255,0.5)",
+                                background: "rgba(0,0,0,0.15)",
+                                color: "#fff",
+                                borderRadius: 6,
+                                cursor: "pointer",
                               }}
                             >
                               Reveal
@@ -702,10 +714,19 @@ export default function CardsCarousel() {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h2>Reveal Card Number</h2>
-                <button className="modal-close-btn" onClick={() => setRevealFor(null)} aria-label="Close modal">✕</button>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setRevealFor(null)}
+                  aria-label="Close modal"
+                >
+                  ✕
+                </button>
               </div>
               <div className="reveal-body">
-                <p>For security, please re-enter your account password to view the full card number.</p>
+                <p>
+                  For security, please re-enter your account password to view
+                  the full card number.
+                </p>
                 <label htmlFor="revealPassword">Password</label>
                 <input
                   id="revealPassword"
@@ -714,28 +735,49 @@ export default function CardsCarousel() {
                   onChange={(e) => setRevealPassword(e.target.value)}
                   placeholder="Enter your password"
                 />
-                <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
                   <button
                     className="btn-submit"
                     onClick={async () => {
                       try {
-                        const res = await revealCardNumber(revealFor._id, revealPassword);
+                        const res = await revealCardNumber(
+                          revealFor._id,
+                          revealPassword,
+                        );
                         setRevealedNumber(res.number);
                       } catch (err) {
-                        alert(err.message || 'Failed to reveal number');
+                        alert(err.message || "Failed to reveal number");
                       }
                     }}
                   >
                     Reveal
                   </button>
-                  <button className="btn-cancel" onClick={() => setRevealFor(null)}>Cancel</button>
+                  <button
+                    className="btn-cancel"
+                    onClick={() => setRevealFor(null)}
+                  >
+                    Cancel
+                  </button>
                 </div>
                 {revealedNumber && (
                   <div className="revealed-number" style={{ marginTop: 16 }}>
-                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>Full Number</div>
-                    <div style={{ fontSize: 18, letterSpacing: 2 }}>{revealedNumber}</div>
-                    <small style={{ display:'block', marginTop: 8, color:'#fca5a5' }}>
-                      Do not share this number. It will disappear when you close this dialog.
+                    <div
+                      style={{ fontSize: 14, color: "rgba(255,255,255,0.7)" }}
+                    >
+                      Full Number
+                    </div>
+                    <div style={{ fontSize: 18, letterSpacing: 2 }}>
+                      {revealedNumber}
+                    </div>
+                    <small
+                      style={{
+                        display: "block",
+                        marginTop: 8,
+                        color: "#fca5a5",
+                      }}
+                    >
+                      Do not share this number. It will disappear when you close
+                      this dialog.
                     </small>
                   </div>
                 )}

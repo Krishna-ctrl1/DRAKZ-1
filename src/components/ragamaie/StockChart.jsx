@@ -57,7 +57,12 @@ export default function StockChart() {
               current_price: s.current_price,
               change_pct: s.change_pct,
             }));
-            const csv = toCSV(rows, ["index","symbol","current_price","change_pct"]);
+            const csv = toCSV(rows, [
+              "index",
+              "symbol",
+              "current_price",
+              "change_pct",
+            ]);
             downloadCSV("stock-table.csv", csv);
           }}
         >
@@ -91,9 +96,7 @@ export default function StockChart() {
                 <td>{index + 1}</td>
                 <td>{s.symbol}</td>
                 <td>{formatPrice(s.current_price)}</td>
-                <td className={getStatusClass(s.change_pct)}>
-                  {s.change_pct}
-                </td>
+                <td className={getStatusClass(s.change_pct)}>{s.change_pct}</td>
               </tr>
             ))}
           </tbody>
