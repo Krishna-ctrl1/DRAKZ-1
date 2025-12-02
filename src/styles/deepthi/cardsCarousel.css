@@ -127,7 +127,7 @@
 /* Card Header */
 .card-header {
   display: flex;
-  justify-content: flex-end; /* Brand is now typically bottom right or top right, adjusting to right */
+  justify-content: flex-end; 
   align-items: center;
   margin-bottom: 0;
   position: absolute;
@@ -212,7 +212,7 @@
 }
 
 .card-type-label {
-  display: none; /* Hide generic type text to clean up UI */
+  display: none; 
 }
 
 /* Card Gradient Overlay */
@@ -232,7 +232,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.1); /* Glassy */
+  background: rgba(255, 255, 255, 0.1); 
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
@@ -288,10 +288,10 @@
 /* Add Card Button - REDESIGNED */
 .add-card-btn {
   display: flex;
-  width: auto; /* Not full width */
-  margin: 0 auto; /* Center it */
+  width: auto; 
+  margin: 0 auto; 
   padding: 10px 24px;
-  background: #3b82f6; /* Dashboard Blue */
+  background: #3b82f6; 
   border: none;
   color: #fff;
   font-size: 14px;
@@ -322,7 +322,6 @@
   justify-content: center;
   z-index: 2000;
   backdrop-filter: blur(8px);
-  /* Animation */
   animation: overlayFadeIn 0.3s ease-out;
 }
 
@@ -425,7 +424,6 @@
   background: #1a1a2e;
 }
 
-/* Buttons */
 .form-actions, 
 .reveal-body div[style*="display: flex"] {
   display: flex;
@@ -468,7 +466,6 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Revealed Number Display */
 .revealed-number {
   background: linear-gradient(145deg, #1a1a2e, #151521);
   border: 1px dashed rgba(74, 222, 128, 0.3);
