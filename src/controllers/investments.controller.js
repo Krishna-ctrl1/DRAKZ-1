@@ -3,21 +3,10 @@ const axios = require("axios");
 const Loan = require("../models/loan.model");
 const Transaction = require("../models/transaction.model");
 
-/*
-|--------------------------------------------------------------------------
-| 1. Get Stock API Key (keep simple so routes don't break)
-|--------------------------------------------------------------------------
-*/
 exports.getStockApiKey = (req, res) => {
   return res.json({ apiKey: process.env.FINNHUB_API_KEY || "" });
 };
 
-/*
-|--------------------------------------------------------------------------
-| 1.1 Get Real-Time Stock Price (Finnhub)
-|   Example: GET /api/stocks/realtime?symbol=AAPL
-|--------------------------------------------------------------------------
-*/
 exports.getRealTimeStock = async (req, res) => {
   try {
     const symbol = req.query.symbol; // e.g. ?symbol=AAPL
@@ -37,13 +26,17 @@ exports.getRealTimeStock = async (req, res) => {
     const response = await axios.get(url);
     const data = response.data || {};
 
+    // Define conversion rate (approximate)
+    const USD_TO_INR = 84.5;
+    const convert = (val) => (val != null ? val * USD_TO_INR : null);
+
     return res.json({
       symbol,
-      current_price: data.c ?? null,
-      high: data.h ?? null,
-      low: data.l ?? null,
-      open: data.o ?? null,
-      previous_close: data.pc ?? null,
+      current_price: convert(data.c),
+      high: convert(data.h),
+      low: convert(data.l),
+      open: convert(data.o),
+      previous_close: convert(data.pc),
       volume: data.v ?? null,
       timestamp: data.t ?? null,
     });
@@ -55,11 +48,6 @@ exports.getRealTimeStock = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| 2. Get User Stocks (REAL-TIME via Finnhub)
-|--------------------------------------------------------------------------
-*/
 exports.getUserStocks = async (req, res) => {
   try {
     const API_KEY = process.env.FINNHUB_API_KEY;
@@ -77,6 +65,10 @@ exports.getUserStocks = async (req, res) => {
       { name: "Amazon", symbol: "AMZN" },
     ];
 
+    // Define conversion rate (approximate)
+    // Since these are US stocks, Finnhub returns USD. We convert to INR.
+    const USD_TO_INR = 84.5;
+
     const results = await Promise.all(
       baseStocks.map(async (stock) => {
         try {
@@ -91,15 +83,18 @@ exports.getUserStocks = async (req, res) => {
             changePct = (((curr - prev) / prev) * 100).toFixed(2) + "%";
           }
 
+          // Helper to convert USD -> INR
+          const convert = (val) => (val != null ? val * USD_TO_INR : null);
+
           return {
             name: stock.name,
             symbol: stock.symbol,
-            current_price: curr ?? null,
-            change_pct: changePct,
-            high: data?.h ?? null,
-            low: data?.l ?? null,
-            open: data?.o ?? null,
-            previous_close: prev ?? null,
+            current_price: convert(curr), // Converted to INR
+            change_pct: changePct,        // Percentage remains same
+            high: convert(data?.h),
+            low: convert(data?.l),
+            open: convert(data?.o),
+            previous_close: convert(prev),
             volume: data?.v ?? null,
             timestamp: data?.t ?? null,
           };
