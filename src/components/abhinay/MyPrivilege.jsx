@@ -50,6 +50,7 @@ const MyPrivilege = () => {
   const [metalPriceUpdatedAt, setMetalPriceUpdatedAt] = useState(null);
   const [metalPriceError, setMetalPriceError] = useState(null);
   const lastKnownPricesRef = useRef({ ...FALLBACK_METAL_PRICES });
+  const [minWeightFilter, setMinWeightFilter] = useState(0);
 
   // Currency conversion rate (1 USD = 83 INR approximately)
   const USD_TO_INR = 83;
@@ -70,6 +71,36 @@ const MyPrivilege = () => {
     }
     return FALLBACK_METAL_PRICES[metalKey];
   };
+
+  const parseWeightToGrams = (weightValue = "") => {
+    const match = weightValue?.match(/([0-9.]+)/);
+    const numeric = match ? parseFloat(match[1]) : 0;
+    if (!Number.isFinite(numeric)) return 0;
+    const isGramUnit = weightValue?.toLowerCase().includes("g");
+    if (isGramUnit) return numeric;
+    const isOunceUnit = weightValue?.toLowerCase().includes("oz");
+    if (isOunceUnit) return numeric * 31.1035;
+    return numeric; // default assume grams
+  };
+
+  const maxWeightValue = useMemo(() => {
+    if (!holdings?.length) return 0;
+    return holdings.reduce((max, holding) => {
+      const grams = parseWeightToGrams(holding.weight);
+      return grams > max ? grams : max;
+    }, 0);
+  }, [holdings]);
+
+  const filteredHoldings = useMemo(() => {
+    if (!holdings?.length) return [];
+    return holdings.filter((holding) => parseWeightToGrams(holding.weight) >= minWeightFilter);
+  }, [holdings, minWeightFilter]);
+
+  useEffect(() => {
+    if (minWeightFilter > maxWeightValue) {
+      setMinWeightFilter(Math.floor(maxWeightValue));
+    }
+  }, [maxWeightValue, minWeightFilter]);
 
   const applyLivePriceSnapshot = (prices = {}, sourceLabel, updatedAtLabel) => {
     const previous = lastKnownPricesRef.current;
@@ -586,6 +617,23 @@ const MyPrivilege = () => {
 
                   {holdings.length > 0 ? (
                     <div className="table-wrapper">
+                      {maxWeightValue > 0 && (
+                        <div className="holdings-filter">
+                          <div className="filter-label">
+                            <span>Minimum weight filter</span>
+                            <strong>{Math.round(minWeightFilter)}g</strong>
+                          </div>
+                          <input
+                            type="range"
+                            min={0}
+                            max={Math.max(1, Math.ceil(maxWeightValue))}
+                            value={minWeightFilter}
+                            step={1}
+                            onChange={(event) => setMinWeightFilter(Number(event.target.value))}
+                          />
+                          <div className="filter-hint">Drag to show holdings above the selected weight.</div>
+                        </div>
+                      )}
                       <table className="holdings-table">
                         <thead>
                           <tr>
@@ -600,20 +648,10 @@ const MyPrivilege = () => {
                           </tr>
                         </thead>
                       <tbody>
-                        {holdings.map((h) => {
-                          // Extract numeric weight (remove 'g', 'oz', etc.)
-                          const weightMatch = h.weight?.match(/([0-9.]+)/);
-                          const numericWeight = weightMatch ? parseFloat(weightMatch[1]) : 0;
-                          const isGrams = h.weight?.toLowerCase().includes('g');
-                          const weightInGrams = isGrams ? numericWeight : numericWeight * 31.1035; // Convert oz to grams if needed
-                          
-                          // Get live price per gram from API (already in INR)
+                        {filteredHoldings.map((h) => {
+                          const weightInGrams = parseWeightToGrams(h.weight);
                           const liveApiPricePerGram = liveMetalPrices[h.type] || 0;
-                          
-                          // Calculate current value based on live price in INR
                           const liveCurrentValue = Math.round(weightInGrams * liveApiPricePerGram);
-                          
-                          // Calculate gain
                           const gain = liveCurrentValue - h.purchasedValue;
                           const gainPercent = h.purchasedValue > 0 ? ((gain / h.purchasedValue) * 100).toFixed(2) : 0;
                           
@@ -625,7 +663,7 @@ const MyPrivilege = () => {
                                   {h.type}
                                 </span>
                               </td>
-                              <td>{h.weight}</td>
+                              <td>{h.weight || `${Math.round(weightInGrams)}g`}</td>
                               <td>₹{h.purchasedValue.toLocaleString('en-IN')}</td>
                               <td className="live-price">
                                 {pricesLoading ? (
@@ -656,6 +694,11 @@ const MyPrivilege = () => {
                         })}
                       </tbody>
                     </table>
+                    {filteredHoldings.length === 0 && (
+                      <div className="table-empty-state">
+                        No holdings meet the selected weight filter.
+                      </div>
+                    )}
                     </div>
                   ) : (
                     <p className="no-data">No holdings yet. Click "Add New Holding" to get started.</p>
