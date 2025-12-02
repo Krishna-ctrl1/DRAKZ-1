@@ -140,16 +140,61 @@ exports.getUserLoans = async (req, res) => {
 };
 
 
+/*
+|--------------------------------------------------------------------------
+| 4. Get Investment History (Total Investment graph)
+|   1M  -> group by DAY (last 30 days)
+|   6M  -> group by MONTH (last 6 months)
+|   1Y  -> group by MONTH (last 12 months)
+|--------------------------------------------------------------------------
+*/
 exports.getInvestmentHistory = async (req, res) => {
   try {
     const range = req.query.range || "6M";
+    const now = new Date();
 
-    let monthsBack = 6;
-    if (range === "1M") monthsBack = 1;
-    if (range === "1Y") monthsBack = 12;
+    let fromDate;
+    let groupStage;
+    let sortStage;
 
-    const fromDate = new Date();
-    fromDate.setMonth(fromDate.getMonth() - monthsBack);
+    if (range === "1M") {
+      // Last 30 days, grouped by DAY
+      fromDate = new Date(now);
+      fromDate.setDate(fromDate.getDate() - 30);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+          day: { $dayOfMonth: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+        "_id.day": 1,
+      };
+    } else {
+      // 6M or 1Y -> group by MONTH
+      const monthsBack = range === "1Y" ? 12 : 6;
+      fromDate = new Date(now);
+      fromDate.setMonth(fromDate.getMonth() - monthsBack);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+      };
+    }
 
     const data = await Transaction.aggregate([
       {
@@ -158,22 +203,11 @@ exports.getInvestmentHistory = async (req, res) => {
           date: { $gte: fromDate },
         },
       },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$date" },
-            month: { $month: "$date" },
-          },
-          total: { $sum: "$amount" },
-        },
-      },
-      {
-        $sort: { "_id.year": 1, "_id.month": 1 },
-      },
+      { $group: groupStage },
+      { $sort: sortStage },
     ]);
 
     if (!data || data.length === 0) {
-      // No more dummy – just return empty array.
       return res.json([]);
     }
 
@@ -193,11 +227,22 @@ exports.getInvestmentHistory = async (req, res) => {
     ];
 
     const chartData = data.map((item) => {
-      const monthIndex = item._id.month - 1;
-      return {
-        name: monthNamesShort[monthIndex],
-        value: item.total,
-      };
+      if (range === "1M") {
+        const { year, month, day } = item._id;
+        const dateObj = new Date(year, month - 1, day);
+        // show just date number on X-axis, e.g. "3", "14"
+        const label = String(dateObj.getDate());
+        return {
+          name: label,
+          value: item.total,
+        };
+      } else {
+        const monthIndex = item._id.month - 1;
+        return {
+          name: monthNamesShort[monthIndex],
+          value: item.total,
+        };
+      }
     });
 
     return res.json(chartData);

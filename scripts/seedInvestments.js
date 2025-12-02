@@ -14,32 +14,59 @@ async function seedInvestments() {
 
     console.log("Seeding investment history for user:", user.email);
 
-    // Clear existing investment transactions for this user
+    // Clear old investment transactions for this user
     await Transaction.collection.deleteMany({
       category: "investment",
       userId: user._id,
     });
 
-    const year = new Date().getFullYear();
+    const now = new Date();
+    const year = now.getFullYear();
 
-    const investments = [
-      { month: 6, amount: 4200 },
-      { month: 7, amount: 4350 },
-      { month: 8, amount: 4430 },
-      { month: 9, amount: 4550 },
-      { month: 10, amount: 4730 },
-      { month: 11, amount: 4925 },
-    ].map((i) => ({
-      userId: user._id,            // your schema wants this
-      type: "investment",          // we can use any string; enum is bypassed
+    // --- 12 months (for 1Y / 6M) ---
+    const yearlyTemplate = [
+      { month: 0, amount: 3980 }, // Jan
+      { month: 1, amount: 4120 }, // Feb
+      { month: 2, amount: 4300 }, // Mar
+      { month: 3, amount: 4225 }, // Apr
+      { month: 4, amount: 4400 }, // May
+      { month: 5, amount: 4200 }, // Jun
+      { month: 6, amount: 4350 }, // Jul
+      { month: 7, amount: 4430 }, // Aug
+      { month: 8, amount: 4550 }, // Sep
+      { month: 9, amount: 4730 }, // Oct
+      { month: 10, amount: 4925 }, // Nov
+      { month: 11, amount: 5050 }, // Dec
+    ];
+
+    const yearlyDocs = yearlyTemplate.map((m) => ({
+      userId: user._id,
+      type: "investment", // enum is bypassed because we use collection.insertMany
       category: "investment",
-      amount: i.amount,
-      date: new Date(year, i.month - 1, 10),
-      description: "Seed Investment",
+      amount: m.amount,
+      date: new Date(year, m.month, 10), // 10th of each month
+      description: "Seed yearly investment",
     }));
 
-    // INSERT DIRECTLY into Mongo
-    await Transaction.collection.insertMany(investments);
+    // --- Last 30 days (for 1M) ---
+    const dailyDocs = [];
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i); // today, yesterday, ...
+
+      dailyDocs.push({
+        userId: user._id,
+        type: "investment",
+        category: "investment",
+        amount: 2000 + i * 20, // just incremental demo values
+        date: d,
+        description: "Seed daily investment",
+      });
+    }
+
+    const allDocs = [...yearlyDocs, ...dailyDocs];
+
+    await Transaction.collection.insertMany(allDocs);
     console.log("Investments seeded successfully ✅");
   } catch (err) {
     console.error("Error seeding investments:", err);
