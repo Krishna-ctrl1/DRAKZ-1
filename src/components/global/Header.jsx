@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { clearAuth } from "../../utils/auth.util";
 import "../../styles/global/Header.css";
 import { logout } from "../../auth/auth";
+import { useUI } from "../../context/UIContext";
 
 const Header = ({ collapsed }) => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Header = ({ collapsed }) => {
     time: "",
   });
   const [userName, setUserName] = useState("");
+  const { collapsed: uiCollapsed } = useUI();
 
   useEffect(() => {
     // Get user name from localStorage
@@ -73,8 +75,10 @@ const Header = ({ collapsed }) => {
     navigate("/login", { replace: true });
   };
 
+  const isCollapsed = typeof collapsed === "boolean" ? collapsed : uiCollapsed;
+
   return (
-    <div className={`dashboard-header ${!collapsed ? "expanded" : ""}`}>
+    <div className={`dashboard-header ${!isCollapsed ? "expanded" : ""}`}>
       <div className="header-content">
         <div className="logo-section">
           <h1 className="dashboard-logo">DRAKZ</h1>

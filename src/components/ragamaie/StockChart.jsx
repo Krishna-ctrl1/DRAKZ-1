@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../styles/ragamaie/StockChart.css";
+import { toCSV, downloadCSV } from "../../utils/csv.util";
 
 const API_BASE = "http://localhost:3001";
 
@@ -46,6 +47,22 @@ export default function StockChart() {
     <div className="stockchart-container">
       <div className="stockchart-header">
         <h2>Stock Chart</h2>
+        <button
+          className="link-btn"
+          onClick={() => {
+            if (!Array.isArray(stocks) || stocks.length === 0) return;
+            const rows = stocks.map((s, index) => ({
+              index: index + 1,
+              symbol: s.symbol,
+              current_price: s.current_price,
+              change_pct: s.change_pct,
+            }));
+            const csv = toCSV(rows, ["index","symbol","current_price","change_pct"]);
+            downloadCSV("stock-table.csv", csv);
+          }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {loading ? (
