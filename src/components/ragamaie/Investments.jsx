@@ -34,7 +34,7 @@ export default function Investments() {
 
         const apiData = await res.json();
 
-        // expecting [{ name: "Nov", value: 4925 }, ...]
+        // expecting [{ name: "Nov", value: 4925 }, ...] OR [{ name: "3", value: 4200 }, ...]
         if (Array.isArray(apiData)) {
           setData(apiData);
         } else {
@@ -54,10 +54,33 @@ export default function Investments() {
 
   const lastValue =
     data && data.length > 0 ? data[data.length - 1].value : 0;
+  const firstValue =
+    data && data.length > 0 ? data[0].value : 0;
 
-  // you can later also calculate this from backend; for now keep fixed
   const growthPercent =
-    range === "1M" ? "1.8" : range === "6M" ? "6.9" : "12.5";
+    firstValue > 0
+      ? (((lastValue - firstValue) / firstValue) * 100).toFixed(1)
+      : "0.0";
+
+  // For 1M range, only show ticks like 1, 5, 10, 15, 20, 25, 30
+  const getXAxisTicks = () => {
+    if (range !== "1M" || data.length === 0) return undefined;
+
+    const days = data
+      .map((d) => Number(d.name))
+      .filter((n) => !Number.isNaN(n));
+
+    if (days.length === 0) return undefined;
+
+    const min = Math.min(...days);
+    const max = Math.max(...days);
+
+    const candidates = [1, 5, 10, 15, 20, 25, 30, 31];
+
+    return candidates
+      .filter((d) => d >= min && d <= max)
+      .map((d) => String(d));
+  };
 
   return (
     <div className="investment-container">
@@ -102,12 +125,18 @@ export default function Investments() {
         <>
           <p className="investment-value">
             ₹{lastValue.toLocaleString()}{" "}
-            <span className="growth-text">(+{growthPercent}%)</span>
+            <span className="growth-text">
+              (+{growthPercent}%)
+            </span>
           </p>
 
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={data}>
-              <XAxis dataKey="name" stroke="#9ca3af" />
+              <XAxis
+                dataKey="name"
+                stroke="#9ca3af"
+                ticks={getXAxisTicks()}
+              />
               <YAxis stroke="#9ca3af" />
               <Tooltip
                 contentStyle={{
