@@ -1,11 +1,21 @@
-.app {
-  display: flex;
-  background: #0f0f1a;
-  color: white;
+.blog-page {
   min-height: 100vh;
+  background-image: url("/Premiumbackgorund.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: white;
 }
 
-.main-content {
+.blog-page .blog-app {
+  display: flex;
+  min-height: 100vh;
+  color: white;
+  background: transparent;
+}
+
+.blog-page .main-content {
   flex: 1;
   padding: 40px;
 }

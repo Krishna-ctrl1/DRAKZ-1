@@ -22,12 +22,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #000000;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .App {
   position: relative;
   width: 100%;
   min-height: 100vh;
+  background-image: url('/Premiumbackgorund.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .page-with-sidebar {

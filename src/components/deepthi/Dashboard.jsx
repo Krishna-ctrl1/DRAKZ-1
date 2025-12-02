@@ -69,7 +69,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page deepthi-dashboard">
       <style>{`
         .dashboard-grid {
           display: grid;
@@ -87,7 +87,7 @@ const Dashboard = () => {
       <Header />
 
       {/* Main Content */}
-      <div className="app">
+      <div className="app deepthi-app">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
           <div className="dashboard-content">

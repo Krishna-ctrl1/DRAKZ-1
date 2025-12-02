@@ -90,11 +90,8 @@ export default function Sidebar({ collapsed = true, setCollapsed }) {
             </li>
             // --- END OF FIX ---
           ))}
-        </ul>
-      </div>
-
-      <div className="sidebar-bottom">
-        <ul className="sidebar-list">
+          
+          {/* Settings item at the end of the main list */}
           <li className={currentPath === settingsItem.path ? "active" : ""}>
             <Link to={settingsItem.path} className="sidebar-link" title={settingsItem.label}>
               <i className={settingsItem.icon}></i>

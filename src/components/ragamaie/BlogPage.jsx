@@ -8,10 +8,10 @@ function BlogPage() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page blog-page">
       <Header />
 
-      <div className="app">
+      <div className="app blog-app">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <div className={collapsed ? "main-content-collapsed" : "main-content"}>
