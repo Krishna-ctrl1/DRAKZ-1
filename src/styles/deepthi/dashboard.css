@@ -1,58 +1,45 @@
-/* Deepthi's CSS Styles - Dashboard */
-
-.app {
-  background-image: url("/Premiumbackgorund.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: white;
+.deepthi-dashboard {
   min-height: 100vh;
+  width: 100%;
+  color: white;
+  background: url("/Premiumbackgorund.jpg") center/cover fixed;
+  background-color: transparent;
 }
 
-.main-content {
+.deepthi-dashboard .deepthi-app {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background: url("/Premiumbackgorund.jpg") center/cover fixed;
+  background-color: transparent;
+}
+
+.deepthi-dashboard .main-content {
   flex: 1;
   padding: 20px;
-  margin-left: 250px;
+  padding-left: 280px;
+  margin-left: 0;
   margin-top: 5rem;
-  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background-image: url("/Premiumbackgorund.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
-  width: calc(100vw - 250px);
-  display: block;
+  transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  min-height: calc(100vh - 5rem);
+  width: 100%;
   position: relative;
   z-index: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
-.main-content-collapsed {
+.deepthi-dashboard .main-content-collapsed {
   flex: 1;
   padding: 20px;
-  margin-left: 90px;
+  padding-left: 120px;
+  margin-left: 0;
   margin-top: 5rem;
-  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background-image: url("/Premiumbackgorund.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  min-height: 100vh;
-  /* width: calc(100vw - 90px);
-  display: block;
+  transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  min-height: calc(100vh - 5rem);
+  width: 100%;
   position: relative;
   z-index: 1;
-  overflow-y: auto;
-  overflow-x: hidden; */
-}
-.dashboard-page {
-  min-height: 100vh;
-  background: #000000;
-  color: white;
 }
 
 .dashboard-content {
@@ -96,18 +83,22 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background: #0f1425;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 20, 37, 0.55);
   padding: 1rem 2.5rem 1rem 0.75rem;
-  margin-left: -200px;
-  backdrop-filter: blur(10px);
+  margin-left: 5px;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: 0 10px 30px rgba(3, 8, 20, 0.25);
   height: auto;
   box-sizing: border-box;
-  transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.3s ease;
 }
 
 .dashboard-header.expanded {
-  padding-left: calc(250px + 0.75rem);
+  padding-left: calc(25px + 0.75rem);
 }
 
 /* REMOVED: .dashboard-header.collapsed is no longer needed */

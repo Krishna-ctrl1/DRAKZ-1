@@ -11,19 +11,14 @@
 }
 
 /* --- Privilege Page Global Background --- */
+
 .privilege-page {
   position: relative;
   min-height: 100vh;
-  background: radial-gradient(circle at 20% 15%, rgba(39, 104, 255, 0.4), rgba(10, 20, 60, 0) 42%),
-    radial-gradient(circle at 50% 28%, rgba(26, 93, 255, 0.38), rgba(8, 18, 55, 0) 40%),
-    radial-gradient(circle at 85% 22%, rgba(35, 110, 255, 0.36), rgba(12, 22, 58, 0) 45%),
-    radial-gradient(circle at 18% 78%, rgba(20, 83, 255, 0.35), rgba(6, 15, 50, 0) 48%),
-    radial-gradient(circle at 52% 82%, rgba(23, 91, 255, 0.37), rgba(7, 16, 52, 0) 50%),
-    radial-gradient(circle at 88% 75%, rgba(16, 66, 255, 0.33), rgba(5, 12, 48, 0) 52%),
-    linear-gradient(180deg, #0a1428 0%, #06102a 50%, #030b1f 100%);
-  background-attachment: fixed;
+  background: transparent;
   overflow: hidden;
   z-index: 0;
+  color: #ffffff;
 }
 
 .privilege-page::after {
