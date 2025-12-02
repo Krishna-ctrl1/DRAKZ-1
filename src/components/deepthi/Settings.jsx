@@ -1,40 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../global/Header';
-import Sidebar from '../global/Sidebar';
-import '../../styles/deepthi/settings.css';
-import axios from '../../api/axios.api';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../global/Header";
+import Sidebar from "../global/Sidebar";
+import "../../styles/deepthi/settings.css";
+import axios from "../../api/axios.api";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [collapsed, setCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   // Profile state
   const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    occupation: '',
-    role: ''
+    name: "",
+    email: "",
+    phone: "",
+    occupation: "",
+    role: "",
   });
+  const [profileErrors, setProfileErrors] = useState({});
 
   // Financial state
   const [financialData, setFinancialData] = useState({
-    currency: 'INR',
-    riskProfile: 'Moderate',
-    monthlyIncome: 0
+    currency: "INR",
+    riskProfile: "Moderate",
+    monthlyIncome: 0,
   });
+  const [financialErrors, setFinancialErrors] = useState({});
 
   // Security state
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+  const [passwordErrors, setPasswordErrors] = useState({});
 
   useEffect(() => {
     fetchUserData();
@@ -43,91 +46,207 @@ const Settings = () => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/settings/profile');
+      const response = await axios.get("/api/settings/profile");
       const data = response.data;
-      
+
       setProfileData({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        occupation: data.occupation || '',
-        role: data.role || ''
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        occupation: data.occupation || "",
+        role: data.role || "",
       });
 
       setFinancialData({
-        currency: data.currency || 'INR',
-        riskProfile: data.riskProfile || 'Moderate',
-        monthlyIncome: data.monthlyIncome || 0
+        currency: data.currency || "INR",
+        riskProfile: data.riskProfile || "Moderate",
+        monthlyIncome: data.monthlyIncome || 0,
       });
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      setMessage({ type: 'error', text: 'Failed to load settings' });
+      console.error("Error fetching user data:", error);
+      setMessage({ type: "error", text: "Failed to load settings" });
     } finally {
       setLoading(false);
     }
   };
 
   const handleProfileSave = async () => {
+    // client-side validation before sending
+    console.log("Validating profile data:", profileData);
+    const errs = validateProfile(profileData);
+    console.log("Validation errors:", errs);
+    setProfileErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      console.log("Validation failed, stopping save.");
+      setMessage({ type: "error", text: "Please fix validation errors" });
+      return;
+    }
+    console.log("Validation passed, proceeding to save.");
     try {
       setSaving(true);
-      setMessage({ type: '', text: '' });
-      
-      await axios.put('/api/settings/profile', {
+      setMessage({ type: "", text: "" });
+
+      await axios.put("/api/settings/profile", {
         name: profileData.name,
         phone: profileData.phone,
-        occupation: profileData.occupation
+        occupation: profileData.occupation,
       });
 
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.msg || 'Failed to update profile' });
+      setMessage({
+        type: "error",
+        text: error.response?.data?.msg || "Failed to update profile",
+      });
     } finally {
       setSaving(false);
     }
   };
+  const validateProfile = (data) => {
+    const errors = {};
+    const newData = { ...data };
+
+    // --- Name Validation ---
+    const name = (data.name || "").trim();
+    if (!name) {
+      errors.name = "Name is required";
+      newData.name = "";
+    } else if (name.length < 2) {
+      errors.name = "Name must be at least 2 characters";
+      newData.name = "";
+    } else if (name.length > 100) {
+      errors.name = "Name must be under 100 characters";
+      newData.name = "";
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+      errors.name = "Name can only contain letters and spaces";
+      newData.name = "";
+    }
+
+    // --- Phone Validation ---
+    const phoneRaw = (data.phone || "").toString().trim();
+    if (phoneRaw) {
+      if (!/^[0-9+\-\s()]+$/.test(phoneRaw)) {
+        errors.phone = "Phone number contains invalid characters";
+        newData.phone = "";
+      } else {
+        const digits = phoneRaw.replace(/\D/g, "");
+        if (digits.length < 10 || digits.length > 15) {
+          errors.phone = "Enter a valid phone number (10–15 digits)";
+          newData.phone = "";
+        }
+      }
+    }
+
+    // --- Occupation Validation ---
+    if (data.occupation) {
+      if (/\d/.test(data.occupation)) {
+        errors.occupation = "Occupation cannot contain numbers";
+        newData.occupation = "";
+      } else if (!/^[a-zA-Z\s]+$/.test(data.occupation)) {
+        errors.occupation = "Occupation can only contain letters and spaces";
+        newData.occupation = "";
+      }
+    }
+
+    // Update data after clearing incorrect fields
+    setProfileData(newData);
+
+    return errors;
+  };
+
+  const validateFinancial = (data) => {
+    const errors = {};
+    if (
+      data.monthlyIncome === undefined ||
+      data.monthlyIncome === null ||
+      isNaN(data.monthlyIncome)
+    ) {
+      errors.monthlyIncome = "Please enter a valid income amount";
+    } else if (data.monthlyIncome < 0) {
+      errors.monthlyIncome = "Income cannot be negative";
+    }
+    return errors;
+  };
+
+  const validatePassword = (data) => {
+    const errors = {};
+    if (!data.newPassword) {
+      errors.newPassword = "New password is required";
+    } else {
+      if (data.newPassword.length < 8) {
+        errors.newPassword = "Password must be at least 8 characters";
+      } else if (!/[A-Z]/.test(data.newPassword)) {
+        errors.newPassword =
+          "Password must contain at least one uppercase letter";
+      } else if (!/[0-9]/.test(data.newPassword)) {
+        errors.newPassword = "Password must contain at least one number";
+      } else if (!/[^A-Za-z0-9]/.test(data.newPassword)) {
+        errors.newPassword =
+          "Password must contain at least one special character";
+      }
+    }
+
+    if (data.newPassword !== data.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+    return errors;
+  };
 
   const handleFinancialSave = async () => {
+    const errs = validateFinancial(financialData);
+    setFinancialErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      setMessage({ type: "error", text: "Please fix validation errors" });
+      return;
+    }
     try {
       setSaving(true);
-      setMessage({ type: '', text: '' });
-      
-      await axios.put('/api/settings/financial', financialData);
+      setMessage({ type: "", text: "" });
 
-      setMessage({ type: 'success', text: 'Financial preferences updated!' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      await axios.put("/api/settings/financial", financialData);
+
+      setMessage({ type: "success", text: "Financial preferences updated!" });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.msg || 'Failed to update preferences' });
+      setMessage({
+        type: "error",
+        text: error.response?.data?.msg || "Failed to update preferences",
+      });
     } finally {
       setSaving(false);
     }
   };
 
   const handlePasswordChange = async () => {
+    const errs = validatePassword(passwordData);
+    setPasswordErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      setMessage({ type: "error", text: "Please fix validation errors" });
+      return;
+    }
     try {
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setMessage({ type: 'error', text: 'New passwords do not match' });
-        return;
-      }
-
-      if (passwordData.newPassword.length < 6) {
-        setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
-        return;
-      }
-
       setSaving(true);
-      setMessage({ type: '', text: '' });
-      
-      await axios.put('/api/settings/password', {
+      setMessage({ type: "", text: "" });
+
+      await axios.put("/api/settings/password", {
         currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
+        newPassword: passwordData.newPassword,
       });
 
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+      setMessage({ type: "success", text: "Password changed successfully!" });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.msg || 'Failed to change password' });
+      setMessage({
+        type: "error",
+        text: error.response?.data?.msg || "Failed to change password",
+      });
     } finally {
       setSaving(false);
     }
@@ -139,7 +258,9 @@ const Settings = () => {
         <Header />
         <div className="app">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-          <div className={collapsed ? "main-content-collapsed" : "main-content"}>
+          <div
+            className={collapsed ? "main-content-collapsed" : "main-content"}
+          >
             <div className="settings-loading">Loading settings...</div>
           </div>
         </div>
@@ -166,20 +287,20 @@ const Settings = () => {
             {/* Tabs */}
             <div className="settings-tabs">
               <button
-                className={`settings-tab ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => setActiveTab('profile')}
+                className={`settings-tab ${activeTab === "profile" ? "active" : ""}`}
+                onClick={() => setActiveTab("profile")}
               >
                 <i className="fa-solid fa-user"></i> Profile
               </button>
               <button
-                className={`settings-tab ${activeTab === 'financial' ? 'active' : ''}`}
-                onClick={() => setActiveTab('financial')}
+                className={`settings-tab ${activeTab === "financial" ? "active" : ""}`}
+                onClick={() => setActiveTab("financial")}
               >
                 <i className="fa-solid fa-chart-line"></i> Financial
               </button>
               <button
-                className={`settings-tab ${activeTab === 'security' ? 'active' : ''}`}
-                onClick={() => setActiveTab('security')}
+                className={`settings-tab ${activeTab === "security" ? "active" : ""}`}
+                onClick={() => setActiveTab("security")}
               >
                 <i className="fa-solid fa-lock"></i> Security
               </button>
@@ -187,9 +308,8 @@ const Settings = () => {
 
             {/* Tab Content */}
             <div className="settings-content">
-              
               {/* Profile Settings */}
-              {activeTab === 'profile' && (
+              {activeTab === "profile" && (
                 <div className="settings-section">
                   <h2>Profile Information</h2>
                   <div className="settings-form">
@@ -198,9 +318,18 @@ const Settings = () => {
                       <input
                         type="text"
                         value={profileData.name}
-                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                        onChange={(e) => {
+                          setProfileData({
+                            ...profileData,
+                            name: e.target.value,
+                          });
+                          setProfileErrors((p) => ({ ...p, name: undefined }));
+                        }}
                         placeholder="Enter your full name"
                       />
+                      {profileErrors.name && (
+                        <div className="field-error">{profileErrors.name}</div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -219,9 +348,19 @@ const Settings = () => {
                       <input
                         type="tel"
                         value={profileData.phone}
-                        onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                        onChange={(e) => {
+                          console.log("Phone changed to:", e.target.value);
+                          setProfileData({
+                            ...profileData,
+                            phone: e.target.value,
+                          });
+                          setProfileErrors((p) => ({ ...p, phone: undefined }));
+                        }}
                         placeholder="+91 XXXXXXXXXX"
                       />
+                      {profileErrors.phone && (
+                        <div className="field-error">{profileErrors.phone}</div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -229,9 +368,23 @@ const Settings = () => {
                       <input
                         type="text"
                         value={profileData.occupation}
-                        onChange={(e) => setProfileData({ ...profileData, occupation: e.target.value })}
+                        onChange={(e) => {
+                          setProfileData({
+                            ...profileData,
+                            occupation: e.target.value,
+                          });
+                          setProfileErrors((p) => ({
+                            ...p,
+                            occupation: undefined,
+                          }));
+                        }}
                         placeholder="e.g., Software Engineer"
                       />
+                      {profileErrors.occupation && (
+                        <div className="field-error">
+                          {profileErrors.occupation}
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -245,19 +398,19 @@ const Settings = () => {
                       <small>Contact admin to change account type</small>
                     </div>
 
-                    <button 
-                      className="settings-save-btn" 
+                    <button
+                      className="settings-save-btn"
                       onClick={handleProfileSave}
                       disabled={saving}
                     >
-                      {saving ? 'Saving...' : 'Save Changes'}
+                      {saving ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </div>
               )}
 
               {/* Financial Preferences */}
-              {activeTab === 'financial' && (
+              {activeTab === "financial" && (
                 <div className="settings-section">
                   <h2>Financial Preferences</h2>
                   <div className="settings-form">
@@ -265,7 +418,12 @@ const Settings = () => {
                       <label>Currency</label>
                       <select
                         value={financialData.currency}
-                        onChange={(e) => setFinancialData({ ...financialData, currency: e.target.value })}
+                        onChange={(e) =>
+                          setFinancialData({
+                            ...financialData,
+                            currency: e.target.value,
+                          })
+                        }
                       >
                         <option value="INR">₹ Indian Rupee (INR)</option>
                         <option value="USD">$ US Dollar (USD)</option>
@@ -278,13 +436,26 @@ const Settings = () => {
                       <label>Risk Profile</label>
                       <select
                         value={financialData.riskProfile}
-                        onChange={(e) => setFinancialData({ ...financialData, riskProfile: e.target.value })}
+                        onChange={(e) =>
+                          setFinancialData({
+                            ...financialData,
+                            riskProfile: e.target.value,
+                          })
+                        }
                       >
-                        <option value="Conservative">Conservative - Low Risk, Stable Returns</option>
-                        <option value="Moderate">Moderate - Balanced Risk & Returns</option>
-                        <option value="Aggressive">Aggressive - High Risk, High Returns</option>
+                        <option value="Conservative">
+                          Conservative - Low Risk, Stable Returns
+                        </option>
+                        <option value="Moderate">
+                          Moderate - Balanced Risk & Returns
+                        </option>
+                        <option value="Aggressive">
+                          Aggressive - High Risk, High Returns
+                        </option>
                       </select>
-                      <small>This helps tailor investment recommendations</small>
+                      <small>
+                        This helps tailor investment recommendations
+                      </small>
                     </div>
 
                     <div className="form-group">
@@ -292,26 +463,42 @@ const Settings = () => {
                       <input
                         type="number"
                         value={financialData.monthlyIncome}
-                        onChange={(e) => setFinancialData({ ...financialData, monthlyIncome: Number(e.target.value) })}
+                        onChange={(e) => {
+                          setFinancialData({
+                            ...financialData,
+                            monthlyIncome: Number(e.target.value),
+                          });
+                          setFinancialErrors((p) => ({
+                            ...p,
+                            monthlyIncome: undefined,
+                          }));
+                        }}
                         placeholder="Enter your monthly income"
                         min="0"
                       />
-                      <small>Used for budget planning and recommendations</small>
+                      {financialErrors.monthlyIncome && (
+                        <div className="field-error">
+                          {financialErrors.monthlyIncome}
+                        </div>
+                      )}
+                      <small>
+                        Used for budget planning and recommendations
+                      </small>
                     </div>
 
-                    <button 
-                      className="settings-save-btn" 
+                    <button
+                      className="settings-save-btn"
                       onClick={handleFinancialSave}
                       disabled={saving}
                     >
-                      {saving ? 'Saving...' : 'Save Preferences'}
+                      {saving ? "Saving..." : "Save Preferences"}
                     </button>
                   </div>
                 </div>
               )}
 
               {/* Security Settings */}
-              {activeTab === 'security' && (
+              {activeTab === "security" && (
                 <div className="settings-section">
                   <h2>Change Password</h2>
                   <div className="settings-form">
@@ -320,7 +507,12 @@ const Settings = () => {
                       <input
                         type="password"
                         value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
                         placeholder="Enter current password"
                       />
                     </div>
@@ -330,9 +522,23 @@ const Settings = () => {
                       <input
                         type="password"
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                        placeholder="Enter new password (min 6 characters)"
+                        onChange={(e) => {
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          });
+                          setPasswordErrors((p) => ({
+                            ...p,
+                            newPassword: undefined,
+                          }));
+                        }}
+                        placeholder="Enter new password (min 8 characters)"
                       />
+                      {passwordErrors.newPassword && (
+                        <div className="field-error">
+                          {passwordErrors.newPassword}
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -340,22 +546,35 @@ const Settings = () => {
                       <input
                         type="password"
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        onChange={(e) => {
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          });
+                          setPasswordErrors((p) => ({
+                            ...p,
+                            confirmPassword: undefined,
+                          }));
+                        }}
                         placeholder="Re-enter new password"
                       />
+                      {passwordErrors.confirmPassword && (
+                        <div className="field-error">
+                          {passwordErrors.confirmPassword}
+                        </div>
+                      )}
                     </div>
 
-                    <button 
-                      className="settings-save-btn" 
+                    <button
+                      className="settings-save-btn"
                       onClick={handlePasswordChange}
                       disabled={saving}
                     >
-                      {saving ? 'Changing...' : 'Change Password'}
+                      {saving ? "Changing..." : "Change Password"}
                     </button>
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
