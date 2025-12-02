@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
 
+const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "avif", "svg"];
+
+const isValidImageUrl = (value = "") => {
+  if (!value?.trim()) return false;
+  try {
+    const parsed = new URL(value.trim());
+    const protocolAllowed = ["http:", "https:"].includes(parsed.protocol);
+    if (!protocolAllowed) return false;
+    const ext = parsed.pathname.split(".").pop()?.toLowerCase();
+    return !!ext && ALLOWED_IMAGE_EXTENSIONS.includes(ext);
+  } catch (err) {
+    return false;
+  }
+};
+
 const AddPropertyForm = ({ onClose, onSave, property }) => {
   const [name, setName] = useState('');
   const [value, setValue] = useState('');
@@ -38,10 +53,21 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
   const handleImageUrlChange = (e) => {
     const url = e.target.value;
     setImageUrl(url);
-    if (url) {
-      setImagePreview(url);
-      setImageFile(null);
+    if (!url) {
+      setImagePreview('');
+      setError('');
+      return;
     }
+
+    if (!isValidImageUrl(url)) {
+      setError('Please enter a valid image URL (https://example.com/image.jpg).');
+      setImagePreview('');
+      return;
+    }
+
+    setImagePreview(url);
+    setImageFile(null);
+    setError('');
   };
 
   const handleFileChange = (e) => {
@@ -92,6 +118,11 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
     // Minimum property value: $50,000
     if (Number(value) < 50000) {
       setError("Property value must be at least $50,000.");
+      return;
+    }
+
+    if (imageUrl && !isValidImageUrl(imageUrl)) {
+      setError('Please enter a valid image URL (https://example.com/image.jpg).');
       return;
     }
 
@@ -179,11 +210,16 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
         <label htmlFor="imageUrl">Image URL</label>
         <input 
           id="imageUrl" 
-          type="text" 
+          type="url" 
+          inputMode="url"
           value={imageUrl} 
           onChange={handleImageUrlChange} 
-          placeholder="e.g., https://example.com/image.jpg or /2.jpg" 
+          placeholder="https://example.com/image.jpg" 
+          pattern="https?://.*"
         />
+        <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
+          Only HTTPS URLs ending with image extensions (jpg, png, gif, webp, avif, svg)
+        </small>
       </div>
       <div className="form-group">
         <label htmlFor="imageFile">Or Upload Image File (max 5MB)</label>
