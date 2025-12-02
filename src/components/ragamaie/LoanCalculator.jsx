@@ -18,13 +18,22 @@ export default function LoanCalculator() {
   });
 
   useEffect(() => {
-    if (!errors.amount && !errors.rate && !errors.tenure) {
+    // Only calculate if there are no errors and values are present
+    // (Checked against empty string to prevent NaN calculations)
+    if (
+      !errors.amount &&
+      !errors.rate &&
+      !errors.tenure &&
+      amount !== "" &&
+      rate !== "" &&
+      tenure !== ""
+    ) {
       calculateLoanDetails();
     }
   }, [amount, rate, tenure, errors]);
 
   const validateField = (fieldName, value) => {
-    if (value <= 0) {
+    if (value <= 0 && value !== "") {
       setErrors((prev) => ({
         ...prev,
         [fieldName]: "Field cannot be zero or negative",
@@ -49,10 +58,13 @@ export default function LoanCalculator() {
     const totalInterestCalc = totalPaymentCalc - principal;
     const interestPercentCalc = (totalInterestCalc / principal) * 100;
 
-    setEmi(emiCalc.toFixed(2));
-    setTotalPayment(totalPaymentCalc.toFixed(2));
-    setTotalInterest(totalInterestCalc.toFixed(2));
-    setInterestPercent(interestPercentCalc.toFixed(1));
+    // Check against infinity/NaN in case of bad inputs
+    if (isFinite(emiCalc)) {
+      setEmi(emiCalc.toFixed(2));
+      setTotalPayment(totalPaymentCalc.toFixed(2));
+      setTotalInterest(totalInterestCalc.toFixed(2));
+      setInterestPercent(interestPercentCalc.toFixed(1));
+    }
   };
 
   const formatCurrency = (value) =>
@@ -82,7 +94,7 @@ export default function LoanCalculator() {
         {errors.amount && <p className="error-text">{errors.amount}</p>}
       </div>
 
-      {/* Rate Input */}
+      {/* Rate Input - FIXED */}
       <div className="input-group">
         <label>Interest Rate (%)</label>
         <input
@@ -90,7 +102,19 @@ export default function LoanCalculator() {
           step="0.1"
           value={rate}
           onChange={(e) => {
-            const val = Number(e.target.value);
+            const inputValue = e.target.value;
+
+            // Fix 1: Handle empty input to prevent "012" behavior
+            if (inputValue === "") {
+              setRate("");
+              return;
+            }
+
+            const val = Number(inputValue);
+
+            // Fix 2: Cap the interest rate at 100
+            if (val > 100) return;
+
             setRate(val);
             validateField("rate", val);
           }}
