@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
   getStockApiKey,
+  getRealTimeStock,
   getUserStocks,
   getUserLoans,
   getInvestmentHistory,
@@ -12,7 +13,10 @@ const {
 // API KEY for Stock APIs
 router.get("/getStockApiKey", getStockApiKey);
 
-// Stocks (Your Stocks + Stock Table)
+// Real-time Single Stock Price (Finnhub)
+router.get("/stocks/realtime", getRealTimeStock);
+
+// Stocks (Your Stocks table, now real-time)
 router.get("/user-investments", getUserStocks);
 
 // Loans (Your Loans section)
