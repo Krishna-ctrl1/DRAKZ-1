@@ -134,12 +134,47 @@ exports.getRecentSpendings = async (req, res) => {
     const docs = await Spending.find({ user: userId })
       .select("amount type date category description")
       .sort({ date: -1 })
-      .limit(lim)
+      .limit(limit)
       .lean()
       .exec();
     res.json({ success: true, spendings: docs });
   } catch (err) {
     console.error("getRecentSpendings error", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+/**
+ * DELETE /api/spendings/range?from=YYYY-MM-DD&to=YYYY-MM-DD
+ * Deletes the authenticated user's spendings within the inclusive date range.
+ */
+exports.deleteSpendingsInRange = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    if (!userId) return res.status(401).json({ msg: "Unauthorized" });
+
+    const { from, to } = req.query;
+    if (!from || !to)
+      return res
+        .status(400)
+        .json({ msg: "Query params 'from' and 'to' are required (YYYY-MM-DD)" });
+
+    const start = new Date(from);
+    const end = new Date(to);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ msg: "Invalid date format" });
+    }
+    // Make end inclusive to the end of the 'to' day
+    end.setHours(23, 59, 59, 999);
+
+    const result = await Spending.deleteMany({
+      user: userId,
+      date: { $gte: start, $lte: end },
+    });
+
+    return res.json({ success: true, deleted: result.deletedCount });
+  } catch (err) {
+    console.error("deleteSpendingsInRange error", err);
     res.status(500).json({ msg: "Server error" });
   }
 };
