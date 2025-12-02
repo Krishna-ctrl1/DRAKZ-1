@@ -8,6 +8,11 @@
   flex-direction: column;
   gap: 18px;
 }
+.error-text {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
 
 .loan-calculator-dark h2 {
   font-size: 1.25rem;
