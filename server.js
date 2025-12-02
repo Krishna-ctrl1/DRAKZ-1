@@ -69,10 +69,10 @@ app.use("/api/credit-score", require("./src/routes/creditScore.routes"));
 app.use("/api/spendings", spendingsRoutes);
 app.use("/api/cards", require("./src/routes/card.routes"));
 app.use("/api/advisor", advisorRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/settings", settingsRoutes);
-app.use("/api/contact", contactRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

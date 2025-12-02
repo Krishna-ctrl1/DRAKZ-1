@@ -22,6 +22,7 @@ import Unauthorized from "./auth/Unauthorized";
 import AdminLayout from "./components/ziko/admin/AdminLayout";
 import AdminDashboard from "./components/ziko/admin/admin.dashboard";
 import UserManagementPage from "./components/ziko/admin/UserManagementPage";
+import AdminMessages from './components/ziko/admin/AdminMessages';
 import ContentManagementPage from "./components/ziko/admin/ContentManagementPage";
 import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
@@ -51,6 +52,7 @@ function App() {
                 element={<ContentManagementPage />}
               />
               <Route path="/admin/settings" element={<SettingsPage />} />
+              <Route path="/admin/messages" element={<AdminMessages />} />
               <Route path="/admin/logs" element={<LogsPage />} />
             </Route>
           </Route>
