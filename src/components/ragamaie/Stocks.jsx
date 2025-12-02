@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../styles/ragamaie/Stocks.css";
+import { toCSV, downloadCSV } from "../../utils/csv.util";
 
 const API_BASE = "http://localhost:3001";
 
@@ -46,7 +47,29 @@ export default function Stocks() {
     <div className="stocks-container">
       <div className="stocks-header">
         <h2>Your Stocks</h2>
-        <button className="link-btn">View All</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            className="link-btn"
+            onClick={() => {
+              if (!Array.isArray(stocks) || stocks.length === 0) return;
+              const rows = stocks.map((s) => ({
+                name: s.name,
+                symbol: s.symbol,
+                current_price: s.current_price,
+                change_pct: s.change_pct,
+              }));
+              const csv = toCSV(rows, [
+                "name",
+                "symbol",
+                "current_price",
+                "change_pct",
+              ]);
+              downloadCSV("stocks.csv", csv);
+            }}
+          >
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -67,13 +90,9 @@ export default function Stocks() {
                 <span>{stock.name}</span>
                 <span>{stock.symbol}</span>
               </div>
-              <p className="stock-price">
-                {formatPrice(stock.current_price)}
-              </p>
+              <p className="stock-price">{formatPrice(stock.current_price)}</p>
               <span
-                className={`stock-change ${getChangeClass(
-                  stock.change_pct
-                )}`}
+                className={`stock-change ${getChangeClass(stock.change_pct)}`}
               >
                 {stock.change_pct}
               </span>

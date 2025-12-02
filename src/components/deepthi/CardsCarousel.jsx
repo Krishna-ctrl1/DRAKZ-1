@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { getCards, addCard, deleteCard } from "./api/getCards";
 import "../../styles/deepthi/cardsCarousel.css";
+import { toCSV, downloadCSV } from "../../utils/csv.util";
 
 export default function CardsCarousel() {
   const [cards, setCards] = useState([]);
@@ -275,6 +276,29 @@ export default function CardsCarousel() {
     <div className="cards-carousel-wrapper">
       <div className="carousel-container">
         <h3 className="carousel-title">Your Cards</h3>
+        {cards && cards.length > 0 && (
+          <button
+            className="add-card-btn"
+            style={{ marginLeft: 'auto', marginBottom: 12 }}
+            onClick={() => {
+              const rows = cards.map((c) => ({
+                holderName: c.holderName,
+                type: c.type,
+                brand: c.brand,
+                masked: c.masked,
+                expiryMonth: c.expiryMonth,
+                expiryYear: c.expiryYear,
+                colorTheme: c.colorTheme,
+              }));
+              const csv = toCSV(rows, [
+                'holderName','type','brand','masked','expiryMonth','expiryYear','colorTheme'
+              ]);
+              downloadCSV('cards.csv', csv);
+            }}
+          >
+            Export CSV
+          </button>
+        )}
 
         {cards && cards.length > 0 ? (
           <div className="carousel">
