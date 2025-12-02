@@ -15,6 +15,7 @@ const userRoutes = require("./src/routes/user.routes");
 const investmentsRoutes = require("./src/routes/investments.routes.js");
 const accountSummaryRoutes = require("./src/routes/accountSummary.routes.js");
 const settingsRoutes = require("./src/routes/settings.routes.js");
+const contactRoutes = require("./src/routes/contactRoutes.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -71,6 +72,7 @@ app.use("/api/advisor", advisorRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/contact", contactRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

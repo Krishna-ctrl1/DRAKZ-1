@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +13,6 @@ const ContactUs = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -19,31 +21,48 @@ const ContactUs = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitMessage('Thank you for your message! We\'ll get back to you soon.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
+
+    try {
+      const response = await axios.post('http://localhost:3001/api/contact/submit', formData);
+
+      if (response.data.success) {
+        // Show Success Popup (Top Right)
+        toast.success("Message sent successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Clear the form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to send message. Please try again.", {
+        position: "top-right",
       });
-      
-      // Clear success message after 5 seconds
-      setTimeout(() => {
-        setSubmitMessage('');
-      }, 5000);
-    }, 1500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <section className="contact-section">
+      {/* Toast Container needs to be added to the render */}
+      <ToastContainer />
+      
       <div className="contact-container">
         <div className="contact-content">
           {/* Left Side - Contact Info */}
@@ -173,12 +192,6 @@ const ContactUs = () => {
                   'Send Message'
                 )}
               </button>
-
-              {submitMessage && (
-                <div className="submit-success">
-                  {submitMessage}
-                </div>
-              )}
             </form>
         </div>
       </div>
