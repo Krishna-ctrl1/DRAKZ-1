@@ -26,17 +26,17 @@ async function seedInvestments() {
     // --- 12 months (for 1Y / 6M) ---
     const yearlyTemplate = [
       { month: 0, amount: 3980 }, // Jan
-      { month: 1, amount: 4120 }, // Feb
-      { month: 2, amount: 4300 }, // Mar
+      { month: 1, amount: 44120 }, // Feb
+      { month: 2, amount: 7300 }, // Mar
       { month: 3, amount: 4225 }, // Apr
       { month: 4, amount: 4400 }, // May
-      { month: 5, amount: 4200 }, // Jun
+      { month: 5, amount: 27200 }, // Jun
       { month: 6, amount: 4350 }, // Jul
-      { month: 7, amount: 4430 }, // Aug
+      { month: 7, amount: 9430 }, // Aug
       { month: 8, amount: 4550 }, // Sep
       { month: 9, amount: 4730 }, // Oct
       { month: 10, amount: 4925 }, // Nov
-      { month: 11, amount: 5050 }, // Dec
+      { month: 11, amount: 55550 }, // Dec
     ];
 
     const yearlyDocs = yearlyTemplate.map((m) => ({
