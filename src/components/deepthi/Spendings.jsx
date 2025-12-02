@@ -101,24 +101,30 @@ export default function Spendings({ weeks = 5 }) {
             className="export-btn"
             onClick={() => {
               const rows = data.map((w) => ({
-                weekStart: new Date(w.weekStart).toISOString().slice(0,10),
-                weekEnd: new Date(w.weekEnd).toISOString().slice(0,10),
+                weekStart: new Date(w.weekStart).toISOString().slice(0, 10),
+                weekEnd: new Date(w.weekEnd).toISOString().slice(0, 10),
                 income: w.income,
                 expense: w.expense,
-                daily: (w.daily || []).join('|'),
+                daily: (w.daily || []).join("|"),
               }));
-              const csv = toCSV(rows, ["weekStart","weekEnd","income","expense","daily"]);
+              const csv = toCSV(rows, [
+                "weekStart",
+                "weekEnd",
+                "income",
+                "expense",
+                "daily",
+              ]);
               downloadCSV("weekly-spendings.csv", csv);
             }}
             title="Export weekly summary as CSV"
             style={{
               marginLeft: 12,
-              padding: '6px 10px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#e6f1fa',
+              padding: "6px 10px",
+              border: "1px solid rgba(255,255,255,0.2)",
+              background: "rgba(255,255,255,0.06)",
+              color: "#e6f1fa",
               borderRadius: 6,
-              cursor: 'pointer',
+              cursor: "pointer",
               fontSize: 12,
             }}
           >

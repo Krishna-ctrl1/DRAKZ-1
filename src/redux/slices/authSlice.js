@@ -1,23 +1,23 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialUser = (() => {
   try {
-    return JSON.parse(localStorage.getItem('user')) || null;
+    return JSON.parse(localStorage.getItem("user")) || null;
   } catch {
     return null;
   }
 })();
 
 const initialState = {
-  token: localStorage.getItem('token') || null,
-  role: localStorage.getItem('role') || null,
+  token: localStorage.getItem("token") || null,
+  role: localStorage.getItem("role") || null,
   user: initialUser,
   loading: false,
   error: null,
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     loginStart(state) {
@@ -33,7 +33,7 @@ const authSlice = createSlice({
     },
     loginFailure(state, action) {
       state.loading = false;
-      state.error = action.payload || 'Login failed';
+      state.error = action.payload || "Login failed";
     },
     logout(state) {
       state.token = null;
@@ -48,5 +48,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout, setUser } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, setUser } =
+  authSlice.actions;
 export default authSlice.reducer;
