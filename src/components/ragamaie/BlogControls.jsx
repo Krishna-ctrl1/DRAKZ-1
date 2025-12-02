@@ -1,278 +1,151 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../../styles/ragamaie/BlogControls.css";
 
-function BlogControls({ onFiltersChange, onBlogCreated, onSearch }) {
-  const [activeTab, setActiveTab] = useState("Latest");
+// --- DARK MODAL STYLES ---
+const modalStyles = {
+  overlay: {
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)', // Dark dim
+    display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2000,
+    backdropFilter: 'blur(5px)'
+  },
+  content: {
+    backgroundColor: '#1e1e2f', // Dark Navy
+    padding: '30px', borderRadius: '16px', width: '90%', maxWidth: '600px',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.6)', border: '1px solid #2b2b40', color: '#fff'
+  },
+  input: {
+    width: '100%', padding: '12px', marginBottom: '15px', backgroundColor: '#11111d',
+    border: '1px solid #2b2b40', color: '#fff', borderRadius: '8px', fontSize: '1rem'
+  },
+  textarea: {
+    width: '100%', padding: '12px', marginBottom: '15px', backgroundColor: '#11111d',
+    border: '1px solid #2b2b40', color: '#fff', borderRadius: '8px', fontSize: '1rem', minHeight: '150px'
+  },
+  btnPrimary: {
+    padding: '10px 20px', backgroundColor: '#6C63FF', color: '#fff', border: 'none',
+    borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem'
+  },
+  btnSecondary: {
+    padding: '10px 20px', backgroundColor: 'transparent', color: '#aaa', border: '1px solid #444',
+    borderRadius: '8px', cursor: 'pointer', marginLeft: '10px'
+  }
+};
+
+function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, onCancelEdit }) {
   const [showForm, setShowForm] = useState(false);
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [formData, setFormData] = useState({ title: "", content: "", image: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Unified filter state
-  const [activeFilters, setActiveFilters] = useState({
-    authorType: "all",
-    sortBy: "latest",
-    search: "",
-  });
-
+  
+  // existing states...
+  const [activeFilters, setActiveFilters] = useState({ authorType: "all", sortBy: "latest", search: "" });
   const dropdownRef = useRef(null);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    image: "",
-    author_type: "user",
-    author_id: "",
-    status: "pending",
-    verified_by: null,
-    published_at: null,
-  });
-
-  const [errors, setErrors] = useState({});
-
+  // WATCH FOR EDIT PROP
   useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowFilterDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setActiveFilters((prev) => ({ ...prev, search: value }));
-    onSearch?.(value);
-  };
-
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...activeFilters, [key]: value };
-    setActiveFilters(newFilters);
-    onFiltersChange?.(newFilters);
-    setShowFilterDropdown(false);
-  };
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    const sortBy = tab === "Latest" ? "latest" : "top";
-    const newFilters = { ...activeFilters, sortBy };
-    setActiveFilters(newFilters);
-    onFiltersChange?.(newFilters);
-  };
-
-  const clearFilters = () => {
-    const newFilters = { ...activeFilters, authorType: "all" };
-    setActiveFilters(newFilters);
-    onFiltersChange?.(newFilters);
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: null });
+    if (editingBlog) {
+      setFormData({
+        title: editingBlog.title,
+        content: editingBlog.content,
+        image: editingBlog.image || ""
+      });
+      setShowForm(true);
     }
-  };
+  }, [editingBlog]);
 
-  // ---------------------------------------------------------
-  // 🛡️ IMPROVED VALIDATION LOGIC
-  // ---------------------------------------------------------
-  const validate = () => {
-    const newErrors = {};
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-
-    // Remove all non-alphanumeric characters (keeps only letters and numbers)
-    // "....." becomes "" (length 0)
-    // "Hi...." becomes "Hi" (length 2)
-    const cleanTitle = formData.title.replace(/[^a-zA-Z0-9]/g, "");
-    const cleanContent = formData.content.replace(/[^a-zA-Z0-9]/g, "");
-
-    // 1. Title Validation
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required.";
-    } else if (cleanTitle.length < 3) { 
-      // Ensures at least 3 REAL letters/numbers exist
-      newErrors.title = "Title must contain at least 3 alphanumeric characters (no filler symbols).";
-    } else if (formData.title.length > 100) {
-      newErrors.title = "Title cannot exceed 100 characters.";
-    }
-
-    // 2. Content Validation
-    if (!formData.content.trim()) {
-      newErrors.content = "Content is required.";
-    } else if (cleanContent.length < 10) { 
-      // Ensures at least 10 REAL letters/numbers exist
-      newErrors.content = "Content is too short or contains only symbols (min 10 alphanumeric characters).";
-    }
-
-    // 3. Image URL Validation
-    if (formData.image.trim() && !urlPattern.test(formData.image)) {
-      newErrors.image = "Please enter a valid Image URL (http:// or https://).";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-
     setIsSubmitting(true);
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to post.");
-        setIsSubmitting(false);
-        return;
-      }
+    const token = localStorage.getItem("token");
+    if (!token) { setIsSubmitting(false); return alert("Please login."); }
 
-      const response = await fetch("http://localhost:3001/api/blogs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          content: formData.content,
-          image: formData.image
-        })
+    const url = editingBlog 
+      ? `http://localhost:3001/api/blogs/update/${editingBlog._id}` // PUT
+      : "http://localhost:3001/api/blogs";                          // POST
+      
+    const method = editingBlog ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
-        alert("Blog submitted successfully! ⏳ It is now pending Admin approval.");
+        alert(editingBlog ? "Blog updated! It is pending approval." : "Blog submitted!");
         setShowForm(false);
-        setFormData({ ...formData, title: "", content: "", image: "" });
+        setFormData({ title: "", content: "", image: "" });
         onBlogCreated?.(); 
       } else {
-        const errorData = await response.json();
-        alert(`Failed: ${errorData.message}`);
+        alert("Failed to save.");
       }
-    } catch (error) {
-      console.error("Network error:", error);
-      alert("Could not connect to the server.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (error) { console.error("Error:", error); }
+    setIsSubmitting(false);
   };
 
-  const getFilterLabel = () =>
-    activeFilters.authorType === "user"
-      ? "Users"
-      : activeFilters.authorType === "advisor"
-      ? "Advisors"
-      : "Filter";
+  const closeForm = () => {
+    setShowForm(false);
+    setFormData({ title: "", content: "", image: "" });
+    if(editingBlog) onCancelEdit?.(); 
+  };
 
   return (
     <>
       <div className="blog-controls">
         <div className="left">
-          <input
-            type="text"
-            placeholder="🔍 Search blogs..."
-            value={activeFilters.search}
-            onChange={handleSearchChange}
-            className="search-input"
-          />
-
-          <div className="filter-dropdown" ref={dropdownRef}>
-            <button
-              className="filter-btn"
-              onClick={() => setShowFilterDropdown((p) => !p)}
-            >
-              {getFilterLabel()} ▼
-            </button>
-
-            {showFilterDropdown && (
-              <div className="dropdown-content">
-                <div className="filter-section">
-                  <strong>Author Type</strong>
-                  {["all", "user", "advisor"].map((type) => (
-                    <label key={type}>
-                      <input
-                        type="radio"
-                        name="author_type"
-                        checked={activeFilters.authorType === type}
-                        onChange={() => handleFilterChange("authorType", type)}
-                      />
-                      {type === "all" ? "All Authors" : type.charAt(0).toUpperCase() + type.slice(1)}
-                    </label>
-                  ))}
-                </div>
-                <button className="clear-filters" onClick={clearFilters}>
-                  Clear Filters
-                </button>
-              </div>
-            )}
-          </div>
-
-          {["Latest", "Top"].map((tab) => (
-            <button
-              key={tab}
-              className={`tab ${activeTab === tab ? "active" : ""}`}
-              onClick={() => handleTabChange(tab)}
-            >
-              {tab}
-            </button>
-          ))}
+           {/* Ensure your CSS file handles this search input styling to match the screenshot */}
+           <input 
+             type="text" 
+             placeholder="🔍 Search..." 
+             onChange={(e) => onSearch?.(e.target.value)} 
+             className="search-input"
+             style={{ 
+               background: '#11111d', border: '1px solid #2b2b40', color: '#fff', 
+               padding: '10px 15px', borderRadius: '20px', width: '300px'
+             }}
+           />
         </div>
 
         <div className="right">
-          <button className="create-btn" onClick={() => setShowForm(true)}>
-            Create your Blog
+          <button 
+            className="create-btn" 
+            onClick={() => setShowForm(true)}
+            style={{
+              background: 'linear-gradient(45deg, #6C63FF, #4840d6)',
+              color: '#fff', border: 'none', padding: '10px 20px', 
+              borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold'
+            }}
+          >
+            {editingBlog ? "Editing Blog..." : "Create your Blog"}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Create Blog</h2>
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.content}>
+            <h2 style={{marginTop:0, marginBottom:'20px'}}>{editingBlog ? "Edit & Resubmit" : "Create Blog"}</h2>
             <form onSubmit={handleSubmit}>
-              
               <div className="form-group">
-                <input 
-                  type="text" 
-                  name="title" 
-                  placeholder="Title" 
-                  value={formData.title} 
-                  onChange={handleChange} 
-                  className={errors.title ? "input-error" : ""}
-                />
-                {errors.title && <p className="error-text">{errors.title}</p>}
+                <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Title</label>
+                <input style={modalStyles.input} type="text" name="title" value={formData.title} onChange={handleChange} required />
               </div>
-
               <div className="form-group">
-                <textarea 
-                  name="content" 
-                  placeholder="Content (min 10 real characters)" 
-                  rows="5" 
-                  value={formData.content} 
-                  onChange={handleChange}
-                  className={errors.content ? "input-error" : ""}
-                />
-                {errors.content && <p className="error-text">{errors.content}</p>}
+                <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Content</label>
+                <textarea style={modalStyles.textarea} name="content" rows="5" value={formData.content} onChange={handleChange} required />
               </div>
-
               {/* <div className="form-group">
-                <input 
-                  type="text" 
-                  name="image" 
-                  placeholder="Image URL (optional)" 
-                  value={formData.image} 
-                  onChange={handleChange} 
-                  className={errors.image ? "input-error" : ""}
-                />
-                {errors.image && <p className="error-text">{errors.image}</p>}
+                <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Image URL (Optional)</label>
+                <input style={modalStyles.input} type="text" name="image" value={formData.image} onChange={handleChange} />
               </div> */}
-
-              <div className="button-row">
-                <button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                </button>
-                <button type="button" className="cancel" onClick={() => setShowForm(false)}>
-                  Cancel
+              <div style={{display:'flex', justifyContent:'flex-end', marginTop:'20px'}}>
+                <button type="button" style={modalStyles.btnSecondary} onClick={closeForm}>Cancel</button>
+                <button type="submit" style={modalStyles.btnPrimary} disabled={isSubmitting}>
+                   {isSubmitting ? "Saving..." : (editingBlog ? "Save & Resubmit" : "Submit")}
                 </button>
               </div>
             </form>

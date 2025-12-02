@@ -1,16 +1,16 @@
 const Blog = require("../models/blog.model");
 const Person = require("../models/people.model");
 
-// CREATE: Force status to 'pending'
+// CREATE
 exports.createBlog = async (req, res) => {
-  const { title, content, image } = req.body; // Added image if you use it
+  const { title, content, image } = req.body;
   const author_id = req.user.id; 
 
   try {
     const blog = new Blog({
       title,
       content,
-      // image,
+      image,
       author_id,
       status: "pending",
       likes: [],
@@ -25,56 +25,25 @@ exports.createBlog = async (req, res) => {
   }
 };
 
-// controllers/blog.controller.js
-
-exports.getComments = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    // 1. Find the blog
-    // 2. Populate the 'user_id' inside the 'comments' array
-    const blog = await Blog.findById(id)
-      .populate({
-        path: "comments.user_id", 
-        model: "Person",           
-        select: "name email"       
-      });
-
-    if (!blog) {
-      return res.status(404).json({ message: "Blog not found" });
-    }
-
-    // 3. Return the comments array
-    res.json(blog.comments);
-
-  } catch (err) {
-    console.error("Error fetching comments:", err);
-    res.status(500).json({ message: "Server error loading comments" });
-  }
-};
-
-// ADMIN: Get blogs by status
+// ADMIN: Get blogs (Fixed Populate for "Unknown" issue)
 exports.getAdminBlogs = async (req, res) => {
   const { status } = req.query;
   try {
     const filter = status ? { status } : {};
-    
-    // 👇 REMOVED .populate('author_id', 'name email')
     const blogs = await Blog.find(filter)
+      .populate('author_id', 'name email') // <--- FIXES "Unknown (ID Only)"
       .sort({ createdAt: -1 }); 
-      
     res.json(blogs);
   } catch (err) {
-    console.error(err); // Log the error to see if anything else is wrong
     res.status(500).json({ message: "Failed to fetch admin data" });
   }
 };
 
-// GET PUBLIC
+// PUBLIC: Get Approved Blogs
 exports.getBlogs = async (req, res) => {
   try {
-    // 👇 REMOVED .populate('author_id', 'name email')
     const blogs = await Blog.find({ status: "approved" })
+      .populate('author_id', 'name email')
       .sort({ createdAt: -1 });
     res.json(blogs);
   } catch (err) {
@@ -82,10 +51,53 @@ exports.getBlogs = async (req, res) => {
   }
 };
 
-// ADMIN: Approve or Reject Blog
+// USER: Get My Blogs
+exports.getMyBlogs = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Fetch all blogs by this user, regardless of status
+    const blogs = await Blog.find({ author_id: userId }).sort({ createdAt: -1 });
+    res.json(blogs);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch your blogs" });
+  }
+};
+
+// USER: Edit & Resubmit (Resets status to Pending)
+exports.updateBlogContent = async (req, res) => {
+  const { id } = req.params;
+  const { title, content, image } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const blog = await Blog.findById(id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+
+    // Only author can edit
+    if (blog.author_id.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Update fields
+    blog.title = title || blog.title;
+    blog.content = content || blog.content;
+    if (image !== undefined) blog.image = image;
+
+    // RESET STATUS
+    blog.status = "pending";
+    blog.rejection_reason = ""; // Clear previous rejection
+    
+    await blog.save();
+    res.json({ message: "Blog updated and resubmitted!", blog });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update blog" });
+  }
+};
+
+// ADMIN: Approve or Reject (With Reason)
 exports.updateBlogStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body; // 'approved' or 'rejected'
+  const { status, reason } = req.body; // Capture 'reason'
   const adminId = req.user.id;
 
   try {
@@ -96,10 +108,12 @@ exports.updateBlogStatus = async (req, res) => {
 
     if (status === 'approved') {
       updateData.published_at = new Date();
+      updateData.rejection_reason = "";
+    } else if (status === 'rejected') {
+      updateData.rejection_reason = reason || "No reason provided.";
     }
 
     const blog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
-    
     if (!blog) return res.status(404).json({ message: "Blog not found" });
     
     res.json(blog);
