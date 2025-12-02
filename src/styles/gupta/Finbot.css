@@ -53,6 +53,7 @@
   transition: margin-left 0.3s ease;
   margin-top: 5rem;
   width: 100%;
+  margin-left: 8rem;
 }
 
 .chatbot-container {
