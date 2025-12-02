@@ -230,6 +230,15 @@
   padding-left: 4px;
 }
 
+.field-error {
+  color: #ffb4b4;
+  background: rgba(239, 68, 68, 0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
 .form-group select {
   cursor: pointer;
   appearance: none;
@@ -347,7 +356,7 @@
   background: rgba(124, 58, 237, 0.2);
   border-radius: 2px;
   margin-top: 4px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .password-strength-bar {
@@ -369,4 +378,12 @@
 .password-strength-bar.strong {
   width: 100%;
   background: #22c55e;
+}
+
+.field-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
 }
