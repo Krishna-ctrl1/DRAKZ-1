@@ -1,7 +1,7 @@
 /* Account Summary Styles */
 .account-summary-container {
   background-color: #1e1e2d; /* Dark background matching dashboard */
-  padding: 20px;
+  padding: 24px; /* Increased padding slightly */
   border-radius: 16px;
   color: white;
   font-family: 'Inter', sans-serif;
@@ -12,28 +12,28 @@
 }
 
 .account-summary-title {
-  font-size: 18px;
+  font-size: 20px; /* Increased title size */
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: #ffffff;
 }
 
 .summary-cards {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 20px; /* Increased gap */
 }
 
 .summary-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px; /* Increased gap between ring and text */
 }
 
 .progress-circle {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 70px; /* Increased from 50px */
+  height: 70px; /* Increased from 50px */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -44,8 +44,8 @@
 .progress-circle::before {
   content: '';
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 56px; /* Increased from 40px to match new size */
+  height: 56px; /* Increased from 40px to match new size */
   background-color: #1e1e2d;
   border-radius: 50%;
 }
@@ -54,7 +54,7 @@
   position: relative;
   z-index: 1;
   color: white;
-  font-size: 16px;
+  font-size: 24px; /* Increased from 16px */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,22 +63,25 @@
 .summary-details {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .summary-amount {
-  font-size: 16px;
+  font-size: 22px; /* Increased from 16px */
   font-weight: 700;
   color: #ffffff;
+  line-height: 1.2;
 }
 
 .summary-label {
-  font-size: 12px;
-  color: #888;
+  font-size: 14px; /* Increased from 12px */
+  color: #aaa; /* Slightly brighter for better contrast */
+  margin-top: 4px;
 }
 
 @media (max-width: 768px) {
   .summary-cards {
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
   }
 }
