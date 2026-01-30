@@ -1,37 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import "../../styles/ragamaie/Stocks.css";
 import { toCSV, downloadCSV } from "../../utils/csv.util";
-
-const API_BASE = "http://localhost:3001";
+import { fetchStocks } from "../../redux/slices/stocksSlice";
 
 export default function Stocks() {
-  const [stocks, setStocks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+
+  const { list: stocks, loading, error } = useSelector(
+    (state) => state.stocks
+  );
 
   useEffect(() => {
-    const fetchStocks = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/user-investments`, {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch stocks");
-        }
-
-        const data = await res.json();
-        setStocks(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setError("Could not load stocks.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStocks();
-  }, []);
+    dispatch(fetchStocks());
+  }, [dispatch]);
 
   const formatPrice = (value) => {
     if (value == null) return "-";
@@ -47,29 +29,27 @@ export default function Stocks() {
     <div className="stocks-container">
       <div className="stocks-header">
         <h2>Your Stocks</h2>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            className="link-btn"
-            onClick={() => {
-              if (!Array.isArray(stocks) || stocks.length === 0) return;
-              const rows = stocks.map((s) => ({
-                name: s.name,
-                symbol: s.symbol,
-                current_price: s.current_price,
-                change_pct: s.change_pct,
-              }));
-              const csv = toCSV(rows, [
-                "name",
-                "symbol",
-                "current_price",
-                "change_pct",
-              ]);
-              downloadCSV("stocks.csv", csv);
-            }}
-          >
-            Export CSV
-          </button>
-        </div>
+        <button
+          className="link-btn"
+          onClick={() => {
+            if (!stocks.length) return;
+            const rows = stocks.map((s) => ({
+              name: s.name,
+              symbol: s.symbol,
+              current_price: s.current_price,
+              change_pct: s.change_pct,
+            }));
+            const csv = toCSV(rows, [
+              "name",
+              "symbol",
+              "current_price",
+              "change_pct",
+            ]);
+            downloadCSV("stocks.csv", csv);
+          }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {loading ? (
@@ -90,7 +70,9 @@ export default function Stocks() {
                 <span>{stock.name}</span>
                 <span>{stock.symbol}</span>
               </div>
-              <p className="stock-price">{formatPrice(stock.current_price)}</p>
+              <p className="stock-price">
+                {formatPrice(stock.current_price)}
+              </p>
               <span
                 className={`stock-change ${getChangeClass(stock.change_pct)}`}
               >
