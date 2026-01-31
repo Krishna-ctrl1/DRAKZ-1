@@ -73,7 +73,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 - Live video session interface implementation
 - Backend integration for AI services
 
-### M Deepthi Nagineni - Dashboard & Analytics
+### M Deepthi - Dashboard & Analytics
 **Primary Responsibilities:**
 - User dashboard development and design
 - Account summary visualizations
