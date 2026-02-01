@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
+import api from "../../api/axios.api";
 import "../../styles/ragamaie/StockChart.css";
 import { toCSV, downloadCSV } from "../../utils/csv.util";
-
-const API_BASE = "http://localhost:3001";
 
 export default function StockChart() {
   const [stocks, setStocks] = useState([]);
@@ -12,16 +11,8 @@ export default function StockChart() {
   useEffect(() => {
     const fetchStocks = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/user-investments`, {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch stocks");
-        }
-
-        const data = await res.json();
-        setStocks(Array.isArray(data) ? data : []);
+        const res = await api.get("/api/user-investments");
+        setStocks(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
         setError("Could not load stock table.");

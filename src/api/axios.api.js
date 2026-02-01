@@ -22,6 +22,7 @@ instance.interceptors.response.use(
 
     // Handle 401 - redirect to login
     if (err?.response?.status === 401) {
+      console.error(`🚫 401 Unauthorized on ${config?.url}`, err.response?.data);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       window.location.href = "/login";

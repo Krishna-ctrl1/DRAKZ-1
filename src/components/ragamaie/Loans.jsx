@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import api from "../../api/axios.api";
 import "../../styles/ragamaie/Loans.css";
-
-const API_BASE = "http://localhost:3001";
 
 export default function Loans() {
   const [expanded, setExpanded] = useState(null);
@@ -13,16 +12,8 @@ export default function Loans() {
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/user-loans`, {
-          credentials: "include",
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch loans");
-        }
-
-        const data = await res.json();
-        setLoans(Array.isArray(data) ? data : []);
+        const res = await api.get("/api/user-loans");
+        setLoans(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
         setError("Could not load loans.");

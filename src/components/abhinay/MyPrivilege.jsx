@@ -26,9 +26,9 @@ const getTransactionIcon = (type) => {
 };
 
 const FALLBACK_METAL_PRICES = {
-  Gold: 6610,
-  Silver: 83,
-  Platinum: 3290,
+  Gold: 17886,
+  Silver: 980,
+  Platinum: 32500,
 };
 
 const MyPrivilege = () => {
@@ -118,15 +118,29 @@ const MyPrivilege = () => {
   const fetchLiveMetalPrices = async () => {
     try {
       setPricesLoading(true);
+      console.log('[MetalPrices] Fetching live metal prices...');
       const response = await api.get('/api/privilege/live-metal-prices');
-      applyLivePriceSnapshot(
-        response.data?.prices || {},
-        response.data?.source || 'Live market feed',
-        response.data?.updatedAt
-      );
-      setMetalPriceError(null);
+      console.log('[MetalPrices] Response received:', response.data);
+      
+      if (response.data?.prices) {
+        applyLivePriceSnapshot(
+          response.data.prices,
+          response.data.source || 'Live market feed',
+          response.data.updatedAt
+        );
+        setMetalPriceError(null);
+        console.log('[MetalPrices] Prices updated successfully:', response.data.prices);
+      } else {
+        console.warn('[MetalPrices] No prices in response, using fallback');
+        applyLivePriceSnapshot(
+          lastKnownPricesRef.current,
+          'Fallback values',
+          new Date().toISOString()
+        );
+      }
     } catch (err) {
-      console.error('Failed to fetch live metal prices', err);
+      console.error('[MetalPrices] Failed to fetch live metal prices:', err);
+      console.error('[MetalPrices] Error details:', err.response?.data || err.message);
       
       // Apply last known values with error message
       applyLivePriceSnapshot(
@@ -137,6 +151,7 @@ const MyPrivilege = () => {
       setMetalPriceError('Unable to refresh live market rates right now. Showing last known values.');
     } finally {
       setPricesLoading(false);
+      console.log('[MetalPrices] Loading complete, pricesLoading set to false');
     }
   };
 
@@ -541,7 +556,24 @@ const MyPrivilege = () => {
                   
                   {/* Live Metal Prices Card */}
                   <div className="live-metal-prices-card">
-                    <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India) - 24K</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India) - 24K</h4>
+                      <button 
+                        onClick={fetchLiveMetalPrices} 
+                        disabled={pricesLoading}
+                        style={{ 
+                          padding: '6px 12px', 
+                          border: '1px solid #4CAF50', 
+                          background: 'transparent', 
+                          color: '#4CAF50',
+                          borderRadius: '4px',
+                          cursor: pricesLoading ? 'not-allowed' : 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        <i className="fa-solid fa-refresh"></i> {pricesLoading ? 'Updating...' : 'Refresh'}
+                      </button>
+                    </div>
                     <div className="metal-price-meta">
                       <span className="price-source-tag">
                         Source: {metalPriceSource || 'Fetching...' }
@@ -567,8 +599,8 @@ const MyPrivilege = () => {
                               <span className="price-loading">Loading...</span>
                             ) : (
                               <>
-                                <span className="price-label">1 Gram</span>
-                                <span className="price-value">₹{liveMetalPrices.Gold.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <span className="price-label">10 Grams</span>
+                                <span className="price-value">₹{(liveMetalPrices.Gold * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                               </>
                             )}
                           </div>
@@ -586,8 +618,8 @@ const MyPrivilege = () => {
                               <span className="price-loading">Loading...</span>
                             ) : (
                               <>
-                                <span className="price-label">1 Gram</span>
-                                <span className="price-value">₹{liveMetalPrices.Silver.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <span className="price-label">10Grams</span>
+                                <span className="price-value">₹{(liveMetalPrices.Silver * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                               </>
                             )}
                           </div>
@@ -605,8 +637,8 @@ const MyPrivilege = () => {
                               <span className="price-loading">Loading...</span>
                             ) : (
                               <>
-                                <span className="price-label">1 Gram</span>
-                                <span className="price-value">₹{liveMetalPrices.Platinum.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <span className="price-label">10 Grams</span>
+                                <span className="price-value">₹{(liveMetalPrices.Platinum*10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
                               </>
                             )}
                           </div>

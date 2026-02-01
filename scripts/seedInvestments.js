@@ -9,15 +9,17 @@ async function seedInvestments() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to MongoDB");
 
-    const user = await Person.findOne().lean();
-    if (!user) throw new Error("No users found. Run scripts/seed.js first.");
+    // Get all users with role 'user'
+    const users = await Person.find({ role: 'user' }).lean();
+    if (!users || users.length === 0) {
+      throw new Error("No users found. Run scripts/seed.js first.");
+    }
 
-    console.log("Seeding investment history for user:", user.email);
+    console.log(`Seeding investment history for ${users.length} users...`);
 
-    // Clear old investment transactions for this user
+    // Clear old investment transactions for all users
     await Transaction.collection.deleteMany({
       category: "investment",
-      userId: user._id,
     });
 
     const now = new Date();
@@ -39,35 +41,39 @@ async function seedInvestments() {
       { month: 11, amount: 55550 }, // Dec
     ];
 
-    const yearlyDocs = yearlyTemplate.map((m) => ({
-      userId: user._id,
-      type: "investment", // enum is bypassed because we use collection.insertMany
-      category: "investment",
-      amount: m.amount,
-      date: new Date(year, m.month, 10), // 10th of each month
-      description: "Seed yearly investment",
-    }));
-
-    // --- Last 30 days (for 1M) ---
-    const dailyDocs = [];
-    for (let i = 0; i < 30; i++) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i); // today, yesterday, ...
-
-      dailyDocs.push({
+    for (const user of users) {
+      console.log(`  - Seeding investments for: ${user.email}`);
+      
+      const yearlyDocs = yearlyTemplate.map((m) => ({
         userId: user._id,
         type: "investment",
         category: "investment",
-        amount: 2000 + i * 20, // just incremental demo values
-        date: d,
-        description: "Seed daily investment",
-      });
+        amount: m.amount,
+        date: new Date(year, m.month, 10), // 10th of each month
+        description: "Seed yearly investment",
+      }));
+
+      // --- Last 30 days (for 1M) ---
+      const dailyDocs = [];
+      for (let i = 0; i < 30; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i); // today, yesterday, ...
+
+        dailyDocs.push({
+          userId: user._id,
+          type: "investment",
+          category: "investment",
+          amount: 2000 + i * 20, // just incremental demo values
+          date: d,
+          description: "Seed daily investment",
+        });
+      }
+
+      const allDocs = [...yearlyDocs, ...dailyDocs];
+      await Transaction.collection.insertMany(allDocs);
     }
-
-    const allDocs = [...yearlyDocs, ...dailyDocs];
-
-    await Transaction.collection.insertMany(allDocs);
-    console.log("Investments seeded successfully ✅");
+    
+    console.log("Investments seeded successfully for all users ✅");
   } catch (err) {
     console.error("Error seeding investments:", err);
   } finally {
