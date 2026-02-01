@@ -38,18 +38,20 @@ export default function Sidebar({ collapsed = true, setCollapsed }) {
   const sessionLink = isAdvisor ? "/advisor/video" : "/user/video";
   const sessionLabel = isAdvisor ? "Broadcast Updates" : "Advisor Updates"; // New Label
 
+  // Build menu items based on role
   const topMenuItems = [
     { id: "dashboard", label: "Dashboard", icon: "fa-solid fa-border-all", path: isAdvisor ? "/advisor/dashboard" : "/user/dashboard" },
-    { id: "investments", label: "Investments", icon: "fa-solid fa-chart-column", path: "/user/investments" },
-    { id: "privileges", label: "Privileges", icon: "fa-solid fa-star", path: "/user/privileges" },
-    { id: "blog", label: "Blog", icon: "fa-solid fa-pen-to-square", path: "/user/blog" },
-    { id: "finbot", label: "FinBot", icon: "fa-solid fa-robot", path: "/user/finbot" },
-    
-    // ✅ UPDATED LINK
+    // Only show investments, privileges, blog, finbot for regular users
+    ...(!isAdvisor ? [
+      { id: "investments", label: "Investments", icon: "fa-solid fa-chart-column", path: "/user/investments" },
+      { id: "privileges", label: "Privileges", icon: "fa-solid fa-star", path: "/user/privileges" },
+      { id: "blog", label: "Blog", icon: "fa-solid fa-pen-to-square", path: "/user/blog" },
+      { id: "finbot", label: "FinBot", icon: "fa-solid fa-robot", path: "/user/finbot" },
+    ] : []),
     { id: "video", label: sessionLabel, icon: "fa-solid fa-tower-broadcast", path: sessionLink },
   ];
 
-  const settingsItem = { id: "settings", label: "Settings", icon: "fa-solid fa-gear", path: "/user/settings" };
+  const settingsItem = { id: "settings", label: "Settings", icon: "fa-solid fa-gear", path: isAdvisor ? "/advisor/settings" : "/user/settings" };
 
   return (
     <div 

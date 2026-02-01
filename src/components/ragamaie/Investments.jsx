@@ -7,9 +7,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import api from "../../api/axios.api";
 import "../../styles/ragamaie/investments.css";
-
-const API_BASE = "http://localhost:3001";
 
 export default function Investments() {
   const [range, setRange] = useState("6M");
@@ -23,20 +22,11 @@ export default function Investments() {
       setError("");
 
       try {
-        const res = await fetch(
-          `${API_BASE}/api/investment-history?range=${range}`,
-          { credentials: "include" }
-        );
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch investment history");
-        }
-
-        const apiData = await res.json();
+        const res = await api.get(`/api/investment-history?range=${range}`);
 
         // expecting [{ name: "Nov", value: 4925 }, ...] OR [{ name: "3", value: 4200 }, ...]
-        if (Array.isArray(apiData)) {
-          setData(apiData);
+        if (Array.isArray(res.data)) {
+          setData(res.data);
         } else {
           setData([]);
         }

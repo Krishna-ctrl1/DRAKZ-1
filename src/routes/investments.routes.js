@@ -1,6 +1,7 @@
 // src/routes/investments.routes.js
 const express = require("express");
 const router = express.Router();
+const { auth } = require("../middlewares/auth.middleware");
 
 const {
   getStockApiKey,
@@ -10,19 +11,19 @@ const {
   getInvestmentHistory,
 } = require("../controllers/investments.controller");
 
-// API KEY for Stock APIs
-router.get("/getStockApiKey", getStockApiKey);
+// API KEY for Stock APIs (protected)
+router.get("/getStockApiKey", auth, getStockApiKey);
 
-// Real-time Single Stock Price (Finnhub)
-router.get("/stocks/realtime", getRealTimeStock);
+// Real-time Single Stock Price (Finnhub) (protected)
+router.get("/stocks/realtime", auth, getRealTimeStock);
 
-// Stocks (Your Stocks table, now real-time)
-router.get("/user-investments", getUserStocks);
+// Stocks (Your Stocks table, now real-time) (protected)
+router.get("/user-investments", auth, getUserStocks);
 
-// Loans (Your Loans section)
-router.get("/user-loans", getUserLoans);
+// Loans (Your Loans section) (protected)
+router.get("/user-loans", auth, getUserLoans);
 
-// Investment Chart (Total Investment graph)
-router.get("/investment-history", getInvestmentHistory);
+// Investment Chart (Total Investment graph) (protected)
+router.get("/investment-history", auth, getInvestmentHistory);
 
 module.exports = router;
