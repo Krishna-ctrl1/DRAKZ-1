@@ -254,6 +254,9 @@ Comprehensive stock data platform providing:
 # Start development server (frontend + backend)
 npm run dev
 
+# Start the LLM Model
+python llm.py
+
 # Start backend server only
 npm run server
 

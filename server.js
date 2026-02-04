@@ -20,8 +20,13 @@ const contactRoutes = require("./src/routes/contactRoutes.js");
 const app = express();
 const server = http.createServer(app);
 
+// Middleware imports
+const logger = require("./src/middlewares/logger.middleware.js");
+const errorHandler = require("./src/middlewares/errorHandler.middleware.js");
+
 connectDB();
 
+// Global Middleware
 app.use(
   cors({
     origin: ["http://localhost:3000", "http://localhost:5173"],
@@ -32,6 +37,7 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(logger);
 
 // --- SOCKET SERVER ---
 const io = new Server(server, {
@@ -73,6 +79,9 @@ app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/settings", settingsRoutes);
+
+// Global Error Handler Middleware (MUST be last)
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
