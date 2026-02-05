@@ -24,24 +24,22 @@ const getUserProfile = async (req, res) => {
 // Add Property
 const addProperty = async (req, res) => {
   try {
-    const { name, value, location, imageUrl } = req.body;
+    const { name, value, location } = req.body;
     
     // Validate inputs
     if (!name || !value || !location) {
       return res.status(400).json({ error: 'Name, value, and location are required' });
     }
 
-    // Check if imageUrl is too large (MongoDB has 16MB document limit)
-    if (imageUrl && imageUrl.length > 10000000) { // ~10MB limit for base64
-      return res.status(400).json({ error: 'Image size is too large. Please use a smaller image.' });
-    }
+    // Get image path from multer upload
+    const imageUrl = req.file ? `/uploads/properties/${req.file.filename}` : '/1.jpg';
 
     const newProperty = new Property({
       userId: req.user.id, 
       name, 
       value, 
       location, 
-      imageUrl: imageUrl || '/1.jpg',
+      imageUrl,
     });
     await newProperty.save();
     res.status(201).json(newProperty);
@@ -67,21 +65,24 @@ const deleteProperty = async (req, res) => {
 
 const updateProperty = async (req, res) => {
   try {
-    const { name, value, location, imageUrl } = req.body;
+    const { name, value, location } = req.body;
     
     // Validate inputs
     if (!name || !value || !location) {
       return res.status(400).json({ error: 'Name, value, and location are required' });
     }
 
-    // Check if imageUrl is too large
-    if (imageUrl && imageUrl.length > 10000000) { // ~10MB limit for base64
-      return res.status(400).json({ error: 'Image size is too large. Please use a smaller image.' });
+    // Build update object
+    const updateData = { name, value, location };
+    
+    // If new image uploaded, update imageUrl
+    if (req.file) {
+      updateData.imageUrl = `/uploads/properties/${req.file.filename}`;
     }
 
     const property = await Property.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { name, value, location, imageUrl },
+      updateData,
       { new: true, runValidators: true }
     );
     if (!property) {

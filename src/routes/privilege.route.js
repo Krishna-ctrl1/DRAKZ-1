@@ -18,14 +18,15 @@ const {
 } = require('../controllers/privilege.controller.js');
 
 const { auth } = require('../middlewares/auth.middleware.js');
+const upload = require('../middlewares/upload.middleware.js');
 
 // User Profile
 router.get('/profile', auth, getUserProfile);
 
 // Properties
 router.get('/properties', auth, getProperties);
-router.post('/properties', auth, addProperty);
-router.put('/properties/:id', auth, updateProperty);
+router.post('/properties', auth, upload.single('image'), addProperty);
+router.put('/properties/:id', auth, upload.single('image'), updateProperty);
 router.delete('/properties/:id', auth, deleteProperty);
 
 // Insurances
