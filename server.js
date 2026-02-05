@@ -23,6 +23,7 @@ const server = http.createServer(app);
 // Middleware imports
 const logger = require("./src/middlewares/logger.middleware.js");
 const errorHandler = require("./src/middlewares/errorHandler.middleware.js");
+const { getMorganMiddleware } = require("./src/middlewares/morgan.middleware.js");
 
 connectDB();
 
@@ -37,7 +38,15 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// Morgan HTTP request logger
+const morganMiddlewares = getMorganMiddleware();
+morganMiddlewares.forEach(middleware => app.use(middleware));
+
 app.use(logger);
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
 
 // --- SOCKET SERVER ---
 const io = new Server(server, {
