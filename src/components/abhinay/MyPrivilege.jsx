@@ -894,4 +894,652 @@ const MyPrivilege = () => {
   );
 };
 
+// ==================== UTILITY FUNCTIONS & HELPERS ====================
+
+// Advanced price calculation utilities
+const calculateCompoundInterest = (principal, rate, time, frequency = 12) => {
+  return principal * Math.pow((1 + rate / frequency), frequency * time);
+};
+
+const calculateSimpleInterest = (principal, rate, time) => {
+  return principal * rate * time;
+};
+
+const calculateEMI = (principal, rate, tenure) => {
+  const monthlyRate = rate / 12 / 100;
+  return (principal * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / 
+         (Math.pow(1 + monthlyRate, tenure) - 1);
+};
+
+const calculatePresentValue = (futureValue, rate, periods) => {
+  return futureValue / Math.pow(1 + rate, periods);
+};
+
+const calculateFutureValue = (presentValue, rate, periods) => {
+  return presentValue * Math.pow(1 + rate, periods);
+};
+
+const calculateCAGR = (initialValue, finalValue, years) => {
+  return (Math.pow(finalValue / initialValue, 1 / years) - 1) * 100;
+};
+
+const calculateROI = (gain, cost) => {
+  return ((gain - cost) / cost) * 100;
+};
+
+const calculateNetWorth = (assets, liabilities) => {
+  return assets - liabilities;
+};
+
+const calculateDebtToIncomeRatio = (monthlyDebt, monthlyIncome) => {
+  return (monthlyDebt / monthlyIncome) * 100;
+};
+
+const calculateSavingsRate = (monthlySavings, monthlyIncome) => {
+  return (monthlySavings / monthlyIncome) * 100;
+};
+
+// Date and time utilities
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-IN', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
+
+const formatDateTime = (date) => {
+  return new Date(date).toLocaleString('en-IN', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const getMonthsDifference = (date1, date2) => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return (d2.getFullYear() - d1.getFullYear()) * 12 + d2.getMonth() - d1.getMonth();
+};
+
+const getYearsDifference = (date1, date2) => {
+  return (new Date(date2) - new Date(date1)) / (1000 * 60 * 60 * 24 * 365.25);
+};
+
+const addMonths = (date, months) => {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
+};
+
+const addYears = (date, years) => {
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() + years);
+  return d;
+};
+
+// Portfolio analysis functions
+const calculatePortfolioValue = (holdings) => {
+  return holdings.reduce((total, holding) => {
+    return total + (holding.quantity * holding.currentPrice || 0);
+  }, 0);
+};
+
+const calculatePortfolioDiversity = (holdings) => {
+  const categories = {};
+  holdings.forEach(holding => {
+    const category = holding.category || 'Other';
+    categories[category] = (categories[category] || 0) + holding.value;
+  });
+  return categories;
+};
+
+const calculateAssetAllocation = (portfolio) => {
+  const total = portfolio.reduce((sum, asset) => sum + asset.value, 0);
+  return portfolio.map(asset => ({
+    ...asset,
+    percentage: (asset.value / total) * 100
+  }));
+};
+
+const rebalancePortfolio = (currentAllocation, targetAllocation) => {
+  const recommendations = [];
+  Object.keys(targetAllocation).forEach(asset => {
+    const current = currentAllocation[asset] || 0;
+    const target = targetAllocation[asset];
+    const difference = target - current;
+    if (Math.abs(difference) > 0.5) {
+      recommendations.push({
+        asset,
+        action: difference > 0 ? 'BUY' : 'SELL',
+        percentage: Math.abs(difference)
+      });
+    }
+  });
+  return recommendations;
+};
+
+// Risk assessment functions
+const calculateVolatility = (prices) => {
+  if (prices.length < 2) return 0;
+  const returns = [];
+  for (let i = 1; i < prices.length; i++) {
+    returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+  }
+  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+  const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+  return Math.sqrt(variance) * 100;
+};
+
+const calculateSharpeRatio = (returns, riskFreeRate, volatility) => {
+  return (returns - riskFreeRate) / volatility;
+};
+
+const calculateBeta = (assetReturns, marketReturns) => {
+  const n = Math.min(assetReturns.length, marketReturns.length);
+  const assetMean = assetReturns.reduce((a, b) => a + b, 0) / n;
+  const marketMean = marketReturns.reduce((a, b) => a + b, 0) / n;
+  
+  let covariance = 0;
+  let marketVariance = 0;
+  
+  for (let i = 0; i < n; i++) {
+    covariance += (assetReturns[i] - assetMean) * (marketReturns[i] - marketMean);
+    marketVariance += Math.pow(marketReturns[i] - marketMean, 2);
+  }
+  
+  return covariance / marketVariance;
+};
+
+const assessRiskProfile = (age, income, savings, riskTolerance) => {
+  const scores = {
+    age: age < 30 ? 5 : age < 40 ? 4 : age < 50 ? 3 : age < 60 ? 2 : 1,
+    income: income > 100000 ? 5 : income > 75000 ? 4 : income > 50000 ? 3 : income > 25000 ? 2 : 1,
+    savings: savings > 500000 ? 5 : savings > 250000 ? 4 : savings > 100000 ? 3 : savings > 50000 ? 2 : 1,
+    tolerance: riskTolerance === 'aggressive' ? 5 : riskTolerance === 'moderate' ? 3 : 1
+  };
+  
+  const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+  const avgScore = totalScore / Object.keys(scores).length;
+  
+  if (avgScore >= 4) return 'Aggressive';
+  if (avgScore >= 3) return 'Moderate';
+  return 'Conservative';
+};
+
+// Tax calculation utilities
+const calculateIncomeTax = (income) => {
+  let tax = 0;
+  if (income <= 250000) {
+    tax = 0;
+  } else if (income <= 500000) {
+    tax = (income - 250000) * 0.05;
+  } else if (income <= 1000000) {
+    tax = 12500 + (income - 500000) * 0.20;
+  } else {
+    tax = 112500 + (income - 1000000) * 0.30;
+  }
+  return tax;
+};
+
+const calculateCapitalGainsTax = (gain, holdingPeriod, assetType) => {
+  if (assetType === 'equity') {
+    return holdingPeriod > 365 ? gain * 0.10 : gain * 0.15;
+  } else if (assetType === 'property') {
+    return holdingPeriod > 730 ? gain * 0.20 : gain * 0.30;
+  }
+  return gain * 0.20;
+};
+
+const calculate80CDeduction = (investments) => {
+  return Math.min(investments, 150000);
+};
+
+const calculateHRAExemption = (hra, basicSalary, rentPaid, isMetroCity) => {
+  const exemption1 = hra;
+  const exemption2 = isMetroCity ? basicSalary * 0.50 : basicSalary * 0.40;
+  const exemption3 = rentPaid - (basicSalary * 0.10);
+  return Math.max(0, Math.min(exemption1, exemption2, exemption3));
+};
+
+// Insurance calculation utilities
+const calculateLifeInsuranceCoverage = (annualIncome, age, dependents) => {
+  const yearsToRetirement = 60 - age;
+  const baseCoverage = annualIncome * yearsToRetirement;
+  const dependentFactor = 1 + (dependents * 0.2);
+  return baseCoverage * dependentFactor;
+};
+
+const calculateHealthInsurancePremium = (age, coverageAmount, preExisting) => {
+  let basePremium = coverageAmount * 0.02;
+  const ageFactor = age < 30 ? 1 : age < 40 ? 1.2 : age < 50 ? 1.5 : 2;
+  const healthFactor = preExisting ? 1.3 : 1;
+  return basePremium * ageFactor * healthFactor;
+};
+
+const calculateTermLifePremium = (coverageAmount, age, gender, smoker) => {
+  let base = coverageAmount * 0.001;
+  const ageFactor = age < 30 ? 1 : age < 40 ? 1.5 : age < 50 ? 2.5 : 4;
+  const genderFactor = gender === 'male' ? 1.2 : 1;
+  const smokerFactor = smoker ? 2 : 1;
+  return base * ageFactor * genderFactor * smokerFactor;
+};
+
+// Loan calculation utilities
+const calculateLoanEligibility = (monthlyIncome, existingEMI, creditScore) => {
+  const maxEMI = monthlyIncome * 0.50;
+  const availableEMI = maxEMI - existingEMI;
+  const creditFactor = creditScore > 750 ? 1 : creditScore > 650 ? 0.8 : 0.6;
+  return availableEMI * creditFactor;
+};
+
+const calculateHomeLoanEligibility = (income, age, tenure) => {
+  const maxTenure = 65 - age;
+  const actualTenure = Math.min(tenure, maxTenure);
+  const emi = income * 0.40;
+  const rate = 0.085 / 12;
+  const months = actualTenure * 12;
+  return (emi * (Math.pow(1 + rate, months) - 1)) / (rate * Math.pow(1 + rate, months));
+};
+
+const calculateOutstandingLoan = (principal, emiPaid, totalEMI, monthlyEMI) => {
+  const principalPaid = (emiPaid * monthlyEMI) * 0.6; // Approximate
+  return principal - principalPaid;
+};
+
+const calculatePrepaymentSavings = (outstanding, prepayment, rate, remainingTenure) => {
+  const oldEMI = calculateEMI(outstanding, rate, remainingTenure);
+  const newOutstanding = outstanding - prepayment;
+  const newEMI = calculateEMI(newOutstanding, rate, remainingTenure);
+  const totalOldPayment = oldEMI * remainingTenure;
+  const totalNewPayment = newEMI * remainingTenure;
+  return totalOldPayment - totalNewPayment;
+};
+
+// Investment strategy functions
+const calculateSIPReturns = (monthlyInvestment, annualReturn, years) => {
+  const months = years * 12;
+  const monthlyRate = annualReturn / 12 / 100;
+  const futureValue = monthlyInvestment * 
+    ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
+    (1 + monthlyRate);
+  const totalInvested = monthlyInvestment * months;
+  return {
+    futureValue,
+    totalInvested,
+    returns: futureValue - totalInvested
+  };
+};
+
+const calculateLumpsumReturns = (investment, annualReturn, years) => {
+  const futureValue = investment * Math.pow(1 + annualReturn / 100, years);
+  return {
+    futureValue,
+    totalInvested: investment,
+    returns: futureValue - investment
+  };
+};
+
+const calculateRetirementCorpus = (currentAge, retirementAge, monthlyExpense, inflation) => {
+  const yearsToRetirement = retirementAge - currentAge;
+  const lifeExpectancy = 85;
+  const yearsInRetirement = lifeExpectancy - retirementAge;
+  
+  const futureMonthlyExpense = monthlyExpense * Math.pow(1 + inflation / 100, yearsToRetirement);
+  const annualExpense = futureMonthlyExpense * 12;
+  
+  const corpusNeeded = annualExpense * yearsInRetirement;
+  return corpusNeeded;
+};
+
+const calculateGoalAmount = (currentCost, years, inflation) => {
+  return currentCost * Math.pow(1 + inflation / 100, years);
+};
+
+const calculateMonthlyInvestment = (targetAmount, years, expectedReturn) => {
+  const months = years * 12;
+  const monthlyRate = expectedReturn / 12 / 100;
+  return targetAmount / (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate));
+};
+
+// Emergency fund calculations
+const calculateEmergencyFund = (monthlyExpense) => {
+  return monthlyExpense * 6; // 6 months of expenses
+};
+
+const assessEmergencyFundAdequacy = (currentFund, monthlyExpense) => {
+  const required = monthlyExpense * 6;
+  const percentage = (currentFund / required) * 100;
+  if (percentage >= 100) return 'Adequate';
+  if (percentage >= 50) return 'Partially Adequate';
+  return 'Inadequate';
+};
+
+// Budgeting utilities
+const categorizeExpenses = (transactions) => {
+  const categories = {
+    housing: 0,
+    food: 0,
+    transportation: 0,
+    utilities: 0,
+    healthcare: 0,
+    entertainment: 0,
+    education: 0,
+    insurance: 0,
+    savings: 0,
+    other: 0
+  };
+  
+  transactions.forEach(tx => {
+    const category = tx.category?.toLowerCase() || 'other';
+    if (categories[category] !== undefined) {
+      categories[category] += tx.amount;
+    } else {
+      categories.other += tx.amount;
+    }
+  });
+  
+  return categories;
+};
+
+const apply50_30_20Rule = (income) => {
+  return {
+    needs: income * 0.50,
+    wants: income * 0.30,
+    savings: income * 0.20
+  };
+};
+
+const analyzeSpendingPattern = (expenses, income) => {
+  const totalExpense = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const savingsRate = ((income - totalExpense) / income) * 100;
+  const pattern = savingsRate > 20 ? 'Excellent' : savingsRate > 10 ? 'Good' : savingsRate > 0 ? 'Average' : 'Poor';
+  return { savingsRate, pattern };
+};
+
+// Credit score utilities
+const estimateCreditScore = (paymentHistory, creditUtilization, creditAge, hardInquiries) => {
+  let score = 300;
+  
+  // Payment history (35%)
+  score += paymentHistory * 3.5;
+  
+  // Credit utilization (30%)
+  score += (100 - creditUtilization) * 3;
+  
+  // Credit age (15%)
+  score += Math.min(creditAge * 10, 150);
+  
+  // Hard inquiries (10%)
+  score -= hardInquiries * 10;
+  
+  return Math.min(900, Math.max(300, Math.round(score)));
+};
+
+const getCreditScoreCategory = (score) => {
+  if (score >= 750) return 'Excellent';
+  if (score >= 700) return 'Good';
+  if (score >= 650) return 'Fair';
+  if (score >= 600) return 'Poor';
+  return 'Very Poor';
+};
+
+const suggestCreditImprovement = (score, utilization, paymentHistory) => {
+  const suggestions = [];
+  
+  if (score < 750) {
+    if (utilization > 30) {
+      suggestions.push('Reduce credit utilization below 30%');
+    }
+    if (paymentHistory < 100) {
+      suggestions.push('Make all payments on time');
+    }
+    suggestions.push('Avoid hard inquiries');
+    suggestions.push('Maintain old credit accounts');
+  }
+  
+  return suggestions;
+};
+
+// Wealth accumulation tracking
+const calculateWealthGrowth = (initialWealth, monthlyContribution, years, averageReturn) => {
+  const months = years * 12;
+  const monthlyRate = averageReturn / 12 / 100;
+  
+  let wealth = initialWealth;
+  const timeline = [];
+  
+  for (let month = 0; month <= months; month++) {
+    if (month > 0) {
+      wealth = (wealth + monthlyContribution) * (1 + monthlyRate);
+    }
+    if (month % 12 === 0) {
+      timeline.push({
+        year: month / 12,
+        wealth: Math.round(wealth)
+      });
+    }
+  }
+  
+  return timeline;
+};
+
+const calculateFinancialIndependenceNumber = (annualExpense, withdrawalRate = 4) => {
+  return (annualExpense * 100) / withdrawalRate;
+};
+
+const calculateYearsToFI = (currentWealth, targetWealth, monthlyContribution, averageReturn) => {
+  if (monthlyContribution <= 0) return Infinity;
+  
+  const monthlyRate = averageReturn / 12 / 100;
+  let wealth = currentWealth;
+  let months = 0;
+  
+  while (wealth < targetWealth && months < 1200) { // Max 100 years
+    wealth = (wealth + monthlyContribution) * (1 + monthlyRate);
+    months++;
+  }
+  
+  return months / 12;
+};
+
+// Gold and precious metal utilities
+const convertGoldUnits = (value, fromUnit, toUnit) => {
+  const gramValue = fromUnit === 'kg' ? value * 1000 :
+                   fromUnit === 'tola' ? value * 11.66 :
+                   fromUnit === 'oz' ? value * 31.10 : value;
+  
+  return toUnit === 'kg' ? gramValue / 1000 :
+         toUnit === 'tola' ? gramValue / 11.66 :
+         toUnit === 'oz' ? gramValue / 31.10 : gramValue;
+};
+
+const calculateGoldInvestmentReturn = (quantity, buyPrice, currentPrice) => {
+  const investment = quantity * buyPrice;
+  const currentValue = quantity * currentPrice;
+  const gain = currentValue - investment;
+  const returnPercentage = (gain / investment) * 100;
+  
+  return { investment, currentValue, gain, returnPercentage };
+};
+
+const assessGoldAllocation = (goldValue, totalPortfolio) => {
+  const allocation = (goldValue / totalPortfolio) * 100;
+  if (allocation > 15) return 'Over-allocated';
+  if (allocation >= 5) return 'Optimal';
+  return 'Under-allocated';
+};
+
+// Property and real estate utilities
+const calculatePropertyValue = (purchasePrice, appreciationRate, years) => {
+  return purchasePrice * Math.pow(1 + appreciationRate / 100, years);
+};
+
+const calculateRentalYield = (annualRent, propertyValue) => {
+  return (annualRent / propertyValue) * 100;
+};
+
+const calculatePropertyROI = (purchasePrice, currentValue, totalRentCollected, expenses) => {
+  const totalGain = (currentValue - purchasePrice) + totalRentCollected - expenses;
+  return (totalGain / purchasePrice) * 100;
+};
+
+const assessPropertyAffordability = (propertyPrice, annualIncome) => {
+  const ratio = propertyPrice / annualIncome;
+  if (ratio <= 3) return 'Highly Affordable';
+  if (ratio <= 5) return 'Affordable';
+  if (ratio <= 7) return 'Moderately Affordable';
+  return 'Not Affordable';
+};
+
+// Market analysis utilities
+const calculateMovingAverage = (prices, period) => {
+  if (prices.length < period) return prices[prices.length - 1];
+  const slice = prices.slice(-period);
+  return slice.reduce((a, b) => a + b, 0) / period;
+};
+
+const calculateRSI = (prices, period = 14) => {
+  if (prices.length < period + 1) return 50;
+  
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+  
+  const recentChanges = changes.slice(-period);
+  const gains = recentChanges.filter(c => c > 0).reduce((a, b) => a + b, 0) / period;
+  const losses = Math.abs(recentChanges.filter(c => c < 0).reduce((a, b) => a + b, 0)) / period;
+  
+  if (losses === 0) return 100;
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+};
+
+const detectTrend = (prices) => {
+  if (prices.length < 3) return 'Neutral';
+  
+  const recent = prices.slice(-5);
+  const older = prices.slice(-10, -5);
+  
+  const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+  const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+  
+  const change = ((recentAvg - olderAvg) / olderAvg) * 100;
+  
+  if (change > 5) return 'Uptrend';
+  if (change < -5) return 'Downtrend';
+  return 'Neutral';
+};
+
+// Data validation utilities
+const validateEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+const validatePhone = (phone) => {
+  const regex = /^[6-9]\d{9}$/;
+  return regex.test(phone);
+};
+
+const validatePAN = (pan) => {
+  const regex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  return regex.test(pan);
+};
+
+const validateAadhar = (aadhar) => {
+  const regex = /^\d{12}$/;
+  return regex.test(aadhar);
+};
+
+const validateIFSC = (ifsc) => {
+  const regex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+  return regex.test(ifsc);
+};
+
+// Data formatting utilities
+const formatPercentage = (value, decimals = 2) => {
+  return `${value.toFixed(decimals)}%`;
+};
+
+const formatLargeNumber = (num) => {
+  if (num >= 10000000) return `${(num / 10000000).toFixed(2)} Cr`;
+  if (num >= 100000) return `${(num / 100000).toFixed(2)} L`;
+  if (num >= 1000) return `${(num / 1000).toFixed(2)} K`;
+  return num.toFixed(2);
+};
+
+const formatDuration = (months) => {
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  if (years === 0) return `${remainingMonths} months`;
+  if (remainingMonths === 0) return `${years} years`;
+  return `${years} years ${remainingMonths} months`;
+};
+
+// Notification and alert utilities
+const generateFinancialAlerts = (userData) => {
+  const alerts = [];
+  
+  if (userData.creditScore < 650) {
+    alerts.push({ type: 'warning', message: 'Credit score needs improvement' });
+  }
+  
+  if (userData.emergencyFund < userData.monthlyExpense * 3) {
+    alerts.push({ type: 'critical', message: 'Emergency fund is insufficient' });
+  }
+  
+  if (userData.debtToIncome > 40) {
+    alerts.push({ type: 'warning', message: 'Debt-to-income ratio is high' });
+  }
+  
+  return alerts;
+};
+
+const checkUpcomingPayments = (transactions, daysAhead = 7) => {
+  const today = new Date();
+  const futureDate = new Date(today.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+  
+  return transactions.filter(tx => {
+    const txDate = new Date(tx.dueDate);
+    return txDate >= today && txDate <= futureDate && tx.status === 'pending';
+  });
+};
+
+// Performance optimization utilities
+const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
+};
+
+const debounce = (fn, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+};
+
+const throttle = (fn, limit) => {
+  let inThrottle;
+  return (...args) => {
+    if (!inThrottle) {
+      fn(...args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+};
+
+// ==================== END UTILITIES ====================
+
 export default MyPrivilege;
