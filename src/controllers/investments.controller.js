@@ -208,7 +208,7 @@ exports.getUserLoans = async (req, res) => {
 |   1Y  -> group by MONTH (last 12 months)
 |--------------------------------------------------------------------------
 */
-/* exports.getInvestmentHistory = async (req, res) => {
+exports.getInvestmentHistory = async (req, res) => {
   try {
     // Filter by the logged-in user's ID
     const userId = req.user?.id;
@@ -317,7 +317,7 @@ exports.getUserLoans = async (req, res) => {
     console.error("Error building investment history:", err);
     return res.status(500).json({ error: "Server error" });
   }
-}; */
+}; 
 exports.getInvestmentHistory = async (req, res) => {
   try {
     const range = req.query.range || "6M";
