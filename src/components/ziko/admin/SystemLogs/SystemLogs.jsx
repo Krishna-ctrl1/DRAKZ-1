@@ -20,11 +20,49 @@ const dummyLogs = [
 ];
 
 const SystemLogs = () => {
-  const logsContent = dummyLogs.join("\n");
+  const [logs, setLogs] = React.useState([]);
+  const [logType, setLogType] = React.useState('access'); // 'access' or 'error'
+
+  React.useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:3001/api/logs/${logType}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setLogs(data.logs);
+        }
+      } catch (error) {
+        console.error("Failed to fetch logs:", error);
+      }
+    };
+
+    fetchLogs();
+    // Poll every 10 seconds
+    const interval = setInterval(fetchLogs, 10000);
+    return () => clearInterval(interval);
+  }, [logType]);
+
+  const logsContent = logs.length > 0 ? logs.join("\n") : "No logs found.";
 
   return (
     <SystemLogsContainer>
-      <Title>System Logs</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <Title>System Logs</Title>
+        <select
+          value={logType}
+          onChange={(e) => setLogType(e.target.value)}
+          style={{ padding: '5px', borderRadius: '4px' }}
+        >
+          <option value="access">Access Logs</option>
+          <option value="error">Error Logs</option>
+        </select>
+      </div>
       <LogsArea readOnly value={logsContent} />
     </SystemLogsContainer>
   );

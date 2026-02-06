@@ -95,8 +95,12 @@ const getMorganMiddleware = () => {
       // In test: no logging
       return [];
     default:
-      // In development: colored console output
-      return [morganConfig.dev];
+      // In development: colored console output AND file logging
+      return [
+        morganConfig.dev,
+        morganConfig.success,
+        morganConfig.error
+      ];
   }
 };
 

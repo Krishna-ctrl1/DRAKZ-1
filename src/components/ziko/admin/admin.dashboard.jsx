@@ -24,8 +24,13 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/dashboard-stats'); 
-        
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3001/api/dashboard-stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (response.ok) {
           const data = await response.json();
           setStats({
@@ -56,7 +61,7 @@ const AdminDashboard = () => {
             title="Total Users"
             value={loading ? "..." : stats.totalUsers}
             icon={<MdPeople />}
-            trend="+12% since last month" 
+            trend="+12% since last month"
             isPositive={true}
           />
           <MetricCard
@@ -71,7 +76,7 @@ const AdminDashboard = () => {
             value={loading ? "..." : stats.dataUsed}
             icon={<MdStorage />}
             trend="Real-time DB Size"
-            isPositive={true} 
+            isPositive={true}
           />
         </GridContainer>
       </Section>
@@ -81,7 +86,7 @@ const AdminDashboard = () => {
           <div style={{ gridColumn: "span 2" }}>
             <SystemLogs />
           </div>
-          
+
           <ServerLoad />
         </GridContainer>
       </Section>

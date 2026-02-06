@@ -16,6 +16,7 @@ const investmentsRoutes = require("./src/routes/investments.routes.js");
 const accountSummaryRoutes = require("./src/routes/accountSummary.routes.js");
 const settingsRoutes = require("./src/routes/settings.routes.js");
 const contactRoutes = require("./src/routes/contactRoutes.js");
+const logsRoutes = require("./src/routes/logs.routes.js");
 
 const app = express();
 const server = http.createServer(app);
@@ -92,6 +93,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/logs", logsRoutes);
 
 // Global Error Handler Middleware (MUST be last)
 app.use(errorHandler);
