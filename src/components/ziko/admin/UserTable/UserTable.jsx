@@ -111,7 +111,7 @@ const UserTable = () => {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null); 
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -128,7 +128,12 @@ const UserTable = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(API_URL);
+      const token = localStorage.getItem('token');
+      const response = await fetch(API_URL, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       if (response.ok) setUsers(data);
     } catch (error) {
@@ -164,8 +169,12 @@ const UserTable = () => {
 
     try {
       let response;
-      const headers = { "Content-Type": "application/json" };
-      
+      const token = localStorage.getItem('token');
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
+
       if (editingId) {
         // Update Logic
         response = await fetch(`${API_URL}/${editingId}`, {
@@ -203,7 +212,13 @@ const UserTable = () => {
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const response = await fetch(`${API_URL}/${userId}`, { method: "DELETE" });
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/${userId}`, {
+        method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         setUsers(users.filter((u) => u._id !== userId));
       }
@@ -217,7 +232,7 @@ const UserTable = () => {
   return (
     <UserTableContainer>
       <Title style={{ padding: "24px 24px 0" }}>User Management</Title>
-      
+
       <StyledTable>
         <thead>
           <tr>
@@ -258,7 +273,7 @@ const UserTable = () => {
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>{editingId ? "Edit User Details" : "Add New User"}</ModalHeader>
             <form onSubmit={handleSubmit}>
-              
+
               <FormGroup>
                 <label>Full Name</label>
                 <input
@@ -293,7 +308,7 @@ const UserTable = () => {
 
               <FormGroup>
                 <label>
-                  Password {editingId ? <span style={{fontSize:'12px', opacity: 0.6}}>(Leave blank to keep current)</span> : "*"}
+                  Password {editingId ? <span style={{ fontSize: '12px', opacity: 0.6 }}>(Leave blank to keep current)</span> : "*"}
                 </label>
                 <input
                   type="password"

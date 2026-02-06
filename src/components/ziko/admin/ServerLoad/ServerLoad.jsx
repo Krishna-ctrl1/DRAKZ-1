@@ -9,26 +9,31 @@ import {
   LoadMetric,
   LoadBarGraph,
   LoadBar,
-} from "../../../../styles/ziko/admin/ServerLoad.styles"; 
-import { Title } from "../../../../styles/ziko/admin/SharedStyles"; 
+} from "../../../../styles/ziko/admin/ServerLoad.styles";
+import { Title } from "../../../../styles/ziko/admin/SharedStyles";
 
 const ServerLoad = () => {
-  const [cpuUsage, setCpuUsage] = useState(0); 
+  const [cpuUsage, setCpuUsage] = useState(0);
   const [loadHistory, setLoadHistory] = useState(
     Array.from({ length: 20 }, () => 0)
-  ); 
+  );
 
   useEffect(() => {
     const fetchLoad = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/server-metrics');
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:3001/api/server-metrics', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           const newCpu = data.cpuUsage;
 
           setCpuUsage(newCpu);
           setLoadHistory((prevHistory) => {
-            const newHistory = [...prevHistory.slice(1), newCpu]; 
+            const newHistory = [...prevHistory.slice(1), newCpu];
             return newHistory;
           });
         }
@@ -45,7 +50,7 @@ const ServerLoad = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const radius = 60; 
+  const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const validUsage = Math.min(Math.max(cpuUsage, 0), 100);
   const strokeDashoffset = circumference - (validUsage / 100) * circumference;
@@ -67,7 +72,7 @@ const ServerLoad = () => {
             r={radius}
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }} 
+            style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }}
           />
         </SvgCircle>
         <PercentageText>{displayUsage}%</PercentageText>
