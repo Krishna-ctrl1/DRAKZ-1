@@ -45,6 +45,8 @@ const MyPrivilege = () => {
   const [holdings, setHoldings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [liveMetalPrices, setLiveMetalPrices] = useState({ ...FALLBACK_METAL_PRICES });
+  const [previousPrices, setPreviousPrices] = useState({ ...FALLBACK_METAL_PRICES });
+  const [priceChanges, setPriceChanges] = useState({ Gold: 0, Silver: 0, Platinum: 0 });
   const [pricesLoading, setPricesLoading] = useState(true);
   const [metalPriceSource, setMetalPriceSource] = useState(null);
   const [metalPriceUpdatedAt, setMetalPriceUpdatedAt] = useState(null);
@@ -109,6 +111,16 @@ const MyPrivilege = () => {
       Silver: sanitizePrice(prices.Silver ?? prices.silver, previous.Silver, 'Silver'),
       Platinum: sanitizePrice(prices.Platinum ?? prices.platinum, previous.Platinum, 'Platinum'),
     };
+    
+    // Calculate price changes for trend indicators
+    const changes = {
+      Gold: normalized.Gold - previous.Gold,
+      Silver: normalized.Silver - previous.Silver,
+      Platinum: normalized.Platinum - previous.Platinum,
+    };
+    
+    setPreviousPrices({ ...previous });
+    setPriceChanges(changes);
     lastKnownPricesRef.current = normalized;
     setLiveMetalPrices(normalized);
     setMetalPriceSource(sourceLabel || 'Live market feed');
@@ -192,6 +204,33 @@ const MyPrivilege = () => {
     // Update prices every 30 seconds for real-time India market rates
     const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
+    // Simulate micro price fluctuations every 5 seconds for realistic market feel
+    const microFluctuationInterval = setInterval(() => {
+      setLiveMetalPrices(prev => {
+        const fluctuate = (price) => {
+          // Random fluctuation between -0.2% to +0.2%
+          const changePercent = (Math.random() - 0.5) * 0.4;
+          const newPrice = price * (1 + changePercent / 100);
+          return Math.round(newPrice * 100) / 100;
+        };
+        
+        const newPrices = {
+          Gold: fluctuate(prev.Gold),
+          Silver: fluctuate(prev.Silver),
+          Platinum: fluctuate(prev.Platinum),
+        };
+        
+        // Calculate changes
+        setPriceChanges({
+          Gold: newPrices.Gold - prev.Gold,
+          Silver: newPrices.Silver - prev.Silver,
+          Platinum: newPrices.Platinum - prev.Platinum,
+        });
+        
+        return newPrices;
+      });
+    }, 5000);
+    
     // Function to add ONE pending transaction if user doesn't have any
     const ensureOnePendingTransaction = async () => {
       try {
@@ -230,6 +269,7 @@ const MyPrivilege = () => {
     
     return () => {
       clearInterval(priceInterval);
+      clearInterval(microFluctuationInterval);
     };
   }, []);
 
@@ -605,7 +645,15 @@ const MyPrivilege = () => {
                             ) : (
                               <>
                                 <span className="price-label">10 Grams</span>
-                                <span className="price-value">₹{(liveMetalPrices.Gold * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <div className="price-with-trend">
+                                  <span className="price-value">₹{(liveMetalPrices.Gold * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                  {priceChanges.Gold !== 0 && (
+                                    <span className={`price-trend ${priceChanges.Gold > 0 ? 'trend-up' : 'trend-down'}`}>
+                                      <i className={`fa-solid fa-arrow-${priceChanges.Gold > 0 ? 'up' : 'down'}`}></i>
+                                      {Math.abs(priceChanges.Gold * 10).toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
                               </>
                             )}
                           </div>
@@ -623,8 +671,16 @@ const MyPrivilege = () => {
                               <span className="price-loading">Loading...</span>
                             ) : (
                               <>
-                                <span className="price-label">10Grams</span>
-                                <span className="price-value">₹{(liveMetalPrices.Silver * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <span className="price-label">10 Grams</span>
+                                <div className="price-with-trend">
+                                  <span className="price-value">₹{(liveMetalPrices.Silver * 10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                  {priceChanges.Silver !== 0 && (
+                                    <span className={`price-trend ${priceChanges.Silver > 0 ? 'trend-up' : 'trend-down'}`}>
+                                      <i className={`fa-solid fa-arrow-${priceChanges.Silver > 0 ? 'up' : 'down'}`}></i>
+                                      {Math.abs(priceChanges.Silver * 10).toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
                               </>
                             )}
                           </div>
@@ -643,7 +699,15 @@ const MyPrivilege = () => {
                             ) : (
                               <>
                                 <span className="price-label">10 Grams</span>
-                                <span className="price-value">₹{(liveMetalPrices.Platinum*10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                <div className="price-with-trend">
+                                  <span className="price-value">₹{(liveMetalPrices.Platinum*10).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                  {priceChanges.Platinum !== 0 && (
+                                    <span className={`price-trend ${priceChanges.Platinum > 0 ? 'trend-up' : 'trend-down'}`}>
+                                      <i className={`fa-solid fa-arrow-${priceChanges.Platinum > 0 ? 'up' : 'down'}`}></i>
+                                      {Math.abs(priceChanges.Platinum * 10).toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
                               </>
                             )}
                           </div>
