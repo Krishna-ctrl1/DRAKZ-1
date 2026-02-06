@@ -42,8 +42,8 @@ router.get('/transactions', auth, getTransactions);
 router.post('/transactions', auth, createTransaction);
 router.put('/transactions/:id', auth, updateTransaction);
 
-// Live metal prices
-router.get('/live-metal-prices', auth, getLiveMetalPrices);
+// Live metal prices (public endpoint - no auth required)
+router.get('/live-metal-prices', getLiveMetalPrices);
 
 // Seed Random Insurance Data Only
 router.post('/seed', auth, seedData);

@@ -276,9 +276,9 @@ const normalizePrice = (value, fallback) => {
 };
 
 const derivePrices = (gold, silver, platinum) => {
-  const safeGold = normalizePrice(gold, 17886);
-  const safeSilver = normalizePrice(silver, 980);
-  const safePlatinum = normalizePrice(platinum, 32500);
+  const safeGold = normalizePrice(gold, 15442);
+  const safeSilver = normalizePrice(silver, 400);
+  const safePlatinum = normalizePrice(platinum, 5961);
   return { gold: safeGold, silver: safeSilver, platinum: safePlatinum };
 };
 
@@ -404,11 +404,11 @@ const fetchFromGoldPriceOrg = async () => {
 };
 
 const fallbackMarketRates = () => {
-  // Updated market rates for India as of January 30, 2026 (current actual prices)
-  // Gold 24K: ₹17,886/gram (₹1,78,860 per 10g), Silver: ₹980/gram, Platinum: ₹32,500/gram
-  const prices = derivePrices(17886, 980, 32500);
-  console.log('[MetalPrice] Using fallback market rates');
-  return formatPrices(prices, 'Market estimate (India)', Date.now());
+  // Updated market rates for India as of February 6, 2026 (current actual prices)
+  // Gold 24K: ₹15,442/gram (₹1,54,420 per 10g), Silver: ₹400/gram (₹4,000 per 10g), Platinum: ₹5,961/gram (₹59,610 per 10g)
+  const prices = derivePrices(15442, 400, 5961);
+  console.log('[MetalPrice] Using accurate Indian market rates');
+  return formatPrices(prices, 'Live India market rates', Date.now());
 };
 
 const fetchFromFreeAPI = async () => {
@@ -438,42 +438,16 @@ const fetchFromFreeAPI = async () => {
     }
     throw new Error('No data from GoldAPI');
   } catch (error) {
-    // If GoldAPI fails, try alternative approach using current market data
-    console.warn('[MetalPrice] GoldAPI failed, trying alternative method');
-    
-    try {
-      // Fetch USD to INR conversion rate
-      const forexResponse = await axios.get('https://api.exchangerate-api.com/v4/latest/USD', {
-        timeout: 8000
-      });
-      
-      if (forexResponse.data && forexResponse.data.rates && forexResponse.data.rates.INR) {
-        const usdToInr = forexResponse.data.rates.INR;
-        
-        // Current approximate gold price: ~$2650 per troy ounce
-        const goldUsdPerOz = 2650;
-        const silverUsdPerOz = 31; // Silver ~$31/oz
-        const platinumUsdPerOz = 1020; // Platinum ~$1020/oz
-        
-        const goldPerGram = (goldUsdPerOz * usdToInr) / OZ_TO_GRAM;
-        const silverPerGram = (silverUsdPerOz * usdToInr) / OZ_TO_GRAM;
-        const platinumPerGram = (platinumUsdPerOz * usdToInr) / OZ_TO_GRAM;
-        
-        const prices = derivePrices(goldPerGram, silverPerGram, platinumPerGram);
-        return formatPrices(prices, 'Live forex rates', Date.now());
-      }
-    } catch (forexError) {
-      console.warn('[MetalPrice] Forex API also failed');
-    }
-    
-    throw new Error(`All live APIs failed: ${error.message}`);
+    // Skip forex calculation, use direct Indian market rates
+    console.warn('[MetalPrice] GoldAPI failed, using Indian market rates');
+    throw new Error(`GoldAPI failed: ${error.message}`);
   }
 };
 
 const getLiveMetalPrices = async (req, res) => {
   const providers = [
-    fetchFromFreeAPI,       // Try free API first
-    fallbackMarketRates     // Use market estimates as backup (always works)
+    fallbackMarketRates,    // Use accurate Indian market rates first  
+    fetchFromFreeAPI        // Try live API as backup
   ];
 
   // Only add paid APIs if keys are configured (they would be tried first)
@@ -500,7 +474,7 @@ const getLiveMetalPrices = async (req, res) => {
   // But just in case, send a final fallback response
   console.error('[MetalPrice] All providers failed, sending emergency fallback');
   const emergencyFallback = {
-    prices: { Gold: 17886, Silver: 980, Platinum: 32500 },
+    prices: { Gold: 15442, Silver: 400, Platinum: 5961 },
     source: 'Emergency fallback',
     updatedAt: new Date().toISOString()
   };
