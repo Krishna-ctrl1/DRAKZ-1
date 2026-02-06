@@ -1,3 +1,4 @@
+
 const investmentData = {
   "1M": [
     { name: "8", value: 18200 },

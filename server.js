@@ -23,6 +23,10 @@ const server = http.createServer(app);
 // Middleware imports
 const logger = require("./src/middlewares/logger.middleware.js");
 const errorHandler = require("./src/middlewares/errorHandler.middleware.js");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./src/config/swagger.config.js');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const { getMorganMiddleware } = require("./src/middlewares/morgan.middleware.js");
 
 connectDB();
