@@ -26,9 +26,9 @@ const getTransactionIcon = (type) => {
 };
 
 const FALLBACK_METAL_PRICES = {
-  Gold: 17886,
-  Silver: 980,
-  Platinum: 32500,
+  Gold: 15442,
+  Silver: 400,
+  Platinum: 5961,
 };
 
 const MyPrivilege = () => {
@@ -117,9 +117,14 @@ const MyPrivilege = () => {
 
   const fetchLiveMetalPrices = async () => {
     try {
+      // Clear existing prices to force fresh update
+      setLiveMetalPrices({ Gold: 0, Silver: 0, Platinum: 0 });
       setPricesLoading(true);
       console.log('[MetalPrices] Fetching live metal prices...');
-      const response = await api.get('/api/privilege/live-metal-prices');
+      
+      // Add cache busting with timestamp to force fresh data
+      const cacheBuster = `?_t=${Date.now()}`;
+      const response = await api.get(`/api/privilege/live-metal-prices${cacheBuster}`);
       console.log('[MetalPrices] Response received:', response.data);
       
       if (response.data?.prices) {
@@ -184,8 +189,8 @@ const MyPrivilege = () => {
     fetchData();
     fetchLiveMetalPrices();
     
-    // Update prices every 1 minute (60 seconds) for India region
-    const priceInterval = setInterval(fetchLiveMetalPrices, 60000);
+    // Update prices every 30 seconds for real-time India market rates
+    const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
     // Function to add ONE pending transaction if user doesn't have any
     const ensureOnePendingTransaction = async () => {
@@ -557,7 +562,7 @@ const MyPrivilege = () => {
                   {/* Live Metal Prices Card */}
                   <div className="live-metal-prices-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <h4><i className="fa-solid fa-chart-line"></i> Live Market Rates (India) - 24K</h4>
+                      <h4><i className="fa-solid fa-chart-line"></i> Live Metal Prices (India) - Per 10g</h4>
                       <button 
                         onClick={fetchLiveMetalPrices} 
                         disabled={pricesLoading}
