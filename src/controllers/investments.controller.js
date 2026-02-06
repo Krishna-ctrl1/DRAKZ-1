@@ -7,6 +7,8 @@ const Transaction = require("../models/transaction.model");
 const stockCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
+const investmentData = require("../models/investment.data");
+
 // Fallback prices in USD (approximate current values)
 const FALLBACK_PRICES = {
   AAPL: { price: 225, change: 1.2 },
@@ -206,7 +208,7 @@ exports.getUserLoans = async (req, res) => {
 |   1Y  -> group by MONTH (last 12 months)
 |--------------------------------------------------------------------------
 */
-exports.getInvestmentHistory = async (req, res) => {
+/* exports.getInvestmentHistory = async (req, res) => {
   try {
     // Filter by the logged-in user's ID
     const userId = req.user?.id;
@@ -313,6 +315,14 @@ exports.getInvestmentHistory = async (req, res) => {
     return res.json(chartData);
   } catch (err) {
     console.error("Error building investment history:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+}; */
+exports.getInvestmentHistory = async (req, res) => {
+  try {
+    const range = req.query.range || "6M";
+    return res.json(investmentData[range] || []);
+  } catch (err) {
     return res.status(500).json({ error: "Server error" });
   }
 };
