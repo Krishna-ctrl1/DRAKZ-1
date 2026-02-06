@@ -204,12 +204,12 @@ const MyPrivilege = () => {
     // Update prices every 30 seconds for real-time India market rates
     const priceInterval = setInterval(fetchLiveMetalPrices, 30000);
     
-    // Simulate micro price fluctuations every 5 seconds for realistic market feel
+    // Simulate micro price fluctuations every 15 seconds for smooth market feel
     const microFluctuationInterval = setInterval(() => {
       setLiveMetalPrices(prev => {
         const fluctuate = (price) => {
-          // Random fluctuation between -0.2% to +0.2%
-          const changePercent = (Math.random() - 0.5) * 0.4;
+          // Random fluctuation between -0.15% to +0.15%
+          const changePercent = (Math.random() - 0.5) * 0.3;
           const newPrice = price * (1 + changePercent / 100);
           return Math.round(newPrice * 100) / 100;
         };
@@ -229,7 +229,7 @@ const MyPrivilege = () => {
         
         return newPrices;
       });
-    }, 5000);
+    }, 15000);
     
     // Function to add ONE pending transaction if user doesn't have any
     const ensureOnePendingTransaction = async () => {

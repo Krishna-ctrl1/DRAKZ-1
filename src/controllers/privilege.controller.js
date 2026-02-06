@@ -8,6 +8,13 @@ const Person = require('../models/people.model.js');
 const OZ_TO_GRAM = 31.1035;
 const USD_TO_INR = Number(process.env.USD_TO_INR || 83.5);
 
+// Server-side cache for metal prices (60-minute expiration)
+let metalPricesCache = {
+  data: null,
+  timestamp: null,
+  CACHE_DURATION: 60 * 60 * 1000 // 60 minutes in milliseconds
+};
+
 // Get User Profile
 const getUserProfile = async (req, res) => {
   try {
@@ -267,218 +274,105 @@ const createTransaction = async (req, res) => {
 };
 
 // --- Live Metal Prices ------------------------------------------------------
-const normalizePrice = (value, fallback) => {
-  const num = Number(value);
-  if (!Number.isFinite(num) || num <= 0) {
-    return fallback;
-  }
-  return num;
-};
-
-const derivePrices = (gold, silver, platinum) => {
-  const safeGold = normalizePrice(gold, 15442);
-  const safeSilver = normalizePrice(silver, 400);
-  const safePlatinum = normalizePrice(platinum, 5961);
-  return { gold: safeGold, silver: safeSilver, platinum: safePlatinum };
-};
-
-const formatPrices = (prices, source, timestamp = Date.now()) => ({
-  source,
-  currency: 'INR',
-  unit: 'gram',
-  updatedAt: new Date(timestamp).toISOString(),
-  prices: {
-    Gold: Number(prices.gold.toFixed(2)),
-    Silver: Number(prices.silver.toFixed(2)),
-    Platinum: Number(prices.platinum.toFixed(2))
-  }
-});
-
-const fetchFromMetalPriceApi = async () => {
-  const apiKey = process.env.METALPRICE_API_KEY;
-  if (!apiKey) throw new Error('METALPRICE_API_KEY not configured');
-  const url = `https://api.metalpriceapi.com/v1/latest?api_key=${apiKey}&base=INR&currencies=XAU,XAG,XPT`;
-  const { data } = await axios.get(url, { timeout: 8000 });
-  if (!data?.rates) throw new Error('Invalid response from MetalpriceAPI');
-  const toInrPerGram = (rate) => (rate ? (1 / rate) / OZ_TO_GRAM : null);
-  const prices = derivePrices(
-    toInrPerGram(data.rates.XAU),
-    toInrPerGram(data.rates.XAG),
-    toInrPerGram(data.rates.XPT)
-  );
-  return formatPrices(prices, 'MetalpriceAPI', data?.timestamp ? data.timestamp * 1000 : Date.now());
-};
-
-const fetchFromMetalsApi = async () => {
-  const apiKey = process.env.METALS_API_KEY;
-  if (!apiKey) throw new Error('METALS_API_KEY not configured');
-  const url = `https://metals-api.com/api/latest?access_key=${apiKey}&base=INR&symbols=XAU,XAG,XPT`;
-  const { data } = await axios.get(url, { timeout: 8000 });
-  if (!data?.rates) throw new Error('Invalid response from Metals-API');
-  const toInrPerGram = (rate) => (rate ? (1 / rate) / OZ_TO_GRAM : null);
-  const prices = derivePrices(
-    toInrPerGram(data.rates.XAU),
-    toInrPerGram(data.rates.XAG),
-    toInrPerGram(data.rates.XPT)
-  );
-  return formatPrices(prices, 'Metals-API', data?.timestamp ? data.timestamp * 1000 : Date.now());
-};
-
-const fetchFromGoldApi = async () => {
-  const apiKey = process.env.GOLDAPI_KEY;
-  if (!apiKey) throw new Error('GOLDAPI_KEY not configured');
-  const headers = {
-    'x-access-token': apiKey,
-    'Content-Type': 'application/json'
-  };
-  const symbols = ['XAU', 'XAG', 'XPT'];
-  const responses = await Promise.all(symbols.map((symbol) =>
-    axios.get(`https://www.goldapi.io/api/${symbol}/INR`, { headers, timeout: 8000 })
-  ));
-
-  const extractPrice = (payload) =>
-    payload?.data?.price_gram_24k || payload?.data?.price_gram_999 || payload?.data?.price_gram;
-
-  const prices = derivePrices(
-    extractPrice(responses[0]),
-    extractPrice(responses[1]),
-    extractPrice(responses[2])
-  );
-  const timestamp = responses[0]?.data?.timestamp ? responses[0].data.timestamp * 1000 : Date.now();
-  return formatPrices(prices, 'GoldAPI', timestamp);
-};
-
-const fetchFromGoldPriceOrg = async () => {
-  // Fetch INR rates with improved headers to avoid 403
-  const { data: inrData } = await axios.get('https://data-asg.goldprice.org/dbXRates/INR', { 
-    timeout: 10000,
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Referer': 'https://goldprice.org/',
-      'Origin': 'https://goldprice.org',
-      'Connection': 'keep-alive',
-      'Cache-Control': 'no-cache'
-    }
-  });
-  if (!inrData?.items?.[0]) throw new Error('Invalid response from GoldPrice.org');
-  
-  const inrItem = inrData.items[0];
-  // xauPrice and xagPrice are per troy ounce in INR
-  const goldPerGram = inrItem.xauPrice ? inrItem.xauPrice / OZ_TO_GRAM : null;
-  const silverPerGram = inrItem.xagPrice ? inrItem.xagPrice / OZ_TO_GRAM : null;
-  
-  // Fetch USD rates to get platinum (not available in INR endpoint)
-  let platinumPerGram = null;
-  try {
-    const { data: usdData } = await axios.get('https://data-asg.goldprice.org/dbXRates/USD', {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://goldprice.org/'
-      }
-    });
-    
-    if (usdData?.items?.[0]?.xauPrice) {
-      // Calculate platinum from gold price using market ratio
-      // Platinum is typically 40-45% of gold price per ounce
-      const goldUsdPerOz = usdData.items[0].xauPrice;
-      const platinumUsdPerOz = goldUsdPerOz * 0.42; // 42% ratio
-      platinumPerGram = (platinumUsdPerOz * USD_TO_INR) / OZ_TO_GRAM;
-    }
-  } catch (platErr) {
-    console.warn('[MetalPrice] USD endpoint fetch failed for platinum');
-  }
-  
-  const prices = derivePrices(
-    goldPerGram,
-    silverPerGram,
-    platinumPerGram
-  );
-  
-  return formatPrices(prices, 'Live rates (India)', inrData.ts);
-};
-
-const fallbackMarketRates = () => {
-  // Updated market rates for India as of February 6, 2026 (current actual prices)
-  // Gold 24K: ₹15,442/gram (₹1,54,420 per 10g), Silver: ₹400/gram (₹4,000 per 10g), Platinum: ₹5,961/gram (₹59,610 per 10g)
-  const prices = derivePrices(15442, 400, 5961);
-  console.log('[MetalPrice] Using accurate Indian market rates');
-  return formatPrices(prices, 'Live India market rates', Date.now());
-};
-
-const fetchFromFreeAPI = async () => {
-  try {
-    // Use GoldAPI with API key from environment
-    const apiKey = process.env.GOLDAPI_KEY || 'goldapi-5oro6smio5d0pw-io';
-    
-    const goldResponse = await axios.get('https://www.goldapi.io/api/XAU/INR', {
-      timeout: 10000,
-      headers: {
-        'x-access-token': apiKey,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (goldResponse.data && goldResponse.data.price_gram_24k) {
-      const goldPerGram = goldResponse.data.price_gram_24k;
-      
-      // Silver is typically 1.5-2% of gold price
-      const silverPerGram = goldPerGram * 0.055;
-      
-      // Platinum is typically 180% of gold price
-      const platinumPerGram = goldPerGram * 1.82;
-      
-      const prices = derivePrices(goldPerGram, silverPerGram, platinumPerGram);
-      return formatPrices(prices, 'Live market (GoldAPI)', goldResponse.data.timestamp * 1000);
-    }
-    throw new Error('No data from GoldAPI');
-  } catch (error) {
-    // Skip forex calculation, use direct Indian market rates
-    console.warn('[MetalPrice] GoldAPI failed, using Indian market rates');
-    throw new Error(`GoldAPI failed: ${error.message}`);
-  }
-};
-
 const getLiveMetalPrices = async (req, res) => {
-  const providers = [
-    fallbackMarketRates,    // Use accurate Indian market rates first  
-    fetchFromFreeAPI        // Try live API as backup
-  ];
-
-  // Only add paid APIs if keys are configured (they would be tried first)
-  if (process.env.METALPRICE_API_KEY) providers.unshift(fetchFromMetalPriceApi);
-  if (process.env.METALS_API_KEY) providers.unshift(fetchFromMetalsApi);
-  if (process.env.GOLDAPI_KEY) providers.unshift(fetchFromGoldApi);
-  
-  // GoldPrice.org is blocked with 403, so it's disabled
-
-  let lastError = null;
-  for (const provider of providers) {
-    try {
-      console.log(`[MetalPrice] Trying provider: ${provider.name}`);
-      const payload = await provider();
-      console.log(`[MetalPrice] Success with provider: ${provider.name}`);
-      return res.status(200).json(payload);
-    } catch (error) {
-      lastError = error;
-      console.warn(`[MetalPrice] Provider ${provider.name} failed:`, error.message);
+  try {
+    // Check if cache is valid (60-minute expiration)
+    const now = Date.now();
+    if (metalPricesCache.data && metalPricesCache.timestamp && 
+        (now - metalPricesCache.timestamp) < metalPricesCache.CACHE_DURATION) {
+      console.log('[MetalPrice] Returning cached data');
+      return res.json(metalPricesCache.data);
     }
-  }
 
-  // This should never happen since fallbackMarketRates never throws
-  // But just in case, send a final fallback response
-  console.error('[MetalPrice] All providers failed, sending emergency fallback');
-  const emergencyFallback = {
-    prices: { Gold: 15442, Silver: 400, Platinum: 5961 },
-    source: 'Emergency fallback',
-    updatedAt: new Date().toISOString()
-  };
-  res.status(200).json(emergencyFallback);
+    // Fallback rates (Feb 2026 India Market)
+    const fallbackRates = {
+      Gold: 15442,
+      Silver: 254,
+      Platinum: 6540
+    };
+
+    const GOLDAPI_KEY = 'goldapi-5oro6smio5d0pw-io';
+    const BASE_URL = 'https://www.goldapi.io/api';
+    
+    const metals = {
+      Gold: 'XAU',
+      Silver: 'XAG',
+      Platinum: 'XPT'
+    };
+
+    const prices = {};
+    let apiSuccess = true;
+    let fetchedCount = 0;
+
+    // Fetch prices for each metal from GoldAPI.io
+    for (const [metalName, metalSymbol] of Object.entries(metals)) {
+      try {
+        console.log(`[MetalPrice] Fetching ${metalName} (${metalSymbol}) from GoldAPI.io...`);
+        const response = await axios.get(`${BASE_URL}/${metalSymbol}/INR`, {
+          headers: {
+            'x-access-token': GOLDAPI_KEY,
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        });
+
+        if (response.data && response.data.price_gram_24k) {
+          prices[metalName] = Math.round(response.data.price_gram_24k * 100) / 100;
+          fetchedCount++;
+          console.log(`[MetalPrice] ${metalName}: ₹${prices[metalName]}/gram from GoldAPI.io`);
+        } else {
+          console.warn(`[MetalPrice] ${metalName}: No price_gram_24k in response, using fallback`);
+          prices[metalName] = fallbackRates[metalName];
+          apiSuccess = false;
+        }
+      } catch (error) {
+        console.error(`[MetalPrice] Error fetching ${metalName}:`, error.message);
+        prices[metalName] = fallbackRates[metalName];
+        apiSuccess = false;
+      }
+    }
+
+    // If no prices were fetched successfully, mark as complete failure
+    if (fetchedCount === 0) {
+      apiSuccess = false;
+      console.warn('[MetalPrice] All API calls failed, using complete fallback rates');
+      Object.assign(prices, fallbackRates);
+    }
+
+    const responseData = {
+      source: apiSuccess ? 'GoldAPI.io (Live)' : 'Fallback Rates',
+      currency: 'INR',
+      unit: 'gram',
+      prices: {
+        Gold: prices.Gold || fallbackRates.Gold,
+        Silver: prices.Silver || fallbackRates.Silver,
+        Platinum: prices.Platinum || fallbackRates.Platinum
+      }
+    };
+
+    // Update cache
+    metalPricesCache.data = responseData;
+    metalPricesCache.timestamp = now;
+    console.log(`[MetalPrice] Cache updated. Next refresh at: ${new Date(now + metalPricesCache.CACHE_DURATION).toLocaleTimeString()}`);
+
+    res.json(responseData);
+  } catch (error) {
+    console.error('[MetalPrice] Critical error in getLiveMetalPrices:', error);
+    
+    // Return fallback rates on complete failure
+    const fallbackResponse = {
+      source: 'Fallback Rates',
+      currency: 'INR',
+      unit: 'gram',
+      prices: {
+        Gold: 15442,
+        Silver: 254,
+        Platinum: 6540
+      }
+    };
+
+    res.json(fallbackResponse);
+  }
 };
 
 module.exports = {
