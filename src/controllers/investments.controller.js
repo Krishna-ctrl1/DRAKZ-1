@@ -7,7 +7,7 @@ const Transaction = require("../models/transaction.model");
 const stockCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
-const investmentData = require("../models/investment.data");
+const investmentData = require("../../scripts/investment.data");
 
 // Fallback prices in USD (approximate current values)
 const FALLBACK_PRICES = {
