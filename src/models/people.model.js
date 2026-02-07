@@ -21,6 +21,27 @@ const PersonSchema = new mongoose.Schema({
   lastActive: { type: Date, default: Date.now },
   // ----------------------------------------
 
+  // --- ADVISOR-SPECIFIC PROFILE FIELDS ---
+  advisorProfile: {
+    price: { type: Number, default: 0 },              // Consultation fee
+    certificate: { type: String, default: '' },       // Certification details
+    specialization: { type: String, default: '' },    // Area of expertise (e.g., "Retirement Planning")
+    bio: { type: String, default: '' },               // Short biography
+    contactEmail: { type: String, default: '' },      // Contact email for queries
+    contactPhone: { type: String, default: '' },      // Contact phone
+    experience: { type: Number, default: 0 },         // Years of experience
+    isAcceptingClients: { type: Boolean, default: true } // Availability toggle
+  },
+  // ----------------------------------------
+
+  // --- USER-ADVISOR ASSIGNMENT ---
+  assignedAdvisor: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Person', 
+    default: null 
+  },
+  // ----------------------------------------
+
   created_at: { type: Date, default: Date.now },
 });
 

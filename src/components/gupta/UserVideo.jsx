@@ -1,97 +1,165 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { io } from 'socket.io-client';
-import '../../styles/gupta/VideoSession.css';
+import { fetchMyAdvisorStatus } from '../../redux/slices/advisorSlice';
+import Header from '../global/Header';
+import Sidebar from '../global/Sidebar';
+import '../../styles/gupta/UserVideo.css';
 
 const socket = io("http://localhost:3001");
 
 const UserVideo = () => {
+  const dispatch = useDispatch();
+  const { myAdvisor } = useSelector((state) => state.advisor);
+
+  const [collapsed, setCollapsed] = useState(false);
   const [updates, setUpdates] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
 
   useEffect(() => {
+    dispatch(fetchMyAdvisorStatus());
+  }, [dispatch]);
+
+  useEffect(() => {
     // Listen for broadcast
     socket.on("receive_video", (data) => {
-        // Add new video to top of list
-        setUpdates(prev => [data, ...prev]);
-        
-        // Auto-play the newest one if nothing is playing
-        if(!currentVideo) setCurrentVideo(data);
-        
-        // Optional: Browser notification
-        if(Notification.permission === "granted") {
-            new Notification("New Advisor Update", { body: data.title });
-        }
+      setUpdates(prev => [data, ...prev]);
+      if (!currentVideo) setCurrentVideo(data);
+
+      // Browser notification
+      if (Notification.permission === "granted") {
+        new Notification("New Advisor Update", { body: data.title });
+      }
     });
 
     return () => socket.off("receive_video");
   }, [currentVideo]);
 
   return (
-    <div className="video-session-page">
-      <header className="video-header">
-        <nav><Link to="/user/dashboard">Dashboard</Link> <span>Advisor Updates</span></nav>
-        <div style={{color:'#10b981'}}>● Live Feed Active</div>
-      </header>
+    <div className="user-video-page">
+      <Header />
+      <div className="app user-video-app">
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <div className={collapsed ? "main-content-collapsed" : "main-content"}>
+          <div className="user-video-content">
 
-      <div className="session-wrapper" style={{gridTemplateColumns:'2fr 1fr'}}>
-        
-        {/* Main Player Area */}
-        <main className="session-main">
-          <div className="video-container" style={{height:'100%', background:'#000', display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'12px', overflow:'hidden'}}>
-             {currentVideo ? (
-                 <div style={{width:'100%', height:'100%', display:'flex', flexDirection:'column'}}>
-                     <video src={currentVideo.url} controls autoPlay style={{flex:1, width:'100%', objectFit:'contain'}} />
-                     <div style={{padding:'20px', background:'#1e293b'}}>
-                        <h2 style={{margin:0, color:'white'}}>{currentVideo.title}</h2>
-                        <span style={{color:'#94a3b8', fontSize:'0.9rem'}}>Posted at {currentVideo.timestamp}</span>
-                     </div>
-                 </div>
-             ) : (
-                 <div style={{textAlign:'center', color:'#666'}}>
-                     <i className="fa-solid fa-film" style={{fontSize:'3rem', marginBottom:'15px'}}></i>
-                     <h3>No updates selected</h3>
-                     <p>Select a video from the list or wait for a new broadcast.</p>
-                 </div>
-             )}
-          </div>
-        </main>
+            {/* Page Header */}
+            <div className="page-header">
+              <div className="header-info">
+                <h1>Advisor Updates</h1>
+                <p>Watch live broadcasts and updates from your advisor</p>
+              </div>
+              <div className="header-status">
+                <span className={`live-indicator ${updates.length > 0 ? 'active' : ''}`}>
+                  <i className="fa-solid fa-circle"></i>
+                  {updates.length > 0 ? 'Live Feed Active' : 'Waiting for updates'}
+                </span>
+              </div>
+            </div>
 
-        {/* Sidebar Feed */}
-        <aside className="session-sidebar">
-           <div className="sidebar-tabs">
-              <div className="tab-link active">Recent Updates</div>
-           </div>
+            {/* Advisor Info Card (if assigned) */}
+            {myAdvisor && (
+              <div className="advisor-info-banner">
+                <div className="advisor-avatar">
+                  {myAdvisor.name?.[0]?.toUpperCase() || 'A'}
+                </div>
+                <div className="advisor-details">
+                  <span className="label">Your Advisor</span>
+                  <h3>{myAdvisor.name}</h3>
+                  {myAdvisor.advisorProfile?.specialization && (
+                    <span className="spec">{myAdvisor.advisorProfile.specialization}</span>
+                  )}
+                </div>
+                <a
+                  href={`mailto:${myAdvisor.advisorProfile?.contactEmail || myAdvisor.email}`}
+                  className="contact-btn"
+                >
+                  <i className="fa-solid fa-envelope"></i>
+                  Contact Advisor
+                </a>
+              </div>
+            )}
 
-           <div className="tab-content" style={{overflowY:'auto'}}>
-              {updates.length === 0 && (
-                  <div style={{textAlign:'center', padding:'20px', color:'#666'}}>
-                      <p>No live updates yet.</p>
-                  </div>
-              )}
+            {/* Main Content Grid */}
+            <div className="video-grid">
 
-              {updates.map((item) => (
-                  <div 
-                    key={item.id} 
-                    onClick={() => setCurrentVideo(item)}
-                    style={{
-                        padding:'15px', 
-                        marginBottom:'10px', 
-                        background: currentVideo?.id === item.id ? '#2563eb' : '#334155',
-                        borderRadius:'8px', 
-                        cursor:'pointer',
-                        transition:'background 0.2s'
-                    }}
-                  >
-                      <div style={{fontWeight:'bold', color:'white', marginBottom:'5px'}}>{item.title}</div>
-                      <div style={{display:'flex', justifyContent:'space-between', fontSize:'0.8rem', color: currentVideo?.id === item.id ? '#cbd5e1' : '#94a3b8'}}>
-                          <span><i className="fa-solid fa-clock"></i> {item.timestamp}</span>
-                          <span>Advisor</span>
+              {/* Video Player */}
+              <div className="video-player-section">
+                <div className="video-player">
+                  {currentVideo ? (
+                    <div className="video-wrapper">
+                      <video
+                        src={currentVideo.url}
+                        controls
+                        autoPlay
+                        className="main-video"
+                      />
+                      <div className="video-info">
+                        <h2>{currentVideo.title}</h2>
+                        <span className="timestamp">
+                          <i className="fa-solid fa-clock"></i>
+                          Posted at {currentVideo.timestamp}
+                        </span>
                       </div>
-                  </div>
-              ))}
-           </div>
-        </aside>
+                    </div>
+                  ) : (
+                    <div className="no-video">
+                      <div className="no-video-icon">
+                        <i className="fa-solid fa-video"></i>
+                      </div>
+                      <h3>No Updates Available</h3>
+                      <p>When your advisor broadcasts updates, they'll appear here</p>
+                      {!myAdvisor && (
+                        <Link to="/user/advisors" className="find-advisor-link">
+                          <i className="fa-solid fa-user-tie"></i>
+                          Find an Advisor First
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Updates List */}
+              <div className="updates-sidebar">
+                <div className="updates-header">
+                  <h4>Recent Updates</h4>
+                  <span className="count">{updates.length}</span>
+                </div>
+
+                <div className="updates-list">
+                  {updates.length === 0 ? (
+                    <div className="empty-updates">
+                      <i className="fa-solid fa-inbox"></i>
+                      <p>No updates yet</p>
+                      <span>Stay tuned for advisor broadcasts</span>
+                    </div>
+                  ) : (
+                    updates.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`update-card ${currentVideo?.id === item.id ? 'active' : ''}`}
+                        onClick={() => setCurrentVideo(item)}
+                      >
+                        <div className="update-icon">
+                          <i className="fa-solid fa-play"></i>
+                        </div>
+                        <div className="update-info">
+                          <span className="update-title">{item.title}</span>
+                          <span className="update-time">
+                            <i className="fa-solid fa-clock"></i>
+                            {item.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

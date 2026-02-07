@@ -10,6 +10,7 @@ import FinBot from "./components/gupta/Finbot";
 import MyPrivilege from "./components/abhinay/MyPrivilege";
 import Blogs from "./components/ragamaie/BlogPage";
 import Investments from "./components/ragamaie/InvestmentsPage";
+import AdvisorList from "./components/gupta/AdvisorList";
 
 // --- NEW SESSION COMPONENT IMPORTS ---
 import AdvisorSession from "./components/gupta/AdvisorVideo"; // Uses file AdvisorVideo.jsx
@@ -66,6 +67,7 @@ function App() {
             <Route path="/user/investments" element={<Investments />} />
             <Route path="/user/finbot" element={<FinBot />} />
             <Route path="/user/privileges" element={<MyPrivilege />} />
+            <Route path="/user/advisors" element={<AdvisorList />} />
           </Route>
         </Route>
       </Routes>

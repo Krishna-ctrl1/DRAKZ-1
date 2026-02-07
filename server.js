@@ -17,6 +17,7 @@ const accountSummaryRoutes = require("./src/routes/accountSummary.routes.js");
 const settingsRoutes = require("./src/routes/settings.routes.js");
 const contactRoutes = require("./src/routes/contactRoutes.js");
 const logsRoutes = require("./src/routes/logs.routes.js");
+const userAdvisorRoutes = require("./src/routes/user.advisor.route.js");
 const app = express();
 const server = http.createServer(app);
 
@@ -111,6 +112,7 @@ app.use("/api/credit-score", require("./src/routes/creditScore.routes"));
 app.use("/api/spendings", spendingsRoutes);
 app.use("/api/cards", require("./src/routes/card.routes"));
 app.use("/api/advisor", advisorRoutes);
+app.use("/api/user", userAdvisorRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
