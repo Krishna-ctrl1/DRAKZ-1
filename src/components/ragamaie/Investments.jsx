@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import api from "../../api/axios.api";
 import { getToken } from "../../auth/auth.js";
-import "../../styles/ragamaie/investments.css";
+import "../../styles/ragamaie/Investments.css";
 
 export default function Investments() {
   const [range, setRange] = useState("6M");
@@ -21,7 +21,7 @@ export default function Investments() {
     // Check token availability when component mounts
     const token = getToken();
     console.log("[INVESTMENTS] Component mounted, token status:", token ? "✓ Present" : "✗ Missing");
-    
+
     const fetchHistory = async () => {
       setLoading(true);
       setError("");
