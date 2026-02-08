@@ -39,12 +39,15 @@ const {
 connectDB();
 
 // Global Middleware
+// Helper to normalize URL (remove trailing slash)
+const normalizeUrl = (url) => url ? url.replace(/\/$/, "") : "";
+
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
       "http://localhost:5173",
-      process.env.FRONTEND_URL,
+      normalizeUrl(process.env.FRONTEND_URL), 
     ].filter(Boolean),
     credentials: true,
     allowedHeaders: [
@@ -86,7 +89,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "http://localhost:5173",
-      process.env.FRONTEND_URL,
+      normalizeUrl(process.env.FRONTEND_URL), 
     ].filter(Boolean),
     methods: ["GET", "POST"],
   },
