@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BACKEND_URL } from "../../../../config/backend";
 import {
   ServerLoadContainer,
   ChartWrapper,
@@ -22,7 +23,7 @@ const ServerLoad = () => {
     const fetchLoad = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/server-metrics', {
+        const response = await fetch(`${BACKEND_URL}/api/server-metrics`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

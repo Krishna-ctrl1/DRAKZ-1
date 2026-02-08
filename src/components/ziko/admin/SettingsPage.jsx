@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { BACKEND_URL } from '../../../config/backend';
 import { Title } from '../../../styles/ziko/admin/SharedStyles';
 import { Section, FullWidthBox } from '../../../styles/ziko/admin/AdminLayout.styles';
 
@@ -66,7 +67,7 @@ const SettingsPage = () => {
   const fetchSettings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3001/api/privilege/admin/settings', {
+      const res = await fetch(`${BACKEND_URL}/api/privilege/admin/settings`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -92,7 +93,7 @@ const SettingsPage = () => {
     setMsg({ text: '', type: '' });
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3001/api/privilege/admin/settings', {
+      const res = await fetch(`${BACKEND_URL}/api/privilege/admin/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

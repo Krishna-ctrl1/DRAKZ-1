@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { BACKEND_URL } from "../../../config/backend";
 import MetricCard from "./MetricCard";
 import SystemLogs from "./SystemLogs";
 import ServerLoad from "./ServerLoad";
@@ -33,9 +34,9 @@ const AdminDashboard = () => {
         const headers = { 'Authorization': `Bearer ${token}` };
 
         const [dashboardRes, analyticsRes, businessRes] = await Promise.all([
-          fetch('http://localhost:3001/api/dashboard-stats', { headers }),
-          fetch('http://localhost:3001/api/privilege/admin/analytics', { headers }),
-          fetch('http://localhost:3001/api/privilege/admin/business-analytics', { headers })
+          fetch(`${BACKEND_URL}/api/dashboard-stats`, { headers }),
+          fetch(`${BACKEND_URL}/api/privilege/admin/analytics`, { headers }),
+          fetch(`${BACKEND_URL}/api/privilege/admin/business-analytics`, { headers })
         ]);
 
         if (dashboardRes.ok && analyticsRes.ok) {

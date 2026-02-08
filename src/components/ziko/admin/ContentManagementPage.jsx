@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BACKEND_URL } from '../../../config/backend';
 import { Title, Subtitle } from '../../../styles/ziko/admin/SharedStyles';
 import { Section } from '../../../styles/ziko/admin/AdminLayout.styles';
 import { StyledTable, ActionButton, UserTableContainer } from '../../../styles/ziko/admin/UserTable.styles';
@@ -7,29 +8,29 @@ import { StyledTable, ActionButton, UserTableContainer } from '../../../styles/z
 const modalOverlayStyle = {
   position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
   backgroundColor: 'rgba(0,0,0,0.8)', // Darker dim
-  display: 'flex', justifyContent: 'center', alignItems: 'center', 
+  display: 'flex', justifyContent: 'center', alignItems: 'center',
   zIndex: 1000, backdropFilter: 'blur(4px)'
 };
 
 const modalContentStyle = {
   backgroundColor: '#1e1e2f', // Dark Card Background
-  color: '#ffffff',           
-  padding: '30px', 
-  borderRadius: '12px', 
-  width: '90%', maxWidth: '800px', maxHeight: '85vh', 
+  color: '#ffffff',
+  padding: '30px',
+  borderRadius: '12px',
+  width: '90%', maxWidth: '800px', maxHeight: '85vh',
   display: 'flex', flexDirection: 'column',
   boxShadow: '0 10px 30px rgba(0,0,0,0.5)', border: '1px solid #2b2b40'
 };
 
 const blogBodyStyle = {
   marginTop: '20px', padding: '25px', backgroundColor: '#151521', // Inner Input Dark
-  borderRadius: '8px', lineHeight: '1.8', fontSize: '1rem', color: '#dcdcdc', 
+  borderRadius: '8px', lineHeight: '1.8', fontSize: '1rem', color: '#dcdcdc',
   whiteSpace: 'pre-wrap', overflowY: 'auto', flex: 1, border: '1px solid #2b2b40'
 };
 
 const closeButtonStyle = {
-  alignSelf: 'flex-end', marginTop: '20px', padding: '10px 25px', 
-  backgroundColor: '#2b2b40', color: '#fff', border: '1px solid #3f3f50', 
+  alignSelf: 'flex-end', marginTop: '20px', padding: '10px 25px',
+  backgroundColor: '#2b2b40', color: '#fff', border: '1px solid #3f3f50',
   borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
 };
 
@@ -41,7 +42,7 @@ const ContentManagementPage = () => {
   const [selectedBlog, setSelectedBlog] = useState(null);
 
   const getToken = () => localStorage.getItem("token");
-  const API_URL = "http://localhost:3001/api/blogs"; 
+  const API_URL = `${BACKEND_URL}/api/blogs`;
 
   const fetchData = async () => {
     try {
@@ -86,25 +87,25 @@ const ContentManagementPage = () => {
       });
       if (res.ok) {
         if (selectedBlog?._id === blogId) setSelectedBlog(null);
-        fetchData(); 
+        fetchData();
       } else alert("Failed to update status.");
     } catch (error) { console.error(error); }
   };
 
   const handleDelete = async (blogId) => {
-    if(!window.confirm("Permanently delete?")) return;
+    if (!window.confirm("Permanently delete?")) return;
     try {
       const token = getToken();
       const res = await fetch(`${API_URL}/admin/${blogId}`, {
-         method: "DELETE", headers: { "Authorization": `Bearer ${token}` }
+        method: "DELETE", headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) fetchData();
-    } catch(e) { console.error(e); }
+    } catch (e) { console.error(e); }
   };
 
   const renderAuthor = (author) => author?.name || author?.email || "Unknown";
 
-  if (loading) return <div style={{padding:"20px", color:"#fff"}}>Loading...</div>;
+  if (loading) return <div style={{ padding: "20px", color: "#fff" }}>Loading...</div>;
 
   return (
     <>
@@ -120,7 +121,7 @@ const ContentManagementPage = () => {
                 <span><strong>Author:</strong> {renderAuthor(selectedBlog.author_id)}</span>
                 <span><strong>Date:</strong> {new Date(selectedBlog.createdAt).toLocaleDateString()}</span>
                 <span style={{ textTransform: 'capitalize' }}>
-                  <strong>Status:</strong> 
+                  <strong>Status:</strong>
                   <span style={{ marginLeft: '5px', color: selectedBlog.status === 'approved' ? '#00e676' : selectedBlog.status === 'rejected' ? '#ff5252' : '#ffb74d' }}>
                     {selectedBlog.status}
                   </span>
@@ -172,7 +173,7 @@ const ContentManagementPage = () => {
               {rejectedBlogs.map(b => (
                 <tr key={b._id}>
                   <td>{b.title}</td><td>{renderAuthor(b.author_id)}</td>
-                  <td style={{color:'#ff5252'}}>{b.rejection_reason}</td>
+                  <td style={{ color: '#ff5252' }}>{b.rejection_reason}</td>
                   <td>
                     <ActionButton onClick={() => setSelectedBlog(b)} style={{ backgroundColor: '#17a2b8', color: '#fff', marginRight: '5px' }}>View</ActionButton>
                     <ActionButton onClick={() => changeStatus(b._id, 'approved')}>Re-Approve</ActionButton>

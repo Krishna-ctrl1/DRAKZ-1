@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BACKEND_URL } from '../../../config/backend';
 import { Title } from '../../../styles/ziko/admin/SharedStyles';
 import { Section, FullWidthBox } from '../../../styles/ziko/admin/AdminLayout.styles';
 import { StyledTable, UserTableContainer } from '../../../styles/ziko/admin/UserTable.styles';
@@ -14,7 +15,7 @@ const SupportPage = () => {
     const fetchTickets = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:3001/api/privilege/admin/support', {
+            const res = await fetch(`${BACKEND_URL}/api/privilege/admin/support`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

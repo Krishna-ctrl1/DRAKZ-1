@@ -1,4 +1,5 @@
 import React from "react";
+import { BACKEND_URL } from "../../../../config/backend";
 import { SystemLogsContainer, LogsArea } from "../../../../styles/ziko/admin/SystemLogs.styles"; // Adjusted import path
 import { Title } from "../../../../styles/ziko/admin/SharedStyles"; // Adjusted import path
 
@@ -27,7 +28,7 @@ const SystemLogs = () => {
     const fetchLogs = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3001/api/logs/${logType}`, {
+        const response = await fetch(`${BACKEND_URL}/api/logs/${logType}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

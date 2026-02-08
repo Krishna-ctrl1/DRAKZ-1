@@ -7,7 +7,8 @@ import Header from '../global/Header';
 import Sidebar from '../global/Sidebar';
 import '../../styles/gupta/VideoSession.css';
 
-const socket = io("http://localhost:3001");
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+const socket = io(BACKEND_URL);
 
 const VIDEO_LIBRARY = [
   { id: 1, title: "Market Outlook 2025", url: "https://www.youtube.com/embed/Cda-fUJ-GjE" },
