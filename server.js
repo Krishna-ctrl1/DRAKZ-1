@@ -93,6 +93,10 @@ app.use(userActivity);
 // Serve static files from uploads directory
 app.use("/uploads", express.static("uploads"));
 
+app.get("/cron/health", (req, res) => {
+  res.status(200).json({ ok: true, timestamp: Date.now() });
+});
+
 app.get("/trigger-error", (req, res, next) => {
   console.log("--- Triggering Error Route ---"); // Add this
   const err = new Error("This is a DRAKZ custom error!");
