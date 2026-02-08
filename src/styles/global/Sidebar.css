@@ -24,9 +24,9 @@
   height: calc(100vh - 7rem);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   box-sizing: border-box;
   border-radius: 2.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -40,7 +40,7 @@
 
 /* collapsed state: small */
 .sidebar.collapsed {
-  width:  90px;
+  width: 80px;
   align-items: center;
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.02) 100%);
   backdrop-filter: blur(40px) saturate(180%);
@@ -81,6 +81,8 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  flex: 1;
+  padding-top: 4rem;
 }
 
 /* ---
@@ -93,7 +95,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.8rem; /* Space between items */
+  gap: 3rem; /* Space between items */
   width: 100%;
 }
 
@@ -101,34 +103,57 @@
   display: flex;
   align-items: center;
   justify-content: center; /* Center icons when collapsed */
-  height: 50px;
+  height: 48px;
   width: calc(100% - 1.5rem); /* Full width minus some padding */
   margin: 0 0.75rem;
   padding: 0;
-  margin-top: 35px;
   cursor: pointer;
   border-radius: 1.3rem; /* Rounded box for the active state */
   transition: background-color 0.3s ease;
   position: relative;
   color: var(--icon-color);
+  overflow: hidden; /* Prevent content overflow */
 }
 .sidebar-link {
   display: flex; /* Makes the link fill the entire <li> */
   align-items: center;
+  justify-content: inherit; /* Inherit from parent li */
   width: 100%;
   height: 100%;
+  padding: 0;
   text-decoration: none; /* <-- FIX: Removes the underline */
   color: inherit; /* <-- FIX: Makes text color match the parent */
+  overflow: hidden; /* Prevent overflow */
 }
 /* ---
   Icon Styling
 --- */
 .sidebar-list li i {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: var(--icon-color); /* Default grey */
   transition: color 0.3s ease;
-  width: 50px; /* Fixed width for alignment */
+  min-width: 28px; /* Minimum width for alignment */
+  width: 28px;
   text-align: center;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+/* When collapsed, ensure icons are perfectly centered */
+.sidebar.collapsed .sidebar-list li i {
+  width: 100%;
+  margin: 0;
+}
+
+/* When collapsed, ensure the link and list item are centered */
+.sidebar.collapsed .sidebar-list li {
+  justify-content: center;
+  padding: 0;
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
 }
 
 /* ---
@@ -137,18 +162,24 @@
 .sidebar:not(.collapsed) .sidebar-list li {
   justify-content: flex-start; /* Align icon/text left */
   padding-left: 15px; /* Indent items */
+  padding-right: 10px; /* Add right padding to prevent overflow */
 }
 
 .sidebar:not(.collapsed) .sidebar-list li i {
-  width: 30px; /* Adjust icon width */
+  width: 28px; /* Adjust icon width */
+  min-width: 28px;
   text-align: center;
-  margin-right: 10px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .sidebar:not(.collapsed) .sidebar-list li span {
   color: var(--text-color);
   font-weight: 500;
   white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  flex: 1;
 }
 
 /* ---
@@ -170,6 +201,9 @@
   color: var(--text-color);
   font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 
   /* Start the element as invisible to prepare for animation.
     This prevents the "pop-in" effect.
@@ -268,10 +302,4 @@
 
 .sidebar.collapsed .collapse-btn:active {
   transform: translateX(50%) scale(0.95);
-}
-
-/* Adjust sidebar top padding to accommodate button */
-.sidebar-top {
-  padding-top: 4.5rem;
-  width: 100%;
 }
