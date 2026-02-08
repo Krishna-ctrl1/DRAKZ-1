@@ -3,6 +3,84 @@ const jwt = require("jsonwebtoken");
 const Person = require("../models/people.model.js");
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 
+exports.register = async (req, res) => {
+  const { name, email, password, role, specializedIn, experience, bio, phone } = req.body;
+  
+  try {
+    // Check if user exists
+    let user = await Person.findOne({ email });
+    if (user) {
+      return res.status(400).json({ msg: "User already exists" });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Prepare user data
+    const newPersonData = {
+      name,
+      email,
+      password: hashedPassword,
+      role: role || 'user',
+      isApproved: role === 'advisor' ? false : true, // Advisors need approval
+      phone: phone || 'N/A'
+    };
+
+    // If advisor, add profile details and documents
+    if (role === 'advisor') {
+      newPersonData.advisorProfile = {
+        specialization: specializedIn || '',
+        experience: experience || 0,
+        bio: bio || '',
+        contactPhone: phone || ''
+      };
+
+      // Handle uploaded documents
+      if (req.files && req.files.length > 0) {
+        newPersonData.documents = req.files.map(file => ({
+          name: file.originalname,
+          url: `/uploads/documents/${file.filename}`,
+          type: file.mimetype.includes('pdf') ? 'document' : 'image',
+          uploadedAt: new Date()
+        }));
+      }
+    }
+
+    user = new Person(newPersonData);
+    await user.save();
+
+    // If advisor, return different message
+    if (role === 'advisor') {
+      return res.status(201).json({ 
+        msg: "Registration successful. Please wait for admin approval.",
+        isApproved: false 
+      });
+    }
+
+    // Create token for normal users
+    const payload = {
+      user: {
+        id: user.id
+      }
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: 360000 },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+      }
+    );
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   console.log("🔑 Login attempt for email:", email); // Incoming request
@@ -19,13 +97,27 @@ exports.login = async (req, res) => {
     }
 
     if (!person)
-      return res.status(400).json({ msg: "Invalid credentials oneeee" });
+      return res.status(400).json({ msg: "Invalid credentials" });
+
+    // Check for approval (Advisors only)
+    if (person.role === 'advisor' && !person.isApproved) {
+      // Check if rejected
+      if (person.isRejected) {
+        return res.status(403).json({ msg: "Your application has been rejected. Please contact support." });
+      }
+      return res.status(403).json({ msg: "Your account is pending approval. Please wait for admin verification." });
+    }
+
+    // Check if suspended (All users)
+    if (person.status === 'Suspended') {
+      return res.status(403).json({ msg: "Your account has been suspended. Please contact support." });
+    }
 
     const isMatch = await bcrypt.compare(password, person.password);
     console.log("🔒 Password check:", isMatch ? "MATCH" : "MISMATCH"); // Password OK?
 
     if (!isMatch)
-      return res.status(400).json({ msg: "Invalid credentials twooo" });
+      return res.status(400).json({ msg: "Invalid credentials" });
 
     // Token generation...
     const token = jwt.sign({ id: person._id, role: person.role }, JWT_SECRET, {

@@ -235,6 +235,151 @@ router.get('/live-metal-prices', getLiveMetalPrices);
  *         description: Seed successful
  */
 // Seed Random Insurance Data Only
+// Seed Random Insurance Data Only
 router.post('/seed', auth, seedData);
+
+// --- ADMIN ROUTES ---
+const { 
+  getAnalytics,
+  getAllUsers,
+  toggleUserStatus,
+  approveAdvisor,
+  rejectAdvisor,
+  assignAdvisor,
+  getBusinessAnalytics,
+  getSupportTickets,
+  getSettings,
+  updateSettings
+} = require('../controllers/privilege.controller.js');
+
+const { requireAdmin } = require('../middlewares/auth.middleware.js');
+
+/**
+ * @swagger
+ * /privilege/admin/analytics:
+ *   get:
+ *     summary: Get dashboard analytics (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Analytics data
+ */
+router.get('/admin/analytics', auth, requireAdmin, getAnalytics);
+
+/**
+ * @swagger
+ * /privilege/admin/users:
+ *   get:
+ *     summary: Get all users with filters (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of users
+ */
+router.get('/admin/users', auth, requireAdmin, getAllUsers);
+
+/**
+ * @swagger
+ * /privilege/admin/users/{id}/status:
+ *   patch:
+ *     summary: Toggle user status (Active/Suspended)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Status updated
+ */
+router.patch('/admin/users/:id/status', auth, requireAdmin, toggleUserStatus);
+
+/**
+ * @swagger
+ * /privilege/admin/advisors/{id}/approve:
+ *   patch:
+ *     summary: Approve an advisor account
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Advisor approved
+ */
+router.patch('/admin/advisors/:id/approve', auth, requireAdmin, approveAdvisor);
+
+/**
+ * @swagger
+ * /privilege/admin/advisors/{id}/reject:
+ *   patch:
+ *     summary: Reject an advisor account
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Advisor rejected
+ */
+router.patch('/admin/advisors/:id/reject', auth, requireAdmin, rejectAdvisor);
+
+/**
+ * @swagger
+ * /privilege/admin/assign:
+ *   post:
+ *     summary: Assign advisor to user
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               advisorId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Advisor assigned
+ */
+router.post('/admin/assign', auth, requireAdmin, assignAdvisor);
+
+// New Advanced Admin Routes
+router.get('/admin/business-analytics', auth, requireAdmin, getBusinessAnalytics);
+router.get('/admin/support', auth, requireAdmin, getSupportTickets);
+router.get('/admin/settings', auth, requireAdmin, getSettings);
+router.put('/admin/settings', auth, requireAdmin, updateSettings);
 
 module.exports = router;

@@ -12,6 +12,7 @@ export default function Loans() {
   useEffect(() => {
     const fetchLoans = async () => {
       try {
+        // Let the axios interceptor attach the token automatically
         const res = await api.get("/api/user-loans");
         setLoans(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
@@ -54,9 +55,8 @@ export default function Loans() {
             <motion.div
               key={loan._id}
               layout
-              className={`loan-card-dark ${
-                (loan.status || "").toLowerCase()
-              }`}
+              className={`loan-card-dark ${(loan.status || "").toLowerCase()
+                }`}
               onClick={() => toggleExpand(loan._id)}
               transition={{ layout: { duration: 0.3, type: "spring" } }}
             >
@@ -70,9 +70,8 @@ export default function Loans() {
                   <p>Loan Taken On: {loan.dateTaken}</p>
                 </div>
                 <span
-                  className={`status-badge ${
-                    (loan.status || "").toLowerCase()
-                  }`}
+                  className={`status-badge ${(loan.status || "").toLowerCase()
+                    }`}
                 >
                   {loan.status}
                 </span>

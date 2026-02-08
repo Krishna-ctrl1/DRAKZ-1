@@ -43,6 +43,28 @@ const PersonSchema = new mongoose.Schema({
   },
   // ----------------------------------------
 
+  // --- ADMIN & COMPLIANCE FIELDS ---
+  status: { 
+    type: String, 
+    enum: ['Active', 'Suspended'], 
+    default: 'Active' 
+  },
+  isApproved: { 
+    type: Boolean, 
+    default: true // Advisors will be set to false upon registration
+  },
+  isRejected: {
+    type: Boolean,
+    default: false
+  },
+  documents: [{
+    name: { type: String },
+    url: { type: String },
+    type: { type: String }, // e.g., 'certificate', 'id_proof'
+    uploadedAt: { type: Date, default: Date.now }
+  }],
+  // ----------------------------------------
+
   created_at: { type: Date, default: Date.now },
 });
 

@@ -62,8 +62,14 @@ export const fetchAvailableAdvisors = createAsyncThunk(
   'advisor/fetchAvailableAdvisors',
   async (_, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem('token');
       console.log('[ADVISOR-SLICE] Calling /api/user/advisors...');
-      console.log('[ADVISOR-SLICE] localStorage token:', localStorage.getItem('token') ? 'EXISTS' : 'MISSING');
+      console.log('[ADVISOR-SLICE] localStorage token:', token ? 'EXISTS' : 'MISSING');
+
+      if (!token) {
+        console.error('[ADVISOR-SLICE] No token available, aborting request');
+        return rejectWithValue('No authentication token available');
+      }
 
       const response = await api.get('/api/user/advisors');
 
@@ -94,9 +100,20 @@ export const fetchMyAdvisorStatus = createAsyncThunk(
   'advisor/fetchMyStatus',
   async (_, { rejectWithValue }) => {
     try {
+      // Log token status for debugging
+      const token = localStorage.getItem('token');
+      console.log('[ADVISOR-SLICE] fetchMyAdvisorStatus - Token exists:', !!token);
+      
+      if (!token) {
+        console.error('[ADVISOR-SLICE] No token available, aborting status check');
+        return rejectWithValue('No authentication token available');
+      }
+      
+      // DO NOT pass headers explicitly - let the axios interceptor handle it!
       const response = await api.get('/api/user/advisor/status');
       return response.data;
     } catch (error) {
+      console.error('[ADVISOR-SLICE] fetchMyAdvisorStatus Error:', error.response?.status);
       return rejectWithValue(error.response?.data?.msg || 'Failed to fetch status');
     }
   }

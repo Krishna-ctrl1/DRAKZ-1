@@ -24,9 +24,9 @@ const Sidebar = () => {
     { path: "/admin/dashboard", icon: <MdDashboard />, label: "Dashboard" },
     { path: "/admin/users", icon: <MdPeople />, label: "Users" },
     { path: "/admin/content", icon: <MdArticle />, label: "Content" },
-    { path: "/admin/messages", icon: <MdMessage />, label: "Messages" },
-    // { path: "/admin/settings", icon: <MdSettings />, label: "Settings" },
-    // { path: "/admin/logs", icon: <MdListAlt />, label: "Logs" },
+    { path: "/admin/support", icon: <MdMessage />, label: "Support" }, // Changed from Messages to Support
+    { path: "/admin/settings", icon: <MdSettings />, label: "Settings" },
+    { path: "/admin/logs", icon: <MdListAlt />, label: "Logs" },
   ];
 
   return (

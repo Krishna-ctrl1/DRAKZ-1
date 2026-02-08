@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { login, me } = require('../controllers/auth.controller.js');
+const { login, me, register } = require('../controllers/auth.controller.js');
 const { auth } = require('../middlewares/auth.middleware.js');
+const { advisorDocumentUpload } = require('../middlewares/upload.middleware.js');
+
+// ... (existing swagger docs) ...
+
+router.post('/register', advisorDocumentUpload.array('documents', 5), register);
 
 /**
  * @swagger

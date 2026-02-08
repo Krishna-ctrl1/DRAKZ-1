@@ -58,4 +58,45 @@ const profileUpload = multer({
   fileFilter: fileFilter
 });
 
-module.exports = { upload, profileUpload };
+// Configure storage for advisor documents (Public upload during registration)
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Ensure this directory exists or create it
+    const fs = require('fs');
+    const dir = 'uploads/documents';
+    if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    console.log('📂 Multer: Saving document to uploads/documents');
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename: doc_timestamp_originalname
+    const uniqueName = `doc_${Date.now()}_${path.basename(file.originalname)}`;
+    console.log('📝 Multer: Generated document filename:', uniqueName);
+    cb(null, uniqueName);
+  }
+});
+
+// File filter for documents (Images + PDF)
+const documentFileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp|pdf/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only images and PDF files are allowed'));
+  }
+};
+
+const advisorDocumentUpload = multer({
+  storage: documentStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: documentFileFilter
+});
+
+module.exports = { upload, profileUpload, advisorDocumentUpload };

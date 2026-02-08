@@ -11,6 +11,7 @@ export default function StockChart() {
   useEffect(() => {
     const fetchStocks = async () => {
       try {
+        // Let the axios interceptor attach the token automatically
         const res = await api.get("/api/user-investments");
         setStocks(Array.isArray(res.data) ? res.data : []);
       } catch (err) {

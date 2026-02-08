@@ -74,7 +74,17 @@ const Settings = () => {
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
-      setMessage({ type: "error", text: "Failed to load settings" });
+      if (error.response && error.response.status === 404) {
+        setMessage({ type: "error", text: "Session invalid. Please log in again." });
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+        }, 1500);
+      } else {
+        setMessage({ type: "error", text: "Failed to load settings" });
+      }
     } finally {
       setLoading(false);
     }
@@ -279,7 +289,7 @@ const Settings = () => {
       }
 
       setProfilePictureFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -309,7 +319,7 @@ const Settings = () => {
       });
 
       const updatedProfilePicture = response.data.profilePicture;
-      
+
       console.log('📸 Settings: Received profilePicture from server:', updatedProfilePicture);
 
       setProfileData({
@@ -326,13 +336,13 @@ const Settings = () => {
           user.profilePicture = updatedProfilePicture;
           localStorage.setItem("user", JSON.stringify(user));
           console.log('✅ Settings: Updated user in localStorage:', JSON.parse(localStorage.getItem('user')));
-          
+
           // Update Header directly
           if (window.updateHeaderProfilePicture) {
             window.updateHeaderProfilePicture(updatedProfilePicture);
             console.log('📡 Settings: Called updateHeaderProfilePicture');
           }
-          
+
           // Also dispatch event as fallback
           const event = new CustomEvent("profilePictureUpdated", {
             detail: { profilePicture: updatedProfilePicture }
