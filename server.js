@@ -32,23 +32,40 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/config/swagger.config.js");
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 const {
   getMorganMiddleware,
 } = require("./src/middlewares/morgan.middleware.js");
 
 connectDB();
 
-// Global Middleware
 // Helper to normalize URL (remove trailing slash)
 const normalizeUrl = (url) => url ? url.replace(/\/$/, "") : "";
 
+console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_URL);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  normalizeUrl(process.env.FRONTEND_URL), 
+  "https://drakz-frontend.onrender.com" // Explicit fallback for safety
+].filter(Boolean);
+
+console.log("✅ Allowed CORS Origins:", allowedOrigins);
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      normalizeUrl(process.env.FRONTEND_URL), 
-    ].filter(Boolean),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log(`❌ CORS BLOCKED: Origin '${origin}' not in allowed list.`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     allowedHeaders: [
       "Content-Type",
@@ -86,12 +103,9 @@ app.get("/trigger-error", (req, res, next) => {
 // --- SOCKET SERVER ---
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      normalizeUrl(process.env.FRONTEND_URL), 
-    ].filter(Boolean),
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
