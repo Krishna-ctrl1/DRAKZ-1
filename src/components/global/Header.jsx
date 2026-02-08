@@ -18,6 +18,20 @@ const Header = ({ collapsed }) => {
   const dropdownRef = useRef(null);
   const { collapsed: uiCollapsed } = useUI();
 
+  // Function to update profile picture from anywhere
+  const updateProfilePicture = (newProfilePicture) => {
+    console.log('📸 Header: updateProfilePicture called with:', newProfilePicture);
+    setProfilePicture(newProfilePicture);
+  };
+
+  // Expose function globally for Settings component
+  useEffect(() => {
+    window.updateHeaderProfilePicture = updateProfilePicture;
+    return () => {
+      delete window.updateHeaderProfilePicture;
+    };
+  }, []);
+
   useEffect(() => {
     // Get user name and profile picture from localStorage
     const storedUser = localStorage.getItem("user");
@@ -26,10 +40,19 @@ const Header = ({ collapsed }) => {
         const user = JSON.parse(storedUser);
         setUserName(user.name || "User");
         setProfilePicture(user.profilePicture || "");
+        console.log('📸 Header: Loaded profilePicture from localStorage:', user.profilePicture);
       } catch (e) {
         setUserName("User");
       }
     }
+
+    // Listen for profile picture updates
+    const handleProfilePictureUpdate = (event) => {
+      console.log('📸 Header: Received profilePictureUpdated event:', event.detail.profilePicture);
+      setProfilePicture(event.detail.profilePicture);
+    };
+
+    window.addEventListener("profilePictureUpdated", handleProfilePictureUpdate);
 
     // Update date and time
     const updateDateTime = () => {
@@ -83,6 +106,7 @@ const Header = ({ collapsed }) => {
     return () => {
       clearInterval(interval);
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("profilePictureUpdated", handleProfilePictureUpdate);
     };
   }, []);
 
@@ -115,14 +139,21 @@ const Header = ({ collapsed }) => {
         </div>
         <div className="header-actions">
           <div className="welcome-section">
-            <i className="fa-solid fa-user-circle"></i>
             <span className="welcome-text">Welcome back, {userName}!</span>
           </div>
           <div className="profile-section" ref={dropdownRef}>
             <div className="profile-avatar-wrapper" onClick={toggleDropdown}>
               <div className="profile-avatar">
-                {profilePicture ? (
-                  <img src={`http://localhost:3001${profilePicture}`} alt="Profile" />
+                {profilePicture && profilePicture.trim() !== "" ? (
+                  <img 
+                    src={`http://localhost:3001${profilePicture}`} 
+                    alt="Profile" 
+                    onError={(e) => {
+                      console.error('📸 Header: Image failed to load:', profilePicture);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<i class="fa-solid fa-user"></i>';
+                    }}
+                  />
                 ) : (
                   <i className="fa-solid fa-user"></i>
                 )}

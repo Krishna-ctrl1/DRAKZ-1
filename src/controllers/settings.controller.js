@@ -240,6 +240,9 @@ const uploadProfilePicture = async (req, res) => {
 
     const userId = req.user.id;
     const profilePicturePath = `/uploads/profile/${req.file.filename}`;
+    
+    console.log('📸 Uploading profile picture for user:', userId);
+    console.log('📁 File path:', profilePicturePath);
 
     const user = await Person.findByIdAndUpdate(
       userId,
@@ -251,7 +254,9 @@ const uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    console.log("✅ Profile picture updated for user:", userId);
+    console.log("✅ Profile picture updated in database:", user.profilePicture);
+    console.log("📤 Sending response with profilePicture:", user.profilePicture);
+    
     res.json({
       msg: "Profile picture updated successfully",
       profilePicture: user.profilePicture,
