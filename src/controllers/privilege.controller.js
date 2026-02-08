@@ -4,6 +4,8 @@ const Insurance = require('../models/insurance.model.js');
 const PreciousHolding = require('../models/preciousHolding.model.js');
 const Transaction = require('../models/transaction.model.js');
 const Person = require('../models/people.model.js');
+const Settings = require('../models/Settings.js');
+const Contact = require('../models/ContactModel.js');
 
 const OZ_TO_GRAM = 31.1035;
 const USD_TO_INR = Number(process.env.USD_TO_INR || 83.5);
@@ -375,6 +377,202 @@ const getLiveMetalPrices = async (req, res) => {
   }
 };
 
+// --- ADMIN DASHBOARD FUNCTIONS ---
+
+// 1. Get Analytics
+const getAnalytics = async (req, res) => {
+  try {
+    const totalUsers = await Person.countDocuments({ role: 'user' });
+    const totalAdvisors = await Person.countDocuments({ role: 'advisor' });
+    const activeUsers = await Person.countDocuments({ role: 'user', status: 'Active' });
+    const suspendedUsers = await Person.countDocuments({ role: 'user', status: 'Suspended' });
+    const activeAdvisors = await Person.countDocuments({ role: 'advisor', status: 'Active', isApproved: true });
+    const pendingAdvisors = await Person.countDocuments({ role: 'advisor', isApproved: false, isRejected: false });
+
+    res.status(200).json({
+        users: { total: totalUsers, active: activeUsers, suspended: suspendedUsers },
+        advisors: { total: totalAdvisors, active: activeAdvisors, pending: pendingAdvisors }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 2. Get All Users (with filters)
+const getAllUsers = async (req, res) => {
+  try {
+    const { role, status, isApproved } = req.query;
+    const query = {};
+    if (role) query.role = role;
+    if (status) query.status = status;
+    if (isApproved !== undefined) query.isApproved = isApproved === 'true';
+
+    // Exclude password
+    const users = await Person.find(query).select('-password');
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 3. Toggle User Status (Suspend/Activate)
+const toggleUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Person.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.status = user.status === 'Active' ? 'Suspended' : 'Active';
+    await user.save();
+    
+    res.status(200).json({ msg: `User ${user.status}`, status: user.status });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 4. Approve Advisor
+const approveAdvisor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Person.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.role !== 'advisor') return res.status(400).json({ error: 'User is not an advisor' });
+
+    user.isApproved = true;
+    user.isRejected = false;
+    await user.save();
+
+    res.status(200).json({ msg: 'Advisor approved successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 5. Reject Advisor
+const rejectAdvisor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Person.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    user.isApproved = false;
+    user.isRejected = true;
+    await user.save();
+
+    res.status(200).json({ msg: 'Advisor rejected' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 6. Assign Advisor to User
+const assignAdvisor = async (req, res) => {
+  try {
+    const { userId, advisorId } = req.body;
+    
+    const user = await Person.findById(userId);
+    const advisor = await Person.findById(advisorId);
+
+    if (!user || !advisor) return res.status(404).json({ error: 'User or Advisor not found' });
+    if (advisor.role !== 'advisor') return res.status(400).json({ error: 'Selected person is not an advisor' });
+    if (!advisor.isApproved) return res.status(400).json({ error: 'Advisor is not approved yet' });
+
+    user.assignedAdvisor = advisorId;
+    await user.save();
+
+    res.status(200).json({ msg: 'Advisor assigned successfully', assignedAdvisor: advisor.name });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 7. Business Analytics (Transactions, Growth, Top Advisors)
+const getBusinessAnalytics = async (req, res) => {
+  try {
+    // 1. Financials: Total Transaction Volume
+    const transactions = await Transaction.find({ status: 'Completed' });
+    const totalVolume = transactions.reduce((acc, curr) => acc + curr.amount, 0);
+
+    // 2. User Growth (Last 6 Months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const userGrowth = await Person.aggregate([
+      { $match: { role: 'user', createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    // 3. Top Advisors by Client Count (Assuming assignment logic exists or placeholders)
+    // For now, let's just return advisors sorted by experience as a proxy or random
+    const topAdvisors = await Person.find({ role: 'advisor', isApproved: true })
+      .sort({ "advisorProfile.experience": -1 })
+      .limit(5)
+      .select('name advisorProfile.specialization advisorProfile.experience');
+
+    res.status(200).json({
+      totalVolume,
+      userGrowth,
+      topAdvisors
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 8. Support Tickets
+const getSupportTickets = async (req, res) => {
+  try {
+    const tickets = await Contact.find().sort({ createdAt: -1 });
+    res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 9. Get Global Settings
+const getSettings = async (req, res) => {
+  try {
+    const settings = await Settings.findOne(); // Use the model directly, not static method if not defined there yet or just standard mongoose
+    if (!settings) {
+      const newSettings = new Settings();
+      await newSettings.save();
+      return res.status(200).json(newSettings);
+    }
+    res.status(200).json(settings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 10. Update Global Settings
+const updateSettings = async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) settings = new Settings();
+
+    const { maintenanceMode, allowRegistrations, commissionRate, supportEmail } = req.body;
+    
+    if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
+    if (allowRegistrations !== undefined) settings.allowRegistrations = allowRegistrations;
+    if (commissionRate !== undefined) settings.commissionRate = commissionRate;
+    if (supportEmail !== undefined) settings.supportEmail = supportEmail;
+    
+    settings.updatedBy = req.user.id;
+    await settings.save();
+    
+    res.status(200).json({ msg: "Settings updated", settings });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getUserProfile,
   addProperty, 
@@ -389,5 +587,16 @@ module.exports = {
   updateTransaction,
   createTransaction,
   seedData,
-  getLiveMetalPrices
+  getLiveMetalPrices,
+  // New Admin Functions
+  getAnalytics,
+  getAllUsers,
+  toggleUserStatus,
+  approveAdvisor,
+  rejectAdvisor,
+  assignAdvisor,
+  getBusinessAnalytics,
+  getSupportTickets,
+  getSettings,
+  updateSettings
 };

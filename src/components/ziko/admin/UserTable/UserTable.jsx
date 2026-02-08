@@ -105,7 +105,7 @@ const ModalButton = styled.button`
 `;
 
 // --- MAIN COMPONENT ---
-const UserTable = () => {
+const UserTable = ({ role }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -115,21 +115,27 @@ const UserTable = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "Viewer",
+    role: role || "Viewer",
     password: "",
   });
 
-  const API_URL = "http://localhost:3001/api/users";
+  const API_URL = "http://localhost:3001/api/privilege/admin/users"; // Updated to use Admin API
 
   // --- FETCH USERS ---
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [role]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(API_URL, {
+      // Build query string
+      let query = "";
+      if (role) query = `?role=${role}`;
+      // Add status filter if needed, for now just role
+
+      const response = await fetch(`${API_URL}${query}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -256,6 +262,28 @@ const UserTable = () => {
               </td>
               <td>
                 <ActionButton onClick={() => openEditModal(user)}>Edit</ActionButton>
+                <ActionButton
+                  secondary
+                  onClick={async () => {
+                    if (!window.confirm(`Are you sure you want to ${user.status === 'Active' ? 'suspend' : 'activate'} this user?`)) return;
+                    try {
+                      const token = localStorage.getItem('token');
+                      const response = await fetch(`http://localhost:3001/api/privilege/admin/users/${user._id}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      });
+                      if (response.ok) {
+                        // Update local state
+                        setUsers(users.map(u => u._id === user._id ? { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' } : u));
+                      }
+                    } catch (error) {
+                      console.error("Error updating status:", error);
+                    }
+                  }}
+                  style={{ color: user.status === 'Active' ? '#f87171' : '#4ade80' }}
+                >
+                  {user.status === 'Active' ? 'Suspend' : 'Activate'}
+                </ActionButton>
                 <ActionButton secondary onClick={() => handleDelete(user._id)}>Delete</ActionButton>
               </td>
             </tr>

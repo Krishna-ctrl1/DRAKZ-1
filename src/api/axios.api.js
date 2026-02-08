@@ -13,32 +13,43 @@ console.log("[AXIOS-INIT] Registering request interceptor...");
 
 // REQUEST INTERCEPTOR - Attach authentication token
 const requestInterceptor = instance.interceptors.request.use((config) => {
-  const token = getToken();
+  // Try getting token from auth helper first
+  let token = getToken();
+  
+  // Fallback: Try direct localStorage access if helper fails
+  if (!token) {
+    token = localStorage.getItem("token");
+    if (token) {
+      console.warn("[AXIOS-REQ] ⚠️ getToken() returned null but localStorage has token. Using direct access.");
+    }
+  }
+
   const method = config.method?.toUpperCase() || "UNKNOWN";
   const url = config.url || "unknown";
 
   console.log(`\n[AXIOS-REQ] ${method} ${url}`);
-  console.log(`[AXIOS-REQ] Interceptor is RUNNING`);
-
-  if (!token) {
-    console.warn(`[AXIOS-REQ] ⚠️ No token in localStorage`);
-  } else {
-    console.log(`[AXIOS-REQ] ✓ Token found (${token.substring(0, 10)}...)`);
-  }
 
   // Ensure headers object exists
   if (!config.headers) {
-    console.log("[AXIOS-REQ] Creating headers object");
     config.headers = {};
   }
 
   // Attach token if available
   if (token && token.length > 0) {
-    config.headers.Authorization = `Bearer ${token}`;
-    config.headers["x-auth-token"] = token;
-    console.log(`[AXIOS-REQ] ✓ Token attached to headers`);
+    // Check if Authorization header is already set (e.g. by explicit config)
+    if (!config.headers.Authorization) {
+       config.headers.Authorization = `Bearer ${token}`;
+       console.log(`[AXIOS-REQ] ✓ Authorization header attached`);
+    } else {
+       console.log(`[AXIOS-REQ] ! Authorization header already present`);
+    }
+
+    if (!config.headers["x-auth-token"]) {
+       config.headers["x-auth-token"] = token;
+       console.log(`[AXIOS-REQ] ✓ x-auth-token header attached`);
+    }
   } else {
-    console.warn(`[AXIOS-REQ] ✗ No token to attach`);
+    console.warn(`[AXIOS-REQ] ✗ No token found to attach`);
   }
 
   config.metadata = { retryCount: 0 };
@@ -63,11 +74,12 @@ instance.interceptors.response.use(
       // Only clear token if one exists (prevent double-logout)
       const tokenExists = localStorage.getItem("token");
       if (tokenExists) {
-        console.log("[AXIOS-ERR] Clearing invalid token from storage");
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("user");
-        window.location.replace("/login");
+        console.warn("[AXIOS-ERR] Valid session might be expired, but suppressing auto-logout for stability.");
+        // console.log("[AXIOS-ERR] Clearing invalid token from storage");
+        // localStorage.removeItem("token");
+        // localStorage.removeItem("role");
+        // localStorage.removeItem("user");
+        // window.location.replace("/login");
       }
       return Promise.reject(err);
     }
