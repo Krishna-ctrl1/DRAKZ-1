@@ -3,7 +3,18 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "health-check",
+      configureServer(server) {
+        server.middlewares.use("/cron/health", (req, res) => {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, timestamp: Date.now() }));
+        });
+      },
+    },
+  ],
   server: {
     port: 3000,
     open: true,
