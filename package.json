@@ -49,6 +49,7 @@
   },
   "scripts": {
     "start": "vite",
+    "start:frontend": "node server-static.js",
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server.js",
