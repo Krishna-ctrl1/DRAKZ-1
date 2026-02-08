@@ -8,11 +8,15 @@ exports.login = async (req, res) => {
   console.log("🔑 Login attempt for email:", email); // Incoming request
 
   try {
-    const person = await Person.findOne({ email });
+    const person = await Person.findOne({ email }).select('+profilePicture');
     console.log(
       "👤 User lookup:",
       person ? `Found: ${person.email} (role: ${person.role})` : "NOT FOUND",
     ); // User exists?
+    
+    if (person) {
+      console.log("📸 Profile Picture in DB:", person.profilePicture);
+    }
 
     if (!person)
       return res.status(400).json({ msg: "Invalid credentials oneeee" });
@@ -28,6 +32,7 @@ exports.login = async (req, res) => {
       expiresIn: "8h",
     });
     console.log("✅ Login SUCCESS for:", email);
+    console.log("📤 Sending profilePicture:", person.profilePicture || "");
 
     res.json({
       token,
@@ -52,6 +57,10 @@ exports.me = async (req, res) => {
       "_id email name role profilePicture",
     );
     if (!user) return res.status(404).json({ msg: "User not found" });
+    
+    console.log("🔍 /me endpoint - User ID:", req.user.id);
+    console.log("📸 /me endpoint - ProfilePicture from DB:", user.profilePicture);
+    
     return res.json({
       id: user._id,
       email: user.email,

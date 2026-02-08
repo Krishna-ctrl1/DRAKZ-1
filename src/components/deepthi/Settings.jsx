@@ -309,19 +309,36 @@ const Settings = () => {
       });
 
       const updatedProfilePicture = response.data.profilePicture;
+      
+      console.log('📸 Settings: Received profilePicture from server:', updatedProfilePicture);
 
       setProfileData({
         ...profileData,
         profilePicture: updatedProfilePicture,
       });
 
-      // Update localStorage to reflect the change in Header
+      // Update localStorage to persist the change
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
+          console.log('📦 Settings: Current user in localStorage:', user);
           user.profilePicture = updatedProfilePicture;
           localStorage.setItem("user", JSON.stringify(user));
+          console.log('✅ Settings: Updated user in localStorage:', JSON.parse(localStorage.getItem('user')));
+          
+          // Update Header directly
+          if (window.updateHeaderProfilePicture) {
+            window.updateHeaderProfilePicture(updatedProfilePicture);
+            console.log('📡 Settings: Called updateHeaderProfilePicture');
+          }
+          
+          // Also dispatch event as fallback
+          const event = new CustomEvent("profilePictureUpdated", {
+            detail: { profilePicture: updatedProfilePicture }
+          });
+          window.dispatchEvent(event);
+          console.log('📡 Settings: Dispatched profilePictureUpdated event');
         } catch (e) {
           console.error("Error updating localStorage:", e);
         }
@@ -329,11 +346,7 @@ const Settings = () => {
 
       setMessage({ type: "success", text: "Profile picture updated successfully!" });
       setProfilePictureFile(null);
-      
-      // Reload page after a short delay to update Header
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      setProfilePicturePreview(null);
     } catch (error) {
       setMessage({
         type: "error",

@@ -38,11 +38,13 @@ const upload = multer({
 // Configure storage for profile pictures
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
+    console.log('📂 Multer: Saving profile picture to uploads/profile');
     cb(null, 'uploads/profile'); // Save to uploads/profile folder
   },
   filename: (req, file, cb) => {
     // Generate unique filename: userId_timestamp.ext
     const uniqueName = `profile_${req.user.id}_${Date.now()}${path.extname(file.originalname)}`;
+    console.log('📝 Multer: Generated filename:', uniqueName);
     cb(null, uniqueName);
   }
 });

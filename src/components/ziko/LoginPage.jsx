@@ -27,10 +27,13 @@ const handleSubmit = async (e) => {
     });
 
     console.log('Login response:', data);
+    console.log('📸 ProfilePicture received:', data.user?.profilePicture);
 
     localStorage.setItem('token', data.token);
     localStorage.setItem('role', data.user.role);
     localStorage.setItem('user', JSON.stringify(data.user));
+    
+    console.log('💾 Stored in localStorage:', JSON.parse(localStorage.getItem('user')));
 
     const map = {
       admin: '/admin/dashboard',
