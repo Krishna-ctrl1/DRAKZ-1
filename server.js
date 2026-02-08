@@ -41,7 +41,11 @@ connectDB();
 // Global Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
     credentials: true,
     allowedHeaders: [
       "Content-Type",
@@ -79,7 +83,11 @@ app.get("/trigger-error", (req, res, next) => {
 // --- SOCKET SERVER ---
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
     methods: ["GET", "POST"],
   },
 });
