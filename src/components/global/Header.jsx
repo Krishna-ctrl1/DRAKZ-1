@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearAuth } from "../../utils/auth.util";
 import "../../styles/global/Header.css";
@@ -13,15 +13,19 @@ const Header = ({ collapsed }) => {
     time: "",
   });
   const [userName, setUserName] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   const { collapsed: uiCollapsed } = useUI();
 
   useEffect(() => {
-    // Get user name from localStorage
+    // Get user name and profile picture from localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
         setUserName(user.name || "User");
+        setProfilePicture(user.profilePicture || "");
       } catch (e) {
         setUserName("User");
       }
@@ -67,12 +71,34 @@ const Header = ({ collapsed }) => {
     updateDateTime();
     const interval = setInterval(updateDateTime, 60000); // Update every minute
 
-    return () => clearInterval(interval);
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleLogout = () => {
     clearAuth();
+    setShowDropdown(false);
     navigate("/login", { replace: true });
+  };
+
+  const handleEditProfile = () => {
+    setShowDropdown(false);
+    navigate("/user/settings");
+  };
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
   };
 
   const isCollapsed = typeof collapsed === "boolean" ? collapsed : uiCollapsed;
@@ -88,10 +114,33 @@ const Header = ({ collapsed }) => {
           </div>
         </div>
         <div className="header-actions">
-          <span className="welcome-text">Welcome back, {userName}! 👋</span>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
+          <div className="welcome-section">
+            <i className="fa-solid fa-user-circle"></i>
+            <span className="welcome-text">Welcome back, {userName}!</span>
+          </div>
+          <div className="profile-section" ref={dropdownRef}>
+            <div className="profile-avatar-wrapper" onClick={toggleDropdown}>
+              <div className="profile-avatar">
+                {profilePicture ? (
+                  <img src={`http://localhost:3001${profilePicture}`} alt="Profile" />
+                ) : (
+                  <i className="fa-solid fa-user"></i>
+                )}
+              </div>
+            </div>
+            {showDropdown && (
+              <div className="profile-dropdown">
+                <button className="dropdown-item" onClick={handleEditProfile}>
+                  <i className="fa-solid fa-user-pen"></i>
+                  <span>Edit Profile</span>
+                </button>
+                <button className="dropdown-item logout" onClick={handleLogout}>
+                  <i className="fa-solid fa-right-from-bracket"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

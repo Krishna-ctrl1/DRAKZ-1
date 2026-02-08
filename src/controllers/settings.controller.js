@@ -9,7 +9,7 @@ const getProfile = async (req, res) => {
 
     const user = await Person.findById(req.user.id)
       .select(
-        "name email phone occupation role currency riskProfile monthlyIncome",
+        "name email phone occupation role currency riskProfile monthlyIncome profilePicture",
       )
       .lean();
 
@@ -28,6 +28,7 @@ const getProfile = async (req, res) => {
       currency: user.currency || "INR",
       riskProfile: user.riskProfile || "Moderate",
       monthlyIncome: user.monthlyIncome || 0,
+      profilePicture: user.profilePicture || "",
     });
   } catch (error) {
     console.error("Error in getProfile:", error);
@@ -230,9 +231,41 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Upload profile picture
+const uploadProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const userId = req.user.id;
+    const profilePicturePath = `/uploads/profile/${req.file.filename}`;
+
+    const user = await Person.findByIdAndUpdate(
+      userId,
+      { $set: { profilePicture: profilePicturePath } },
+      { new: true }
+    ).select("profilePicture");
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    console.log("✅ Profile picture updated for user:", userId);
+    res.json({
+      msg: "Profile picture updated successfully",
+      profilePicture: user.profilePicture,
+    });
+  } catch (error) {
+    console.error("💥 Error in uploadProfilePicture:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   updateFinancialPreferences,
   changePassword,
+  uploadProfilePicture,
 };
