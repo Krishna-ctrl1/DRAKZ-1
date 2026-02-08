@@ -18,7 +18,7 @@ const {
 } = require('../controllers/privilege.controller.js');
 
 const { auth } = require('../middlewares/auth.middleware.js');
-const upload = require('../middlewares/upload.middleware.js');
+const { upload } = require('../middlewares/upload.middleware.js');
 
 /**
  * @swagger

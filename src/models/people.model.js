@@ -17,6 +17,7 @@ const PersonSchema = new mongoose.Schema({
   creditScore: { type: Number, default: 750 },
   occupation: { type: String, default: 'Unspecified' },
   phone: { type: String, default: 'N/A' },
+  profilePicture: { type: String, default: '' },
   
   lastActive: { type: Date, default: Date.now },
   // ----------------------------------------

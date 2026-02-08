@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { auth } = require("../middlewares/auth.middleware");
+const { profileUpload } = require("../middlewares/upload.middleware");
 const {
   getProfile,
   updateProfile,
   updateFinancialPreferences,
   changePassword,
+  uploadProfilePicture,
 } = require("../controllers/settings.controller");
 const {
   validateProfileUpdate,
@@ -110,6 +112,32 @@ router.put(
 // @desc    Change password
 // @access  Private
 router.put("/password", auth, validatePasswordChange, changePassword);
+
+/**
+ * @swagger
+ * /settings/profile-picture:
+ *   post:
+ *     summary: Upload profile picture
+ *     tags: [Settings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded
+ */
+// @route   POST /api/settings/profile-picture
+// @desc    Upload profile picture
+// @access  Private
+router.post("/profile-picture", auth, profileUpload.single("profilePicture"), uploadProfilePicture);
 
 // Attach router-level error handler for settings
 router.use(settingsErrorHandler);

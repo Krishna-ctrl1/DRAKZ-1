@@ -20,8 +20,12 @@ const Settings = () => {
     phone: "",
     occupation: "",
     role: "",
+    profilePicture: "",
   });
   const [profileErrors, setProfileErrors] = useState({});
+  const [profilePictureFile, setProfilePictureFile] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
 
   // Financial state
   const [financialData, setFinancialData] = useState({
@@ -55,7 +59,13 @@ const Settings = () => {
         phone: data.phone || "",
         occupation: data.occupation || "",
         role: data.role || "",
+        profilePicture: data.profilePicture || "",
       });
+
+      // Set profile picture preview if exists
+      if (data.profilePicture) {
+        setProfilePicturePreview(`http://localhost:3001${data.profilePicture}`);
+      }
 
       setFinancialData({
         currency: data.currency || "INR",
@@ -252,6 +262,88 @@ const Settings = () => {
     }
   };
 
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setMessage({ type: "error", text: "Only image files are allowed (JPEG, PNG, GIF, WEBP)" });
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: "error", text: "File size must be less than 5MB" });
+        return;
+      }
+
+      setProfilePictureFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicturePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfilePictureUpload = async () => {
+    if (!profilePictureFile) {
+      setMessage({ type: "error", text: "Please select a file first" });
+      return;
+    }
+
+    try {
+      setUploadingPicture(true);
+      setMessage({ type: "", text: "" });
+
+      const formData = new FormData();
+      formData.append("profilePicture", profilePictureFile);
+
+      const response = await axios.post("/api/settings/profile-picture", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const updatedProfilePicture = response.data.profilePicture;
+
+      setProfileData({
+        ...profileData,
+        profilePicture: updatedProfilePicture,
+      });
+
+      // Update localStorage to reflect the change in Header
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          user.profilePicture = updatedProfilePicture;
+          localStorage.setItem("user", JSON.stringify(user));
+        } catch (e) {
+          console.error("Error updating localStorage:", e);
+        }
+      }
+
+      setMessage({ type: "success", text: "Profile picture updated successfully!" });
+      setProfilePictureFile(null);
+      
+      // Reload page after a short delay to update Header
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.msg || "Failed to upload profile picture",
+      });
+    } finally {
+      setUploadingPicture(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="settings-page">
@@ -313,6 +405,44 @@ const Settings = () => {
                 <div className="settings-section">
                   <h2>Profile Information</h2>
                   <div className="settings-form">
+                    {/* Profile Picture Section */}
+                    <div className="form-group profile-picture-section">
+                      <label>Profile Picture</label>
+                      <div className="profile-picture-container">
+                        <div className="profile-picture-preview">
+                          {profilePicturePreview ? (
+                            <img src={profilePicturePreview} alt="Profile" />
+                          ) : (
+                            <div className="profile-picture-placeholder">
+                              <i className="fa-solid fa-user"></i>
+                            </div>
+                          )}
+                        </div>
+                        <div className="profile-picture-controls">
+                          <input
+                            type="file"
+                            id="profilePictureInput"
+                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                            onChange={handleProfilePictureChange}
+                            style={{ display: "none" }}
+                          />
+                          <label htmlFor="profilePictureInput" className="profile-picture-select-btn">
+                            <i className="fa-solid fa-camera"></i> Choose Photo
+                          </label>
+                          {profilePictureFile && (
+                            <button
+                              className="profile-picture-upload-btn"
+                              onClick={handleProfilePictureUpload}
+                              disabled={uploadingPicture}
+                            >
+                              {uploadingPicture ? "Uploading..." : "Upload Photo"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <small>Supported formats: JPEG, PNG, GIF, WEBP (Max 5MB)</small>
+                    </div>
+
                     <div className="form-group">
                       <label>Full Name</label>
                       <input

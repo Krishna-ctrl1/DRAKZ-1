@@ -391,3 +391,102 @@
   font-weight: 500;
   animation: fadeIn 0.3s ease;
 }
+
+/* Profile Picture Styles */
+.profile-picture-section {
+  margin-bottom: 30px;
+}
+
+.profile-picture-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.profile-picture-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  transition: all 0.3s ease;
+}
+
+.profile-picture-preview:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.25);
+}
+
+.profile-picture-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-placeholder {
+  font-size: 48px;
+  color: rgba(59, 130, 246, 0.5);
+}
+
+.profile-picture-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-picture-select-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(29, 78, 216, 0.15) 100%);
+  color: #3b82f6;
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.profile-picture-select-btn:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(29, 78, 216, 0.25) 100%);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+}
+
+.profile-picture-upload-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.profile-picture-upload-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.profile-picture-upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-picture-upload-btn:active:not(:disabled) {
+  transform: translateY(0);
+}

@@ -31,7 +31,13 @@ exports.login = async (req, res) => {
 
     res.json({
       token,
-      user: { id: person._id, email, name: person.name, role: person.role },
+      user: { 
+        id: person._id, 
+        email, 
+        name: person.name, 
+        role: person.role,
+        profilePicture: person.profilePicture || ""
+      },
     });
   } catch (err) {
     console.error("💥 Login error:", err.message);
@@ -43,7 +49,7 @@ exports.login = async (req, res) => {
 exports.me = async (req, res) => {
   try {
     const user = await Person.findById(req.user.id).select(
-      "_id email name role",
+      "_id email name role profilePicture",
     );
     if (!user) return res.status(404).json({ msg: "User not found" });
     return res.json({
@@ -51,6 +57,7 @@ exports.me = async (req, res) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      profilePicture: user.profilePicture || "",
     });
   } catch (err) {
     return res.status(500).json({ msg: "Server error" });
