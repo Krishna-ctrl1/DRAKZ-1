@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { BACKEND_URL } from "../../config/backend";
 import "../../styles/ragamaie/BlogControls.css";
 
 // --- DARK MODAL STYLES ---
@@ -36,7 +37,7 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, o
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ title: "", content: "", image: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // existing states...
   const [activeFilters, setActiveFilters] = useState({ authorType: "all", sortBy: "latest", search: "" });
   const dropdownRef = useRef(null);
@@ -62,10 +63,10 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, o
     const token = localStorage.getItem("token");
     if (!token) { setIsSubmitting(false); return alert("Please login."); }
 
-    const url = editingBlog 
-      ? `http://localhost:3001/api/blogs/update/${editingBlog._id}` // PUT
-      : "http://localhost:3001/api/blogs";                          // POST
-      
+    const url = editingBlog
+      ? `${BACKEND_URL}/api/blogs/update/${editingBlog._id}` // PUT
+      : `${BACKEND_URL}/api/blogs`;                          // POST
+
     const method = editingBlog ? "PUT" : "POST";
 
     try {
@@ -79,7 +80,7 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, o
         alert(editingBlog ? "Blog updated! It is pending approval." : "Blog submitted!");
         setShowForm(false);
         setFormData({ title: "", content: "", image: "" });
-        onBlogCreated?.(); 
+        onBlogCreated?.();
       } else {
         alert("Failed to save.");
       }
@@ -90,33 +91,33 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, o
   const closeForm = () => {
     setShowForm(false);
     setFormData({ title: "", content: "", image: "" });
-    if(editingBlog) onCancelEdit?.(); 
+    if (editingBlog) onCancelEdit?.();
   };
 
   return (
     <>
       <div className="blog-controls">
         <div className="left">
-           {/* Ensure your CSS file handles this search input styling to match the screenshot */}
-           <input 
-             type="text" 
-             placeholder="🔍 Search..." 
-             onChange={(e) => onSearch?.(e.target.value)} 
-             className="search-input"
-             style={{ 
-               background: '#11111d', border: '1px solid #2b2b40', color: '#fff', 
-               padding: '10px 15px', borderRadius: '20px', width: '300px'
-             }}
-           />
+          {/* Ensure your CSS file handles this search input styling to match the screenshot */}
+          <input
+            type="text"
+            placeholder="🔍 Search..."
+            onChange={(e) => onSearch?.(e.target.value)}
+            className="search-input"
+            style={{
+              background: '#11111d', border: '1px solid #2b2b40', color: '#fff',
+              padding: '10px 15px', borderRadius: '20px', width: '300px'
+            }}
+          />
         </div>
 
         <div className="right">
-          <button 
-            className="create-btn" 
+          <button
+            className="create-btn"
             onClick={() => setShowForm(true)}
             style={{
               background: 'linear-gradient(45deg, #6C63FF, #4840d6)',
-              color: '#fff', border: 'none', padding: '10px 20px', 
+              color: '#fff', border: 'none', padding: '10px 20px',
               borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold'
             }}
           >
@@ -128,24 +129,24 @@ function BlogControls({ onFiltersChange, onBlogCreated, onSearch, editingBlog, o
       {showForm && (
         <div style={modalStyles.overlay}>
           <div style={modalStyles.content}>
-            <h2 style={{marginTop:0, marginBottom:'20px'}}>{editingBlog ? "Edit & Resubmit" : "Create Blog"}</h2>
+            <h2 style={{ marginTop: 0, marginBottom: '20px' }}>{editingBlog ? "Edit & Resubmit" : "Create Blog"}</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Title</label>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#aaa', fontSize: '0.9rem' }}>Title</label>
                 <input style={modalStyles.input} type="text" name="title" value={formData.title} onChange={handleChange} required />
               </div>
               <div className="form-group">
-                <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Content</label>
+                <label style={{ display: 'block', marginBottom: '5px', color: '#aaa', fontSize: '0.9rem' }}>Content</label>
                 <textarea style={modalStyles.textarea} name="content" rows="5" value={formData.content} onChange={handleChange} required />
               </div>
               {/* <div className="form-group">
                 <label style={{display:'block', marginBottom:'5px', color:'#aaa', fontSize:'0.9rem'}}>Image URL (Optional)</label>
                 <input style={modalStyles.input} type="text" name="image" value={formData.image} onChange={handleChange} />
               </div> */}
-              <div style={{display:'flex', justifyContent:'flex-end', marginTop:'20px'}}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
                 <button type="button" style={modalStyles.btnSecondary} onClick={closeForm}>Cancel</button>
                 <button type="submit" style={modalStyles.btnPrimary} disabled={isSubmitting}>
-                   {isSubmitting ? "Saving..." : (editingBlog ? "Save & Resubmit" : "Submit")}
+                  {isSubmitting ? "Saving..." : (editingBlog ? "Save & Resubmit" : "Submit")}
                 </button>
               </div>
             </form>

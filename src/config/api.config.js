@@ -1,11 +1,11 @@
-const BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export const API = {
-  base: BASE,
-  login: `${BASE}/api/auth/login`,
-  register: `${BASE}/api/auth/register`,
+  base: BACKEND_URL,
+  login: `${BACKEND_URL}/api/auth/login`,
+  register: `${BACKEND_URL}/api/auth/register`,
   // ... other routes ...
-  advisorClients: `${BASE}/api/advisor/clients`,
+  advisorClients: `${BACKEND_URL}/api/advisor/clients`,
 };
 
 export default API;

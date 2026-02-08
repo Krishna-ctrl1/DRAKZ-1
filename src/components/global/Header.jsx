@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../../config/backend";
 import { clearAuth } from "../../utils/auth.util";
 import "../../styles/global/Header.css";
 import { logout } from "../../auth/auth";
@@ -145,9 +146,9 @@ const Header = ({ collapsed }) => {
             <div className="profile-avatar-wrapper" onClick={toggleDropdown}>
               <div className="profile-avatar">
                 {profilePicture && profilePicture.trim() !== "" ? (
-                  <img 
-                    src={`http://localhost:3001${profilePicture}`} 
-                    alt="Profile" 
+                  <img
+                    src={`${BACKEND_URL}${profilePicture}`}
+                    alt="Profile"
                     onError={(e) => {
                       console.error('📸 Header: Image failed to load:', profilePicture);
                       e.target.style.display = 'none';

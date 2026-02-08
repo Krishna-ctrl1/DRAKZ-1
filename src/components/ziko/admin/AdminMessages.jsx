@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { BACKEND_URL } from "../../../config/backend";
 import { ToastContainer, toast } from "react-toastify";
 import { Section } from "../../../styles/ziko/admin/AdminLayout.styles";
 import { Title } from "../../../styles/ziko/admin/SharedStyles";
@@ -18,7 +19,7 @@ const AdminMessages = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/api/contact/all");
+      const res = await axios.get(`${BACKEND_URL}/api/contact/all`);
       setMessages(res.data);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -31,7 +32,7 @@ const AdminMessages = () => {
     if (!replyText) return toast.warning("Reply cannot be empty");
     setSendingReply(true);
     try {
-      await axios.post("http://localhost:3001/api/contact/reply", {
+      await axios.post(`${BACKEND_URL}/api/contact/reply`, {
         toEmail: msg.email,
         subject: msg.subject,
         replyMessage: replyText
@@ -58,7 +59,7 @@ const AdminMessages = () => {
           <div style={styles.grid}>
             {messages.map((msg) => (
               <div key={msg._id} style={styles.card}>
-                
+
                 {/* Header: Subject & Date */}
                 <div style={styles.cardHeader}>
                   <h3 style={styles.subject}>{msg.subject}</h3>
@@ -94,33 +95,33 @@ const AdminMessages = () => {
                       style={styles.textarea}
                     />
                     <div style={styles.actionButtons}>
-                      <button 
+                      <button
                         onClick={() => sendReply(msg)}
                         disabled={sendingReply}
-                        style={{...styles.button, ...styles.sendButton}}
+                        style={{ ...styles.button, ...styles.sendButton }}
                       >
                         {sendingReply ? "Sending..." : <><MdSend /> Send Reply</>}
                       </button>
-                      <button 
+                      <button
                         onClick={() => setReplyingTo(null)}
-                        style={{...styles.button, ...styles.cancelButton}}
+                        style={{ ...styles.button, ...styles.cancelButton }}
                       >
                         <MdCancel /> Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => { setReplyingTo(msg._id); setReplyText(""); }}
-                    style={{...styles.button, ...styles.replyButton}}
+                    style={{ ...styles.button, ...styles.replyButton }}
                   >
                     <MdReply /> Reply
                   </button>
                 )}
               </div>
             ))}
-            
-            {messages.length === 0 && <p style={{color: '#888'}}>No messages found.</p>}
+
+            {messages.length === 0 && <p style={{ color: '#888' }}>No messages found.</p>}
           </div>
         )}
       </Section>

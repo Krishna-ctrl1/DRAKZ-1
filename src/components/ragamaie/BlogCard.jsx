@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/ragamaie/BlogCard.css"; 
+import { BACKEND_URL } from "../../config/backend";
+import "../../styles/ragamaie/BlogCard.css";
 
 const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = [], dislikes = [], onDelete }) => {
   // State for counts (initialized from props)
   const [likeCount, setLikeCount] = useState(likes.length);
   const [dislikeCount, setDislikeCount] = useState(dislikes.length);
-  
+
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -23,7 +24,7 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
         const token = getToken();
         if (!token) return;
 
-        const res = await fetch(`http://localhost:3001/api/blogs/${_id}/interactions`, {
+        const res = await fetch(`${BACKEND_URL}/api/blogs/${_id}/interactions`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -38,12 +39,12 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
   }, [_id]);
 
   // 2. Handle Like / Dislike with Count Updates
-  const handleInteraction = async (type) => { 
+  const handleInteraction = async (type) => {
     try {
       const token = getToken();
       if (!token) return alert("Please login to interact.");
 
-      const res = await fetch(`http://localhost:3001/api/blogs/${_id}/${type}`, {
+      const res = await fetch(`${BACKEND_URL}/api/blogs/${_id}/${type}`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -83,7 +84,7 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
     if (!showComments) {
       setLoadingComments(true);
       try {
-        const res = await fetch(`http://localhost:3001/api/blogs/${_id}/comments`);
+        const res = await fetch(`${BACKEND_URL}/api/blogs/${_id}/comments`);
         const data = await res.json();
         setComments(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -100,7 +101,7 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
       const token = getToken();
       if (!token) return alert("Login to comment");
 
-      const res = await fetch(`http://localhost:3001/api/blogs/${_id}/comments`, {
+      const res = await fetch(`${BACKEND_URL}/api/blogs/${_id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ text: newComment })
@@ -120,7 +121,7 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
     if (!window.confirm("Delete this comment?")) return;
     try {
       const token = getToken();
-      const res = await fetch(`http://localhost:3001/api/blogs/comments/${commentId}`, {
+      const res = await fetch(`${BACKEND_URL}/api/blogs/comments/${commentId}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -143,17 +144,17 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
           <button type="button" className={`action-btn ${userStatus.hasLiked ? "active" : ""}`} onClick={() => handleInteraction('like')}>
             👍 Like ({likeCount})
           </button>
-          
+
           <button type="button" className={`action-btn ${userStatus.hasDisliked ? "active" : ""}`} onClick={() => handleInteraction('dislike')}>
             👎 Dislike ({dislikeCount})
           </button>
-          
+
           {/* <button type="button" className="action-btn" onClick={toggleComments}>
             💬 Comments
           </button> */}
 
           {currentUserId === author_id?._id && (
-             <button type="button" className="delete-btn" onClick={() => onDelete(_id)}>🗑 Delete</button>
+            <button type="button" className="delete-btn" onClick={() => onDelete(_id)}>🗑 Delete</button>
           )}
         </div>
 
@@ -174,7 +175,7 @@ const BlogCard = ({ _id, title, content, image, author_id, createdAt, likes = []
                       )}
                     </div>
                   ))
-                ) : <p style={{color: "#888"}}>No comments yet.</p>}
+                ) : <p style={{ color: "#888" }}>No comments yet.</p>}
               </div>
             )}
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { BACKEND_URL } from "../../../config/backend";
 import {
     UserTableContainer,
     StyledTable,
@@ -100,7 +101,7 @@ const AdvisorApprovals = () => {
         try {
             const token = localStorage.getItem('token');
             // Fetch only pending advisors (role=advisor & isApproved=false)
-            const response = await fetch('http://localhost:3001/api/privilege/admin/users?role=advisor&isApproved=false', {
+            const response = await fetch(`${BACKEND_URL}/api/privilege/admin/users?role=advisor&isApproved=false`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -123,7 +124,7 @@ const AdvisorApprovals = () => {
         if (!window.confirm("Approve this advisor?")) return;
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3001/api/privilege/admin/advisors/${id}/approve`, {
+            const response = await fetch(`${BACKEND_URL}/api/privilege/admin/advisors/${id}/approve`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -139,7 +140,7 @@ const AdvisorApprovals = () => {
         if (!window.confirm("Reject this advisor?")) return;
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:3001/api/privilege/admin/advisors/${id}/reject`, {
+            const response = await fetch(`${BACKEND_URL}/api/privilege/admin/advisors/${id}/reject`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -209,9 +210,9 @@ const AdvisorApprovals = () => {
                         <h2>Documents for {selectedAdvisor.name}</h2>
                         <DocumentGrid>
                             {selectedAdvisor.documents.map((doc, idx) => (
-                                <DocumentCard key={idx} href={`http://localhost:3001${doc.url}`} target="_blank" rel="noopener noreferrer">
+                                <DocumentCard key={idx} href={`${BACKEND_URL}${doc.url}`} target="_blank" rel="noopener noreferrer">
                                     {doc.type === 'image' ? (
-                                        <img src={`http://localhost:3001${doc.url}`} alt={doc.name} />
+                                        <img src={`${BACKEND_URL}${doc.url}`} alt={doc.name} />
                                     ) : (
                                         <div style={{ height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#333', borderRadius: '4px', width: '100%' }}>
                                             PDF

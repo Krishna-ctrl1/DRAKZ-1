@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { BACKEND_URL } from "../../../../config/backend";
 import {
   UserTableContainer,
   StyledTable,
@@ -119,7 +120,7 @@ const UserTable = ({ role }) => {
     password: "",
   });
 
-  const API_URL = "http://localhost:3001/api/privilege/admin/users"; // Updated to use Admin API
+  const API_URL = `${BACKEND_URL}/api/privilege/admin/users`; // Updated to use Admin API
 
   // --- FETCH USERS ---
   useEffect(() => {
@@ -268,7 +269,7 @@ const UserTable = ({ role }) => {
                     if (!window.confirm(`Are you sure you want to ${user.status === 'Active' ? 'suspend' : 'activate'} this user?`)) return;
                     try {
                       const token = localStorage.getItem('token');
-                      const response = await fetch(`http://localhost:3001/api/privilege/admin/users/${user._id}/status`, {
+                      const response = await fetch(`${BACKEND_URL}/api/privilege/admin/users/${user._id}/status`, {
                         method: 'PATCH',
                         headers: { 'Authorization': `Bearer ${token}` }
                       });

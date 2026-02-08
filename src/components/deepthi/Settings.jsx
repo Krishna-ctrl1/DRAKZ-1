@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../../config/backend";
 import Header from "../global/Header";
 import Sidebar from "../global/Sidebar";
 import "../../styles/deepthi/settings.css";
@@ -64,7 +65,7 @@ const Settings = () => {
 
       // Set profile picture preview if exists
       if (data.profilePicture) {
-        setProfilePicturePreview(`http://localhost:3001${data.profilePicture}`);
+        setProfilePicturePreview(`${BACKEND_URL}${data.profilePicture}`);
       }
 
       setFinancialData({
