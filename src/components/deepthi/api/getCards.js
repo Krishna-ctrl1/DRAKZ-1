@@ -1,4 +1,4 @@
-// src/components/deepthi/api/getCards.js
+import { BACKEND_URL } from "../../../config/api.config";
 
 const TIMEOUT = 30000; // 30 seconds - increased to prevent premature abort
 const MAX_RETRIES = 1; // Reduced retries since we're increasing timeout
@@ -85,8 +85,8 @@ async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
 export async function getCards({ token } = {}) {
   const authToken = token || localStorage.getItem("token");
   console.log("[getCards API] Token present:", !!authToken);
-  console.log("[getCards API] Fetching from /api/cards");
-  const res = await fetchWithRetry("/api/cards", {
+  console.log(`[getCards API] Fetching from ${BACKEND_URL}/api/cards`);
+  const res = await fetchWithRetry(`${BACKEND_URL}/api/cards`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -99,7 +99,7 @@ export async function getCards({ token } = {}) {
 
 export async function addCard(cardData, { token } = {}) {
   const authToken = token || localStorage.getItem("token");
-  const res = await fetchWithRetry("/api/cards", {
+  const res = await fetchWithRetry(`${BACKEND_URL}/api/cards`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -112,7 +112,7 @@ export async function addCard(cardData, { token } = {}) {
 
 export async function deleteCard(cardId, { token } = {}) {
   const authToken = token || localStorage.getItem("token");
-  const res = await fetchWithRetry(`/api/cards/${cardId}`, {
+  const res = await fetchWithRetry(`${BACKEND_URL}/api/cards/${cardId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -124,7 +124,7 @@ export async function deleteCard(cardId, { token } = {}) {
 
 export async function revealCardNumber(cardId, password, { token } = {}) {
   const authToken = token || localStorage.getItem("token");
-  const res = await fetchWithRetry(`/api/cards/${cardId}/reveal`, {
+  const res = await fetchWithRetry(`${BACKEND_URL}/api/cards/${cardId}/reveal`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
