@@ -31,23 +31,7 @@ if (!token) {
     config.headers = {};
   }
 
-  // Attach token if available
-  /* if (token && token.length > 0) {
-    // Check if Authorization header is already set (e.g. by explicit config)
-    if (!config.headers.Authorization) {
-       config.headers.Authorization = `Bearer ${token}`;
-       console.log(`[AXIOS-REQ] ✓ Authorization header attached`);
-    } else {
-       console.log(`[AXIOS-REQ] ! Authorization header already present`);
-    }
-
-    if (!config.headers["x-auth-token"]) {
-       //config.headers["x-auth-token"] = token;
-       console.log(`[AXIOS-REQ] ✓ x-auth-token header attached`);
-    }
-  } else {
-    console.warn(`[AXIOS-REQ] ✗ No token found to attach`);
-  } */
+  
  if (token && token.length > 0) {
   if (!config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
