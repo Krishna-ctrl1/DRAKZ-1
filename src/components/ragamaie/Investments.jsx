@@ -28,7 +28,7 @@ export default function Investments() {
 
       try {
         console.log("[INVESTMENTS] Making API request for investment-history...");
-        const res = await api.get(`/api/investment-history?range=${range}`);
+        const res = await api.get(`/api/investments/investment-history?range=${range}`);
 
         // expecting [{ name: "Nov", value: 4925 }, ...] OR [{ name: "3", value: 4200 }, ...]
         if (Array.isArray(res.data)) {

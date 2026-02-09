@@ -16,10 +16,10 @@ export const fetchStocks = createAsyncThunk(
       }
       
       console.log("[STOCKS-THUNK] Dispatched, token:", token ? "✓" : "✗");
-      console.log("[STOCKS-THUNK] Making request to /api/user-investments...");
-      
-      // Let the axios interceptor handle token attachment
-      const res = await api.get("/api/user-investments");
+     console.log("[STOCKS-THUNK] Making request to /api/investments/user-investments...");
+
+     const res = await api.get("/api/investments/user-investments");
+
       console.log("[STOCKS-THUNK] ✓ Success, got", res.data?.length || 0, "stocks");
       return Array.isArray(res.data) ? res.data : [];
     } catch (err) {

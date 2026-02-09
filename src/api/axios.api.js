@@ -14,15 +14,12 @@ console.log("[AXIOS-INIT] Registering request interceptor...");
 // REQUEST INTERCEPTOR - Attach authentication token
 const requestInterceptor = instance.interceptors.request.use((config) => {
   // Try getting token from auth helper first
-  let token = getToken();
-  
-  // Fallback: Try direct localStorage access if helper fails
-  if (!token) {
-    token = localStorage.getItem("token");
-    if (token) {
-      console.warn("[AXIOS-REQ] ⚠️ getToken() returned null but localStorage has token. Using direct access.");
-    }
-  }
+  let token = localStorage.getItem("token");
+
+if (!token) {
+  token = getToken();
+}
+
 
   const method = config.method?.toUpperCase() || "UNKNOWN";
   const url = config.url || "unknown";
@@ -35,7 +32,7 @@ const requestInterceptor = instance.interceptors.request.use((config) => {
   }
 
   // Attach token if available
-  if (token && token.length > 0) {
+  /* if (token && token.length > 0) {
     // Check if Authorization header is already set (e.g. by explicit config)
     if (!config.headers.Authorization) {
        config.headers.Authorization = `Bearer ${token}`;
@@ -45,12 +42,21 @@ const requestInterceptor = instance.interceptors.request.use((config) => {
     }
 
     if (!config.headers["x-auth-token"]) {
-       config.headers["x-auth-token"] = token;
+       //config.headers["x-auth-token"] = token;
        console.log(`[AXIOS-REQ] ✓ x-auth-token header attached`);
     }
   } else {
     console.warn(`[AXIOS-REQ] ✗ No token found to attach`);
+  } */
+ if (token && token.length > 0) {
+  if (!config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+    console.log(`[AXIOS-REQ] ✓ Authorization header attached`);
   }
+} else {
+  console.warn(`[AXIOS-REQ] ✗ No token found to attach`);
+}
+
 
   config.metadata = { retryCount: 0 };
   return config;
@@ -59,7 +65,7 @@ const requestInterceptor = instance.interceptors.request.use((config) => {
 console.log("[AXIOS-INIT] ✓ Request interceptor registered, ID:", requestInterceptor);
 
 // RESPONSE INTERCEPTOR - Handle errors and retries
-instance.interceptors.response.use(
+ instance.interceptors.response.use(
   (res) => res,
   async (err) => {
     const config = err.config;
@@ -83,6 +89,8 @@ instance.interceptors.response.use(
       }
       return Promise.reject(err);
     }
+ 
+
 
     // Retry on timeout or 5xx errors (max 2 retries)
     const shouldRetry =

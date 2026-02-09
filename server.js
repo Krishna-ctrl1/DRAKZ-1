@@ -143,7 +143,7 @@ app.use("/api/cards", require("./src/routes/card.routes"));
 app.use("/api/advisor", advisorRoutes);
 app.use("/api/user", userAdvisorRoutes);
 app.use("/api/contact", contactRoutes);
-app.use("/api", investmentsRoutes);
+app.use("/api/inestments", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/logs", logsRoutes);
 // Attach app-level context on settings dontenvroutes (single mount)

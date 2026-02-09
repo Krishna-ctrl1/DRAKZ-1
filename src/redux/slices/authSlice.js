@@ -30,6 +30,10 @@ const authSlice = createSlice({
       state.token = token;
       state.role = role;
       state.user = user || null;
+      //
+      localStorage.setItem("token", token);
+     localStorage.setItem("role", role);
+     localStorage.setItem("user", JSON.stringify(user));
     },
     loginFailure(state, action) {
       state.loading = false;
@@ -41,6 +45,10 @@ const authSlice = createSlice({
       state.user = null;
       state.loading = false;
       state.error = null;
+      //
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("user");
     },
     setUser(state, action) {
       state.user = action.payload;
