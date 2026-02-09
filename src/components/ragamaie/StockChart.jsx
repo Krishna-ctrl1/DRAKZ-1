@@ -12,7 +12,7 @@ export default function StockChart() {
     const fetchStocks = async () => {
       try {
         // Let the axios interceptor attach the token automatically
-        const res = await api.get("/api/user-investments");
+        const res = await api.get("/api/investments/user-investments");
         setStocks(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
