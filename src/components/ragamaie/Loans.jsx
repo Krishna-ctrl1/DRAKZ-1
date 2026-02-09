@@ -13,7 +13,7 @@ export default function Loans() {
     const fetchLoans = async () => {
       try {
         // Let the axios interceptor attach the token automatically
-        const res = await api.get("/api/user-loans");
+        const res = await api.get("/api/investments/user-loans");
         setLoans(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
