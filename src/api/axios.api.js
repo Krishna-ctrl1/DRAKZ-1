@@ -1,24 +1,22 @@
 import axios from "axios";
 import API from "../config/api.config.js";
-import { getToken } from "../auth/auth.js";
+// Removed legacy getToken import
+// import { getToken } from "../auth/auth.js";
 
 const instance = axios.create({
   baseURL: API.base,
-  timeout: 8000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
-
-console.log("[AXIOS-INIT] ✓ Axios instance created");
-console.log("[AXIOS-INIT] Base URL:", API.base);
-console.log("[AXIOS-INIT] Registering request interceptor...");
 
 // REQUEST INTERCEPTOR - Attach authentication token
 const requestInterceptor = instance.interceptors.request.use((config) => {
-  // Try getting token from auth helper first
+  // Try getting token from localStorage
   let token = localStorage.getItem("token");
 
-if (!token) {
-  token = getToken();
-}
+  // Legacy fallback removed
+
 
 
   const method = config.method?.toUpperCase() || "UNKNOWN";
@@ -71,21 +69,22 @@ console.log("[AXIOS-INIT] ✓ Request interceptor registered, ID:", requestInter
     const config = err.config;
 
     // Handle 401 Unauthorized
+    // Handle 401 Unauthorized
     if (err?.response?.status === 401) {
       console.error(
         `[AXIOS-ERR] 🚫 401 Unauthorized on ${config?.url}`,
         err.response?.data,
       );
 
-      // Only clear token if one exists (prevent double-logout)
-      const tokenExists = localStorage.getItem("token");
-      if (tokenExists) {
-        console.warn("[AXIOS-ERR] Valid session might be expired, but suppressing auto-logout for stability.");
-        // console.log("[AXIOS-ERR] Clearing invalid token from storage");
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("role");
-        // localStorage.removeItem("user");
-        // window.location.replace("/login");
+      // FORCE LOGOUT
+      console.warn("[AXIOS-ERR] Session expired or invalid. Logging out.");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("user");
+      
+      // Redirect to login if not already there
+      if (!window.location.pathname.includes("/login")) {
+          window.location.replace("/login");
       }
       return Promise.reject(err);
     }

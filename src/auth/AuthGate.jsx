@@ -1,43 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, Navigate } from "react-router-dom";
-import axios from "../api/axios.api";
-import { isAuthenticated } from "./auth";
-import { clearAuth } from "../utils/auth.util";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
 
 const AuthGate = ({ children }) => {
-  const [status, setStatus] = useState("checking"); // 'checking' | 'ok' | 'redirect'
+  const { user, token, isLoading } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    const runCheck = async () => {
-      // First, rely on local token validity (fast, avoids over-eager redirects)
-      const authed = isAuthenticated();
-      console.log("[AUTHGATE] isAuthenticated:", authed);
-      if (!authed) {
-        console.log("[AUTHGATE] Not authenticated, redirecting to login");
-        setStatus("redirect");
-        return;
-      }
+  if (isLoading) {
+    // You might want a spinner here
+    return null;
+  }
 
-      // Soft server-side validation: do NOT redirect on transient failures
-      try {
-        console.log("[AUTHGATE] Validating token with /api/auth/me...");
-        await axios.get("/api/auth/me");
-        console.log("[AUTHGATE] ✓ Token validation passed");
-        setStatus("ok");
-      } catch (e) {
-        // If server check fails but local token is valid, proceed without redirect
-        console.warn("[AUTHGATE] /api/auth/me check failed, but local token valid. Status:", e?.response?.status);
-        setStatus("ok");
-      }
-    };
-
-    runCheck();
-  }, [location.key]);
-
-  if (status === "checking") return null; // or a spinner
-  if (status === "redirect")
+  if (!token) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  // Optional: Check if user data is loaded if you require it for all protected routes
+  // if (!user) { return null; }
+
   return children;
 };
 

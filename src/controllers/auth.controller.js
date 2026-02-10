@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Person = require("../models/people.model.js");
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
+const { jwtSecret } = require("../config/jwt.config.js");
+const JWT_SECRET = jwtSecret;
 
 exports.register = async (req, res) => {
   const { name, email, password, role, specializedIn, experience, bio, phone } = req.body;
@@ -58,20 +59,29 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Create token for normal users
+    // Unified token generation (matches login)
     const payload = {
-      user: {
-        id: user.id
-      }
+      id: user.id,
+      role: user.role
     };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET || "fallback-secret",
-      { expiresIn: 360000 },
+      { expiresIn: "8h" }, // Consistent with login
       (err, token) => {
         if (err) throw err;
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        // Return same structure as login
+        res.json({ 
+          token, 
+          user: { 
+            id: user.id, 
+            name: user.name, 
+            email: user.email, 
+            role: user.role,
+            profilePicture: "" 
+          } 
+        });
       }
     );
 
