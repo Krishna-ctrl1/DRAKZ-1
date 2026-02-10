@@ -42,6 +42,7 @@ connectDB();
 // Helper to normalize URL (remove trailing slash)
 const normalizeUrl = (url) => url ? url.replace(/\/$/, "") : "";
 
+console.log("🔑 JWT_SECRET loaded:", process.env.JWT_SECRET ? "YES" : "NO (using fallback)");
 console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const allowedOrigins = [

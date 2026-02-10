@@ -29,50 +29,54 @@ import ContentManagementPage from "./components/ziko/admin/ContentManagementPage
 import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
 
+import { AuthProvider } from "./context/AuthProvider";
+
 function App() {
   return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+    <AuthProvider>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
-        <Route element={<AuthGate><ProtectedRoute /></AuthGate>}>
-          {/* ADVISOR ROUTES */}
-          <Route element={<RoleRoute allowed={["advisor"]} />}>
-            <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
-            <Route path="/advisor/video" element={<AdvisorSession />} />
-          </Route>
+          <Route element={<AuthGate><ProtectedRoute /></AuthGate>}>
+            {/* ADVISOR ROUTES */}
+            <Route element={<RoleRoute allowed={["advisor"]} />}>
+              <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
+              <Route path="/advisor/video" element={<AdvisorSession />} />
+            </Route>
 
-          {/* ADMIN ROUTES */}
-          <Route element={<RoleRoute allowed={["admin"]} />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<UserManagementPage />} />
-              <Route
-                path="/admin/content"
-                element={<ContentManagementPage />}
-              />
-              <Route path="/admin/settings" element={<SettingsPage />} />
-              <Route path="/admin/support" element={<SupportPage />} />
-              <Route path="/admin/logs" element={<LogsPage />} />
+            {/* ADMIN ROUTES */}
+            <Route element={<RoleRoute allowed={["admin"]} />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UserManagementPage />} />
+                <Route
+                  path="/admin/content"
+                  element={<ContentManagementPage />}
+                />
+                <Route path="/admin/settings" element={<SettingsPage />} />
+                <Route path="/admin/support" element={<SupportPage />} />
+                <Route path="/admin/logs" element={<LogsPage />} />
+              </Route>
+            </Route>
+
+            {/* USER ROUTES */}
+            <Route element={<RoleRoute allowed={["user"]} />}>
+              <Route path="/user/dashboard" element={<Dashboard />} />
+              <Route path="/user/settings" element={<Settings />} />
+              <Route path="/user/video" element={<UserSession />} />
+              <Route path="/user/blog" element={<Blogs />} />
+              <Route path="/user/investments" element={<Investments />} />
+              <Route path="/user/finbot" element={<FinBot />} />
+              <Route path="/user/privileges" element={<MyPrivilege />} />
+              <Route path="/user/advisors" element={<AdvisorList />} />
             </Route>
           </Route>
-
-          {/* USER ROUTES */}
-          <Route element={<RoleRoute allowed={["user"]} />}>
-            <Route path="/user/dashboard" element={<Dashboard />} />
-            <Route path="/user/settings" element={<Settings />} />
-            <Route path="/user/video" element={<UserSession />} />
-            <Route path="/user/blog" element={<Blogs />} />
-            <Route path="/user/investments" element={<Investments />} />
-            <Route path="/user/finbot" element={<FinBot />} />
-            <Route path="/user/privileges" element={<MyPrivilege />} />
-            <Route path="/user/advisors" element={<AdvisorList />} />
-          </Route>
-        </Route>
-      </Routes>
-    </div>
+        </Routes>
+      </div>
+    </AuthProvider>
   );
 }
 

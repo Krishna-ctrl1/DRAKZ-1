@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios.api";
-import { getToken } from "../../auth/auth.js";
-
 /**
  * Fetch user's stocks (REAL API)
  */
@@ -10,15 +8,12 @@ export const fetchStocks = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Robust token retrieval for logging
-      let token = getToken();
-      if (!token) {
-        token = localStorage.getItem("token");
-      }
+      const token = localStorage.getItem("token");
       
       console.log("[STOCKS-THUNK] Dispatched, token:", token ? "✓" : "✗");
-     console.log("[STOCKS-THUNK] Making request to /api/investments/user-investments...");
+      console.log("[STOCKS-THUNK] Making request to /api/investments/user-investments...");
 
-     const res = await api.get("/api/investments/user-investments");
+      const res = await api.get("/api/investments/user-investments");
 
       console.log("[STOCKS-THUNK] ✓ Success, got", res.data?.length || 0, "stocks");
       return Array.isArray(res.data) ? res.data : [];

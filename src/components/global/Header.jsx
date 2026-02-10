@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../../config/backend";
-import { clearAuth } from "../../utils/auth.util";
 import "../../styles/global/Header.css";
-import { logout } from "../../auth/auth";
 import { useUI } from "../../context/UIContext";
+import { useAuth } from "../../context/AuthProvider";
 
 const Header = ({ collapsed }) => {
   const navigate = useNavigate();
@@ -111,8 +110,10 @@ const Header = ({ collapsed }) => {
     };
   }, []);
 
+  const { logout } = useAuth(); // Use logout from context
+
   const handleLogout = () => {
-    clearAuth();
+    logout();
     setShowDropdown(false);
     navigate("/login", { replace: true });
   };

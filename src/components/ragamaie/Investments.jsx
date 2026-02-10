@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../api/axios.api";
-import { getToken } from "../../auth/auth.js";
 import "../../styles/ragamaie/Investments.css";
 
 export default function Investments() {
@@ -19,7 +18,7 @@ export default function Investments() {
 
   useEffect(() => {
     // Check token availability when component mounts
-    const token = getToken();
+    const token = localStorage.getItem("token");
     console.log("[INVESTMENTS] Component mounted, token status:", token ? "✓ Present" : "✗ Missing");
 
     const fetchHistory = async () => {

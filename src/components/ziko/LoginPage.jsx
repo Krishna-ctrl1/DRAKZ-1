@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
 import axios from 'axios';
 import API from '../../config/api.config.js';
 
 const LoginPage = () => {
+  const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({
     name: '', email: '', password: '', role: 'user',
@@ -38,9 +40,8 @@ const LoginPage = () => {
           headers: { 'Content-Type': 'application/json' },
         });
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.user.role);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Use context login
+        login(data.user, data.token);
 
         const map = {
           admin: '/admin/dashboard',
@@ -78,11 +79,17 @@ const LoginPage = () => {
           setForm({ name: '', email: '', password: '', role: 'user', specializedIn: '', experience: '', bio: '', phone: '' });
           setDocuments([]);
         } else {
-          // Auto-login or redirect
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('role', data.user.role);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          navigate('/user/dashboard', { replace: true });
+          // Auto-login logic
+          // Use the login helper from context to update state and storage
+          login(data.user, data.token);
+
+          // Redirect
+          const map = {
+            admin: '/admin/dashboard',
+            advisor: '/advisor/dashboard',
+            user: '/user/dashboard',
+          };
+          navigate(map[data.user.role] || '/user/dashboard', { replace: true });
         }
       }
 
