@@ -248,8 +248,12 @@ const {
   assignAdvisor,
   getBusinessAnalytics,
   getSupportTickets,
+  updateTicketStatus,
   getSettings,
-  updateSettings
+  updateSettings,
+  createAdmin,
+  updateAdminPermissions,
+  getAdminLogs
 } = require('../controllers/privilege.controller.js');
 
 const { requireAdmin } = require('../middlewares/auth.middleware.js');
@@ -379,7 +383,15 @@ router.post('/admin/assign', auth, requireAdmin, assignAdvisor);
 // New Advanced Admin Routes
 router.get('/admin/business-analytics', auth, requireAdmin, getBusinessAnalytics);
 router.get('/admin/support', auth, requireAdmin, getSupportTickets);
+router.patch('/admin/support/:id', auth, requireAdmin, updateTicketStatus);
 router.get('/admin/settings', auth, requireAdmin, getSettings);
 router.put('/admin/settings', auth, requireAdmin, updateSettings);
+
+// RBAC Routes
+router.post('/admin/create-admin', auth, requireAdmin, createAdmin);
+router.patch('/admin/update-permissions/:id', auth, requireAdmin, updateAdminPermissions);
+
+// Logs
+router.get('/admin/logs', auth, requireAdmin, getAdminLogs);
 
 module.exports = router;

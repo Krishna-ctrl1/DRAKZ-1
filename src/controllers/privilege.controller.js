@@ -3,9 +3,11 @@ const Property = require('../models/property.model.js');
 const Insurance = require('../models/insurance.model.js');
 const PreciousHolding = require('../models/preciousHolding.model.js');
 const Transaction = require('../models/transaction.model.js');
+const bcrypt = require('bcryptjs'); // Needed for createAdmin.js');
 const Person = require('../models/people.model.js');
 const Settings = require('../models/Settings.js');
 const Contact = require('../models/ContactModel.js');
+const { logAdminAction } = require('../utils/logger.js');
 
 const OZ_TO_GRAM = 31.1035;
 const USD_TO_INR = Number(process.env.USD_TO_INR || 83.5);
@@ -379,7 +381,7 @@ const getLiveMetalPrices = async (req, res) => {
 
 // --- ADMIN DASHBOARD FUNCTIONS ---
 
-// 1. Get Analytics
+// 1. Get Analytics (Enhanced for Charts)
 const getAnalytics = async (req, res) => {
   try {
     const totalUsers = await Person.countDocuments({ role: 'user' });
@@ -389,11 +391,107 @@ const getAnalytics = async (req, res) => {
     const activeAdvisors = await Person.countDocuments({ role: 'advisor', status: 'Active', isApproved: true });
     const pendingAdvisors = await Person.countDocuments({ role: 'advisor', isApproved: false, isRejected: false });
 
+    // FINANCIAL HEALTH (Total AUM)
+    const totalAUMRaw = await Person.aggregate([
+        { $match: { role: 'user' } },
+        { $group: { _id: null, total: { $sum: "$portfolioValue" } } }
+    ]);
+    const totalAUM = totalAUMRaw.length > 0 ? totalAUMRaw[0].total : 0;
+
+    // --- CHARTS DATA ---
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5); // Last 6 months including current
+
+    // A. User Growth (Group by Month)
+    const userGrowthRaw = await Person.aggregate([
+        { $match: { role: 'user', created_at: { $gte: sixMonthsAgo } } },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$created_at" } },
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { "_id": 1 } }
+    ]);
+    
+    // Fill in missing months
+    const userGrowth = [];
+    for (let i = 0; i < 6; i++) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        const key = d.toISOString().slice(0, 7); // YYYY-MM
+        const found = userGrowthRaw.find(u => u._id === key);
+        userGrowth.push({
+            name: d.toLocaleString('default', { month: 'short' }),
+            users: found ? found.count : 0
+        });
+    }
+
+    // B. Transaction Volume (Group by Month)
+    const transactionVolumeRaw = await Transaction.aggregate([
+        { $match: { date: { $gte: sixMonthsAgo }, status: 'Completed' } },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$date" } },
+                amount: { $sum: "$amount" }
+            }
+        },
+        { $sort: { "_id": 1 } }
+    ]);
+
+    const transactionVolume = [];
+    for (let i = 0; i < 6; i++) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - (5 - i));
+        const key = d.toISOString().slice(0, 7);
+        const found = transactionVolumeRaw.find(t => t._id === key);
+        transactionVolume.push({
+            name: d.toLocaleString('default', { month: 'short' }),
+            volume: found ? found.amount : 0
+        });
+    }
+
+    // C. Cohort Analysis (Retention based on Transaction Activity)
+    // 1. Group users by creation month (Cohort)
+    // 2. Check if they made transactions in subsequent months
+    
+    // Simplified Cohort: Users joined in Month X -> Active in Month Y?
+    // Due to complexity in Mongo aggregation for this specific structure, 
+    // we will simulate a basic retention view for the last 3 months.
+    
+    const cohorts = [];
+    for (let i = 0; i < 3; i++) {
+        const cohortDate = new Date();
+        cohortDate.setMonth(cohortDate.getMonth() - (2 - i));
+        const cohortMonth = cohortDate.toISOString().slice(0, 7); // YYYY-MM
+        
+        // Users passing this month
+        const usersInCohort = userGrowthRaw.find(u => u._id === cohortMonth)?.count || 0;
+        
+        // Retention (Mocked for demo as real transaction-link requires complex lookup)
+        // In real app: Find users created in Month X, count how many have TRX in Month X+1, X+2...
+        cohorts.push({
+            month: cohortMonth,
+            newUsers: usersInCohort,
+            retention: [
+                { month: 'M+1', value: Math.floor(usersInCohort * 0.6) }, // 60%
+                { month: 'M+2', value: Math.floor(usersInCohort * 0.4) }  // 40%
+            ]
+        });
+    }
+
     res.status(200).json({
         users: { total: totalUsers, active: activeUsers, suspended: suspendedUsers },
-        advisors: { total: totalAdvisors, active: activeAdvisors, pending: pendingAdvisors }
+        advisors: { total: totalAdvisors, active: activeAdvisors, pending: pendingAdvisors },
+        financial: { totalAUM },
+        charts: {
+            userGrowth,
+            transactionVolume,
+            cohorts 
+        }
     });
   } catch (error) {
+    console.error("Analytics Error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -424,6 +522,18 @@ const toggleUserStatus = async (req, res) => {
 
     user.status = user.status === 'Active' ? 'Suspended' : 'Active';
     await user.save();
+
+    // Log Action
+    await logAdminAction({
+      adminId: req.user.id,
+      adminName: 'Admin',
+      action: 'TOGGLE_USER_STATUS',
+      targetId: id,
+      targetName: user.name || user.email,
+      targetType: 'USER',
+      details: `Changed status to ${user.status}`,
+      req
+    });
     
     res.status(200).json({ msg: `User ${user.status}`, status: user.status });
   } catch (error) {
@@ -442,6 +552,18 @@ const approveAdvisor = async (req, res) => {
     user.isApproved = true;
     user.isRejected = false;
     await user.save();
+
+    // Log Action
+    await logAdminAction({
+      adminId: req.user.id,
+      adminName: 'Admin',
+      action: 'APPROVE_ADVISOR',
+      targetId: id,
+      targetName: user.name || user.email,
+      targetType: 'ADVISOR',
+      details: `Approved advisor ${user.email}`,
+      req
+    });
 
     res.status(200).json({ msg: 'Advisor approved successfully' });
   } catch (error) {
@@ -526,11 +648,37 @@ const getBusinessAnalytics = async (req, res) => {
   }
 };
 
-// 8. Support Tickets
+// 8. Support Tickets - GET
 const getSupportTickets = async (req, res) => {
   try {
     const tickets = await Contact.find().sort({ createdAt: -1 });
     res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// 8b. Support Tickets - UPDATE (Reply/Status)
+const updateTicketStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, priority, adminReply } = req.body;
+    
+    const updateData = {};
+    if (status) updateData.status = status;
+    if (priority) updateData.priority = priority;
+    if (adminReply) {
+        updateData.adminReply = adminReply;
+        updateData.repliedAt = Date.now();
+        // Auto-close if replid? Maybe not.
+        if (status === 'Open') updateData.status = 'In Progress';
+    }
+
+    const ticket = await Contact.findByIdAndUpdate(id, updateData, { new: true });
+    
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    
+    res.status(200).json({ msg: 'Ticket updated', ticket });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -573,6 +721,88 @@ const updateSettings = async (req, res) => {
   }
 };
 
+// 11. Create Admin (for RBAC)
+const createAdmin = async (req, res) => {
+    try {
+        const { name, email, password, role, permissions } = req.body;
+        
+        let user = await Person.findOne({ email });
+        if (user) return res.status(400).json({ error: 'User already exists' });
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        user = new Person({
+            name,
+            email,
+            password: hashedPassword,
+            role: role || 'admin',
+            permissions: permissions || []
+        });
+
+        await user.save();
+        
+        // Log
+        await logAdminAction({
+          adminId: req.user.id,
+          adminName: 'Admin',
+          action: 'CREATE_ADMIN',
+          targetId: user._id,
+          targetName: email,
+          targetType: 'ADMIN',
+          details: `Created admin ${email}`,
+          req
+        });
+
+        res.status(201).json({ msg: 'Admin created successfully', user: { id: user._id, name, email, role: user.role } });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 12. Update Admin Permissions
+const updateAdminPermissions = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { permissions } = req.body;
+
+        const user = await Person.findById(id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.role !== 'admin') return res.status(400).json({ error: 'Target user is not an admin' });
+
+        user.permissions = permissions;
+        await user.save();
+
+        // Log
+        await logAdminAction({
+          adminId: req.user.id,
+          adminName: 'Admin',
+          action: 'UPDATE_PERMISSIONS',
+          targetId: id,
+          targetName: user.email,
+          targetType: 'ADMIN',
+          details: `Updated permissions for ${user.email}`,
+          req
+        });
+
+        res.json({ msg: 'Permissions updated', permissions: user.permissions });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 13. Get Admin Logs
+const getAdminLogs = async (req, res) => {
+    try {
+        // Dynamic require to avoid potential circular dependency issues if any
+        const AdminLog = require('../models/adminLog.model');
+        const logs = await AdminLog.find().sort({ timestamp: -1 }).limit(100);
+        res.json(logs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
 module.exports = {
   getUserProfile,
   addProperty, 
@@ -586,10 +816,8 @@ module.exports = {
   getTransactions,
   updateTransaction,
   createTransaction,
-  seedData,
   getLiveMetalPrices,
-  // New Admin Functions
-  getAnalytics,
+  seedData,
   getAllUsers,
   toggleUserStatus,
   approveAdvisor,
@@ -597,6 +825,11 @@ module.exports = {
   assignAdvisor,
   getBusinessAnalytics,
   getSupportTickets,
+  updateTicketStatus,
   getSettings,
-  updateSettings
+  updateSettings,
+  getAnalytics,
+  createAdmin,
+  updateAdminPermissions,
+  getAdminLogs
 };

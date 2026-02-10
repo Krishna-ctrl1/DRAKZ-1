@@ -14,6 +14,7 @@ const { auth } = require("../middlewares/auth.middleware.js");
 // 1. ADMIN ROUTES 
 router.get("/admin/list", auth, blogCtrl.getAdminBlogs); 
 router.patch("/admin/:id/status", auth, blogCtrl.updateBlogStatus);
+router.patch("/admin/:id/flag", auth, blogCtrl.toggleBlogFlag);
 router.delete("/admin/:id", auth, blogCtrl.deleteBlogByAdmin);
 
 /**

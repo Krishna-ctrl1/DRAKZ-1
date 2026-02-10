@@ -20,6 +20,13 @@ const PersonSchema = new mongoose.Schema({
   profilePicture: { type: String, default: '' },
   
   lastActive: { type: Date, default: Date.now },
+  
+  // --- KYC STATUS ---
+  kycStatus: {
+    type: String,
+    enum: ['unverified', 'pending', 'verified', 'rejected'],
+    default: 'unverified'
+  },
   // ----------------------------------------
 
   // --- ADVISOR-SPECIFIC PROFILE FIELDS ---
@@ -57,6 +64,11 @@ const PersonSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // RBAC for Admins
+  permissions: [{
+    type: String,
+    enum: ['manage_users', 'manage_content', 'manage_support', 'view_analytics', 'manage_admins']
+  }],
   documents: [{
     name: { type: String },
     url: { type: String },

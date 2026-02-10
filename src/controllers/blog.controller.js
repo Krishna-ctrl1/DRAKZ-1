@@ -27,15 +27,40 @@ exports.createBlog = async (req, res) => {
 
 // ADMIN: Get blogs (Fixed Populate for "Unknown" issue)
 exports.getAdminBlogs = async (req, res) => {
-  const { status } = req.query;
+  const { status, isFlagged } = req.query;
   try {
-    const filter = status ? { status } : {};
+    const filter = {};
+    if (status) filter.status = status;
+    if (isFlagged === 'true') filter.isFlagged = true;
+
     const blogs = await Blog.find(filter)
       .populate('author_id', 'name email') // <--- FIXES "Unknown (ID Only)"
       .sort({ createdAt: -1 }); 
     res.json(blogs);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch admin data" });
+  }
+};
+
+// ADMIN: Toggle Flag (Moderation)
+exports.toggleBlogFlag = async (req, res) => {
+  const { id } = req.params;
+  const { isFlagged, reason } = req.body;
+
+  try {
+    const updateData = { isFlagged };
+    if (isFlagged) {
+        updateData.flagReason = reason || "Flagged by Admin";
+    } else {
+        updateData.flagReason = "";
+    }
+
+    const blog = await Blog.findByIdAndUpdate(id, updateData, { new: true });
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+
+    res.json(blog);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update flag status" });
   }
 };
 

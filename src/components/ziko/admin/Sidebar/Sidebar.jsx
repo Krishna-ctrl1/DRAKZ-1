@@ -13,8 +13,12 @@ import {
   MdPeople,
   MdArticle,
   MdSettings,
-  MdListAlt,
-  MdMessage,
+  MdLogout,
+  MdVerifiedUser,
+  MdSupportAgent,
+  MdLibraryBooks,
+  MdSecurity,
+  MdListAlt
 } from "react-icons/md";
 
 const Sidebar = () => {
@@ -22,9 +26,12 @@ const Sidebar = () => {
 
   const navItems = [
     { path: "/admin/dashboard", icon: <MdDashboard />, label: "Dashboard" },
+
     { path: "/admin/users", icon: <MdPeople />, label: "Users" },
     { path: "/admin/content", icon: <MdArticle />, label: "Content" },
-    { path: "/admin/support", icon: <MdMessage />, label: "Support" }, // Changed from Messages to Support
+    { path: '/admin/support', icon: <MdSupportAgent />, label: 'Support' },
+    { path: '/admin/verification', icon: <MdVerifiedUser />, label: 'Verification' },
+    { path: '/admin/access-control', icon: <MdSecurity />, label: 'Admins' },
     { path: "/admin/settings", icon: <MdSettings />, label: "Settings" },
     { path: "/admin/logs", icon: <MdListAlt />, label: "Logs" },
   ];

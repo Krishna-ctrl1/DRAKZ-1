@@ -181,7 +181,7 @@ const AdvisorApprovals = () => {
                                 <td>{advisor.advisorProfile?.experience || 0} Years</td>
                                 <td>
                                     {advisor.documents && advisor.documents.length > 0 ? (
-                                        <ActionButton secondary onClick={() => setSelectedAdvisor(advisor)}>
+                                        <ActionButton $secondary onClick={() => setSelectedAdvisor(advisor)}>
                                             View ({advisor.documents.length})
                                         </ActionButton>
                                     ) : (
@@ -192,7 +192,7 @@ const AdvisorApprovals = () => {
                                     <ActionButton onClick={() => handleApprove(advisor._id)} title="Approve">
                                         <MdCheck size={18} /> Approve
                                     </ActionButton>
-                                    <ActionButton secondary onClick={() => handleReject(advisor._id)} title="Reject" style={{ color: '#f87171' }}>
+                                    <ActionButton $secondary onClick={() => handleReject(advisor._id)} title="Reject" style={{ color: '#f87171' }}>
                                         <MdClose size={18} /> Reject
                                     </ActionButton>
                                 </td>

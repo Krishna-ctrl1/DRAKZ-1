@@ -19,12 +19,12 @@ const MetricCard = ({ title, value, icon, trend, isPositive }) => {
       </MetricHeader>
       <MetricValue>{value}</MetricValue>
       {trend && (
-        <MetricTrend isPositive={isPositive}>
+        <MetricTrend $isPositive={isPositive}>
           {isPositive ? <MdTrendingUp /> : <MdTrendingDown />}
           {trend}
         </MetricTrend>
       )}
-      <MetricGraph />
+      <MetricGraph $isPositive={isPositive} />
     </MetricCardContainer>
   );
 };

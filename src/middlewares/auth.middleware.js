@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 // --- THIS IS THE FIX ---
 // Changed '../config/jwt.js' to '../config/jwt.config.js'
 const { jwtSecret } = require('../config/jwt.config.js'); 
+// const AdminLog is required inside logAdminAction to avoid circular dep if needed, or top level:
+// const AdminLog = require('../models/adminLog.model'); 
 // --- END FIX ---
 
 const auth = (req, res, next) => {
@@ -49,4 +51,27 @@ const requireAdmin = (req, res, next) => {
     next();
 };
 
-module.exports = { auth, requireRole, requireAdmin };
+const requirePermission = (permission) => {
+    return (req, res, next) => {
+        // 1. Must be at least an admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ msg: 'Admin access required' });
+        }
+        
+        // 2. If legacy admin (no permissions array), allow (Backward Compatibility)
+        if (!req.user.permissions || req.user.permissions.length === 0) {
+            return next();
+        }
+
+        // 3. Granular Check
+        if (req.user.permissions.includes('all') || req.user.permissions.includes(permission)) {
+            return next();
+        }
+
+        return res.status(403).json({ msg: `Missing permission: ${permission}` });
+    }
+}
+
+const { logAdminAction } = require('../utils/logger');
+
+module.exports = { auth, requireRole, requireAdmin, requirePermission, logAdminAction };

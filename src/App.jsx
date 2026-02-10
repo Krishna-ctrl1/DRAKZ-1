@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./components/ziko/Home";
 import LoginPage from "./components/ziko/LoginPage";
@@ -26,15 +26,24 @@ import UserManagementPage from "./components/ziko/admin/UserManagementPage";
 // import AdminMessages from './components/ziko/admin/AdminMessages'; // Replaced by SupportPage
 import SupportPage from "./components/ziko/admin/SupportPage";
 import ContentManagementPage from "./components/ziko/admin/ContentManagementPage";
+import VerificationPage from "./components/ziko/admin/VerificationPage";
+
+import AdminManagementPage from "./components/ziko/admin/AdminManagementPage";
 import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
+import ChatWidget from "./components/ziko/ChatWidget"; // NEW
+import { AuthProvider, useAuth } from "./context/AuthProvider";
 
-import { AuthProvider } from "./context/AuthProvider";
+const ChatWrapper = () => {
+  const { user } = useAuth();
+  return user && user.role !== 'admin' ? <ChatWidget user={user} /> : null;
+};
 
 function App() {
   return (
     <AuthProvider>
       <div className="App">
+        <ChatWrapper />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
@@ -52,12 +61,11 @@ function App() {
               <Route element={<AdminLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UserManagementPage />} />
-                <Route
-                  path="/admin/content"
-                  element={<ContentManagementPage />}
-                />
-                <Route path="/admin/settings" element={<SettingsPage />} />
+                <Route path="/admin/content" element={<ContentManagementPage />} />
+                <Route path="/admin/verification" element={<VerificationPage />} />
                 <Route path="/admin/support" element={<SupportPage />} />
+                <Route path="/admin/access-control" element={<AdminManagementPage />} />
+                <Route path="/admin/settings" element={<SettingsPage />} />
                 <Route path="/admin/logs" element={<LogsPage />} />
               </Route>
             </Route>
