@@ -8,6 +8,7 @@ import {
   AddUserButtonWrapper,
 } from "../../../../styles/ziko/admin/UserTable.styles";
 import { Title, Button } from "../../../../styles/ziko/admin/SharedStyles";
+import UserDetailModal from "./UserDetailModal";
 
 // --- 1. DARK THEME MODAL STYLES ---
 const ModalOverlay = styled.div`
@@ -109,6 +110,7 @@ const ModalButton = styled.button`
 const UserTable = ({ role }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -262,9 +264,10 @@ const UserTable = ({ role }) => {
                 </span>
               </td>
               <td>
+                <ActionButton onClick={() => setSelectedUser(user)} style={{ color: '#a78bfa', borderColor: 'rgba(167, 139, 250, 0.4)', background: 'rgba(167, 139, 250, 0.1)' }}>View</ActionButton>
                 <ActionButton onClick={() => openEditModal(user)}>Edit</ActionButton>
                 <ActionButton
-                  secondary
+                  $secondary
                   onClick={async () => {
                     if (!window.confirm(`Are you sure you want to ${user.status === 'Active' ? 'suspend' : 'activate'} this user?`)) return;
                     try {
@@ -274,8 +277,9 @@ const UserTable = ({ role }) => {
                         headers: { 'Authorization': `Bearer ${token}` }
                       });
                       if (response.ok) {
-                        // Update local state
-                        setUsers(users.map(u => u._id === user._id ? { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' } : u));
+                        const data = await response.json();
+                        // Update local state with the status returned from backend
+                        setUsers(users.map(u => u._id === user._id ? { ...u, status: data.status } : u));
                       }
                     } catch (error) {
                       console.error("Error updating status:", error);
@@ -285,7 +289,7 @@ const UserTable = ({ role }) => {
                 >
                   {user.status === 'Active' ? 'Suspend' : 'Activate'}
                 </ActionButton>
-                <ActionButton secondary onClick={() => handleDelete(user._id)}>Delete</ActionButton>
+                <ActionButton $secondary onClick={() => handleDelete(user._id)}>Delete</ActionButton>
               </td>
             </tr>
           ))}
@@ -296,7 +300,12 @@ const UserTable = ({ role }) => {
         <Button onClick={openAddModal}>Add New User</Button>
       </AddUserButtonWrapper>
 
-      {/* --- DARK THEME MODAL --- */}
+      {/* --- USER DETAIL MODAL --- */}
+      {selectedUser && (
+        <UserDetailModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+      )}
+
+      {/* --- DARK THEME MODAL (ADD/EDIT) --- */}
       {isModalOpen && (
         <ModalOverlay onClick={() => setIsModalOpen(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>

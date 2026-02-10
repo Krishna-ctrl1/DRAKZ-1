@@ -10,6 +10,10 @@ const BlogSchema = new mongoose.Schema({
   
   // NEW: Stores why the admin rejected the blog
   rejection_reason: { type: String, default: "" }, 
+  
+  // MODERATION
+  isFlagged: { type: Boolean, default: false },
+  flagReason: { type: String, default: "" }, 
 
   verified_by: { type: mongoose.Schema.Types.ObjectId, ref: "Person" },
   published_at: Date,

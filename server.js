@@ -46,11 +46,8 @@ console.log("🔑 JWT_SECRET loaded:", process.env.JWT_SECRET ? "YES" : "NO (usi
 console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  normalizeUrl(process.env.FRONTEND_URL), 
-  "https://drakz-frontend.onrender.com" // Explicit fallback for safety
-].filter(Boolean);
+  "http://localhost:3000"
+];
 
 console.log("✅ Allowed CORS Origins:", allowedOrigins);
 
@@ -114,17 +111,58 @@ const io = new Server(server, {
   },
 });
 
+const Chat = require('./src/models/chat.model');
+
 io.on("connection", (socket) => {
   console.log(`⚡ User Connected: ${socket.id}`);
 
+  // Join Personal Room (User ID or 'admin')
   socket.on("join_room", (roomId) => {
     socket.join(roomId);
+    console.log(`User/Admin joined room: ${roomId}`);
   });
 
-  // --- NEW: BROADCAST FEATURE ---
+  // Handle Message
+  socket.on("send_message", async (data) => {
+    const { userId, text, sender, adminId } = data; // sender: 'user' or 'admin'
+    
+    // Save to DB
+    try {
+        // Find active chat or create new
+        let chat = await Chat.findOne({ userId, status: 'active' });
+        
+        if (!chat) {
+            chat = new Chat({ userId, messages: [] });
+        }
+        
+        const message = { sender, text, timestamp: new Date() };
+        chat.messages.push(message);
+        chat.lastActive = new Date();
+        if (sender === 'admin' && adminId) chat.adminId = adminId;
+        
+        await chat.save();
+        
+        // Emit to User Room
+        io.to(userId).emit("receive_message", message);
+
+        // Emit to Admin Room
+        if (sender === 'user') {
+            io.to('admin_notifications').emit("admin_receive_message", { ...message, userId });
+        }
+        
+    } catch (err) {
+        console.error("Chat Error:", err);
+    }
+  });
+
+  // Typing Indicator
+  socket.on("typing", (data) => {
+      socket.to(data.room).emit("display_typing", data);
+  });
+
+  // --- EXISTING BROADCAST FEATURE ---
   socket.on("broadcast_video", (data) => {
     console.log("📢 Advisor broadcasting video to ALL users");
-    // Emits to every connected socket (all users)
     io.emit("receive_video", data);
   });
 
@@ -147,6 +185,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api", investmentsRoutes);
 app.use("/api/account-summary", accountSummaryRoutes);
 app.use("/api/logs", logsRoutes);
+app.use("/api/kyc", require("./src/routes/kyc.routes.js"));
 // Attach app-level context on settings dontenvroutes (single mount)
 app.use("/api/settings", requestContext, settingsRoutes);
 

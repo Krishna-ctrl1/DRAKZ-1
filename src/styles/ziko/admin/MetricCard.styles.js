@@ -60,7 +60,7 @@ export const MetricTrend = styled.div`
   align-items: center;
   font-size: 0.9rem;
   font-weight: 600;
-  color: ${(props) => (props.isPositive ? "#4ade80" : "#f87171")};
+  color: ${(props) => (props.$isPositive ? "#4ade80" : "#f87171")};
   margin-bottom: 4px;
 
   & svg {
@@ -87,5 +87,5 @@ export const MetricGraph = styled.div`
   opacity: 0.8;
   
   /* Change color filter based on trend (optional advanced CSS) */
-  filter: ${(props) => (props.isPositive ? "none" : "hue-rotate(280deg)")}; 
+  filter: ${(props) => (props.$isPositive ? "none" : "hue-rotate(280deg)")}; 
 `;

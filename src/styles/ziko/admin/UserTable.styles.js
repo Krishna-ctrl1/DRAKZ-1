@@ -92,7 +92,7 @@ export const StyledTable = styled.table`
 export const ActionButton = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: ${(props) => (props.secondary ? "#e2e8f0" : "#60a5fa")}; /* Blue or White */
+  color: ${(props) => (props.$secondary ? "#e2e8f0" : "#60a5fa")}; /* Blue or White */
   padding: 8px 16px;
   border-radius: 12px;
   cursor: pointer;
@@ -102,8 +102,8 @@ export const ActionButton = styled.button`
   margin-right: 8px;
 
   &:hover {
-    background: ${(props) => (props.secondary ? "rgba(255, 255, 255, 0.1)" : "rgba(96, 165, 250, 0.15)")};
-    border-color: ${(props) => (props.secondary ? "rgba(255, 255, 255, 0.2)" : "rgba(96, 165, 250, 0.4)")};
+    background: ${(props) => (props.$secondary ? "rgba(255, 255, 255, 0.1)" : "rgba(96, 165, 250, 0.15)")};
+    border-color: ${(props) => (props.$secondary ? "rgba(255, 255, 255, 0.2)" : "rgba(96, 165, 250, 0.4)")};
     transform: translateY(-1px);
   }
 `;
