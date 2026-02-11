@@ -326,9 +326,11 @@ exports.getUserLoans = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 }; */
-exports.getInvestmentHistory = async (req, res) => {
+/* exports.getInvestmentHistory = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const mongoose = require("mongoose");
+const userId = new mongoose.Types.ObjectId(req.user?.id);
+
     if (!userId) {
       return res.status(401).json({ error: "User not authenticated" });
     }
@@ -417,3 +419,114 @@ exports.getInvestmentHistory = async (req, res) => {
   }
 };
 
+ */
+exports.getInvestmentHistory = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const range = req.query.range || "6M";
+    const now = new Date();
+
+    let fromDate;
+    let groupStage;
+    let sortStage;
+
+    // ---------- RANGE LOGIC ----------
+    if (range === "1M") {
+      // last 30 days
+      fromDate = new Date(now);
+      fromDate.setDate(now.getDate() - 30);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+          day: { $dayOfMonth: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+        "_id.day": 1,
+      };
+
+    } else if (range === "6M") {
+      // current month + previous 5
+      fromDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+      };
+
+    } else { // 1Y
+      // same month last year
+      fromDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+      };
+    }
+
+    const data = await Transaction.aggregate([
+      {
+        $match: {
+          userId: userId,
+          type: "Investment",
+          date: { $gte: fromDate },
+        },
+      },
+      { $group: groupStage },
+      { $sort: sortStage },
+    ]);
+
+    if (!data.length) return res.json([]);
+
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    const chartData = data.map((item) => {
+      if (range === "1M") {
+        return {
+          name: String(item._id.day),
+          value: item.total,
+        };
+      }
+
+      return {
+        name: months[item._id.month - 1],
+        value: item.total,
+      };
+    });
+
+    res.json(chartData);
+
+  } catch (err) {
+    console.error("Investment history error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
