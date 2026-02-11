@@ -16,8 +16,9 @@ export default defineConfig({
     },
   ],
   server: {
-    port: 3000,
+    port: process.env.PORT || 3000,
     strictPort: true,
+    host: true, // Listen on all local IPs (needed for Render)
     open: true,
     proxy: {
       // Proxy all /api requests to your backend server
