@@ -10,8 +10,8 @@ async function seedInvestments() {
     console.log("Connected to MongoDB");
 
     // Get all users with role 'user'
-    //const users = await Person.find({ role: 'user' }).lean();
-    const users = await Person.find({ email: "YOUR_LOGIN_EMAIL" }).lean();
+    const users = await Person.find({}).lean();
+
 
     if (!users || users.length === 0) {
       throw new Error("No users found. Run scripts/seed.js first.");
