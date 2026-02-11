@@ -16,6 +16,7 @@ export default defineConfig({
     },
   ],
   server: {
+    allowedHosts: ["drakz-frontend.onrender.com"],
     port: process.env.PORT || 3000,
     strictPort: true,
     host: true, // Listen on all local IPs (needed for Render)
