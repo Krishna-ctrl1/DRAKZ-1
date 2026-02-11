@@ -422,23 +422,21 @@ const userId = new mongoose.Types.ObjectId(req.user?.id);
  */
 exports.getInvestmentHistory = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) {
+    const mongoose = require("mongoose");
+
+    if (!req.user?.id) {
       return res.status(401).json({ error: "User not authenticated" });
     }
 
+    const userId = new mongoose.Types.ObjectId(req.user.id);
     const range = req.query.range || "6M";
     const now = new Date();
 
-    let fromDate;
-    let groupStage;
-    let sortStage;
+    let fromDate, groupStage, sortStage;
 
-    // ---------- RANGE LOGIC ----------
     if (range === "1M") {
-      // last 30 days
-      fromDate = new Date(now);
-      fromDate.setDate(now.getDate() - 30);
+      fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - 30);
 
       groupStage = {
         _id: {
@@ -456,7 +454,6 @@ exports.getInvestmentHistory = async (req, res) => {
       };
 
     } else if (range === "6M") {
-      // current month + previous 5
       fromDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
       groupStage = {
@@ -472,8 +469,7 @@ exports.getInvestmentHistory = async (req, res) => {
         "_id.month": 1,
       };
 
-    } else { // 1Y
-      // same month last year
+    } else {
       fromDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
 
       groupStage = {
@@ -493,7 +489,7 @@ exports.getInvestmentHistory = async (req, res) => {
     const data = await Transaction.aggregate([
       {
         $match: {
-          userId: userId,
+          userId,
           type: "Investment",
           date: { $gte: fromDate },
         },
@@ -508,7 +504,7 @@ exports.getInvestmentHistory = async (req, res) => {
       "Jan","Feb","Mar","Apr","May","Jun",
       "Jul","Aug","Sep","Oct","Nov","Dec"
     ];
-
+/* 
     const chartData = data.map((item) => {
       if (range === "1M") {
         return {
@@ -523,7 +519,57 @@ exports.getInvestmentHistory = async (req, res) => {
       };
     });
 
-    res.json(chartData);
+    res.json(chartData); */
+    let chartData = [];
+
+if (range === "1M") {
+  const map = new Map();
+
+  data.forEach(d => {
+    map.set(d._id.day, d.total);
+  });
+
+  // fill last 30 days
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+
+    const day = d.getDate();
+
+    chartData.push({
+      name: String(day),
+      value: map.get(day) || 0,
+    });
+  }
+
+} else {
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
+
+  const map = new Map();
+  data.forEach(d => {
+    map.set(`${d._id.year}-${d._id.month}`, d.total);
+  });
+
+  const monthsCount = range === "6M" ? 6 : 12;
+
+  for (let i = monthsCount - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setMonth(now.getMonth() - i);
+
+    const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+
+    chartData.push({
+      name: months[d.getMonth()],
+      value: map.get(key) || 0,
+    });
+  }
+}
+
+res.json(chartData);
+
 
   } catch (err) {
     console.error("Investment history error:", err);
