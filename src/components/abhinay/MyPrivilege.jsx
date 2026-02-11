@@ -181,7 +181,7 @@ const MyPrivilege = () => {
         api.get("/api/privilege/insurances"),
         api.get("/api/privilege/properties"),
         api.get("/api/privilege/precious_holdings"),
-        api.get("/api/privilege/transactions?limit=5")
+        api.get("/api/privilege/transactions?limit=20")
       ]);
 
       setUserData(profileRes.data || { name: "User", email: "" });
@@ -254,7 +254,7 @@ const MyPrivilege = () => {
           });
           
           // Refresh transactions
-          const updatedRes = await api.get("/api/privilege/transactions?limit=5");
+          const updatedRes = await api.get("/api/privilege/transactions?limit=20");
           setTransactions(updatedRes.data || []);
           
           console.log('✅ Added one pending transaction for user');
@@ -273,37 +273,24 @@ const MyPrivilege = () => {
     };
   }, []);
 
-  // Seed ONLY Insurances
-  const handleSeedData = async () => {
-    try {
-      setLoading(true);
-      const response = await api.post('/api/privilege/seed');
-      // Update only insurances from the response
-      setAllInsurances(response.data.insurances || []);
-      setLoading(false);
-    } catch (err) {
-      console.error("Failed to generate insurances:", err);
-      alert("Failed to generate insurances");
-      setLoading(false);
-    }
-  };
-
   // --- EXISTING HANDLERS ---
   const closeModal = () => setModalContent(null);
   
   const handleAddProperty = async (data) => {
     try {
-      if (data.id) {
-        // Update existing property
-        await api.put(`/api/privilege/properties/${data.id}`, {
-          name: data.name,
-          value: data.value,
-          location: data.location,
-          imageUrl: data.imageUrl
-        });
+      const propertyId = data.id || data._id;
+      // imageUrl already contains base64 data URL if file was selected (from form preview)
+      const payload = {
+        name: data.name,
+        value: data.value,
+        location: data.location,
+        imageUrl: data.imageUrl
+      };
+
+      if (propertyId) {
+        await api.put(`/api/privilege/properties/${propertyId}`, payload);
       } else {
-        // Add new property
-        await api.post('/api/privilege/properties', data);
+        await api.post('/api/privilege/properties', payload);
       }
       await fetchData();
       closeModal();
@@ -489,9 +476,6 @@ const MyPrivilege = () => {
                      <h2>My Privilege Dashboard</h2>
                      <p>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                   </div>
-                  <button className="seed-btn" onClick={handleSeedData} disabled={loading}>
-                    <i className="fa-solid fa-wand-magic-sparkles"></i> Generate Insurances
-                  </button>
                 </div>
 
                 <section className="privilege-section">
@@ -561,7 +545,7 @@ const MyPrivilege = () => {
                           </div>
                         </div>
                       );
-                    }) : <p>No insurances found. Click "Generate Insurances" to add sample data.</p>}
+                    }) : <p>No insurances found.</p>}
                   </div>
                 </section>
 
@@ -771,7 +755,6 @@ const MyPrivilege = () => {
                                   <span className="price-loading">...</span>
                                 ) : (
                                   <span className="live-price-value">
-                                    <i className="fa-solid fa-circle-dot live-indicator"></i>
                                     ₹{liveApiPricePerGram.toFixed(2)}/g
                                   </span>
                                 )}

@@ -20,6 +20,13 @@ const {
 const { auth } = require('../middlewares/auth.middleware.js');
 const { upload } = require('../middlewares/upload.middleware.js');
 
+const uploadIfMultipart = (req, res, next) => {
+  if (req.is('multipart/form-data')) {
+    return upload.single('image')(req, res, next);
+  }
+  return next();
+};
+
 /**
  * @swagger
  * tags:
@@ -63,7 +70,7 @@ router.get('/profile', auth, getUserProfile);
  */
 // Properties
 router.get('/properties', auth, getProperties);
-router.post('/properties', auth, addProperty);
+router.post('/properties', auth, uploadIfMultipart, addProperty);
 
 /**
  * @swagger
@@ -97,9 +104,7 @@ router.post('/properties', auth, addProperty);
  *       200:
  *         description: Property deleted
  */
-router.put('/properties/:id', auth, updateProperty);
-router.post('/properties', auth, upload.single('image'), addProperty);
-router.put('/properties/:id', auth, upload.single('image'), updateProperty);
+router.put('/properties/:id', auth, uploadIfMultipart, updateProperty);
 router.delete('/properties/:id', auth, deleteProperty);
 
 /**

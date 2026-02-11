@@ -602,7 +602,12 @@
 
 /* --- Holdings Table (Dark Theme) --- */
 .table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  display: block;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   border-radius: 20px;
 }
 
