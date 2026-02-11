@@ -124,11 +124,6 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
       setError("Please enter a valid property value.");
       return;
     }
-    // Minimum property value: INR 50,000
-    if (Number(value) < 50000) {
-      setError("Property value must be at least INR 50,000.");
-      return;
-    }
 
     const shouldValidateUrl = !!imageUrl && !imageFile;
     if (shouldValidateUrl && !isValidImageUrl(imageUrl)) {
@@ -207,11 +202,9 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
           value={value} 
           onChange={(e) => setValue(e.target.value)} 
           required 
-          min="50000"
-          step="1000"
         />
         <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
-          Minimum value: INR 50,000
+          Enter any amount
         </small>
       </div>
       <div className="form-group">
