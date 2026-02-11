@@ -415,21 +415,21 @@ const MyPrivilege = () => {
 
   const handlePaymentComplete = async (transactionId, paymentMethod) => {
     try {
-      // Update transaction status to completed
+      // Update transaction status to active
       await api.put(`/api/privilege/transactions/${transactionId}`, {
-        status: 'Completed'
+        status: 'Active'
       });
       
       // Refresh transactions
       await fetchData();
       
-      // Find the completed transaction
+      // Find the updated transaction
       const completedTransaction = transactions.find(t => t._id === transactionId);
       
       // Show receipt
       setModalContent(
         <TransactionReceipt 
-          transaction={{ ...completedTransaction, status: 'Completed' }}
+          transaction={{ ...completedTransaction, status: 'Active' }}
           onClose={closeModal}
           userData={userData}
           paymentMethod={paymentMethod}
