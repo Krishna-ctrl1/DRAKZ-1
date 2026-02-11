@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 const connectDB = require("./src/config/db.config.js");
 
@@ -47,9 +48,8 @@ console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_U
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://drakz-frontend.onrender.com", 
-  "https://drakz-backend.onrender.com", 
-  process.env.FRONTEND_URL 
+  process.env.FRONTEND_URL,
+  process.env.BACKEND_URL
 ].filter(Boolean); // Remove undefined values
 
 console.log("✅ Allowed CORS Origins:", allowedOrigins);
@@ -93,6 +93,8 @@ app.use(userActivity);
 
 // Serve static files from uploads directory
 app.use("/uploads", express.static("uploads"));
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("/cron/health", (req, res) => {
   res.status(200).json({ ok: true, timestamp: Date.now() });
@@ -200,6 +202,16 @@ app.use("/api/spendings", cacheControl, spendingsRoutes);
 app.use("/api/cards", cacheControl, require("./src/routes/card.routes"));
 // Global Error Handler Middleware
 app.use(errorHandler);
+
+// Catch-all route for SPA (must be after API routes and before starting server)
+// But strictly speaking, it should handle non-API GET requests
+app.get("*", (req, res, next) => {
+  // If it's an API call that wasn't matched satisfy by typical 404 JSON response
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 const PORT = process.env.PORT || 3001;
 

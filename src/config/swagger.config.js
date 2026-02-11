@@ -1,4 +1,5 @@
 const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -15,6 +16,10 @@ const options = {
         url: `${BACKEND_URL}/api`,
         description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Local server',
       },
+      {
+        url: "http://localhost:3001/api",
+        description: "Local Development Server"
+      }
     ],
     components: {
       securitySchemes: {
@@ -31,7 +36,7 @@ const options = {
       },
     ],
   },
-  apis: ['./src/routes/*.js'], // Path to the API docs
+  apis: [path.join(__dirname, '../routes/*.js')], // Path to the API docs
 };
 
 const swaggerSpec = swaggerJsdoc(options);
