@@ -1,4 +1,6 @@
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 const Property = require('../models/property.model.js');
 const Insurance = require('../models/insurance.model.js');
 const PreciousHolding = require('../models/preciousHolding.model.js');
@@ -11,6 +13,35 @@ const { logAdminAction } = require('../utils/logger.js');
 
 const OZ_TO_GRAM = 31.1035;
 const USD_TO_INR = Number(process.env.USD_TO_INR || 83.5);
+
+const getMimeType = (filePath) => {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    case '.avif':
+      return 'image/avif';
+    case '.svg':
+      return 'image/svg+xml';
+    default:
+      return null;
+  }
+};
+
+const fileToDataUrl = (file) => {
+  if (!file?.path) return null;
+  const mimeType = getMimeType(file.path);
+  if (!mimeType) return null;
+  const buffer = fs.readFileSync(file.path);
+  return `data:${mimeType};base64,${buffer.toString('base64')}`;
+};
 
 // Server-side cache for metal prices (60-minute expiration)
 let metalPricesCache = {
@@ -35,22 +66,28 @@ const getUserProfile = async (req, res) => {
 // Add Property
 const addProperty = async (req, res) => {
   try {
-    const { name, value, location } = req.body;
+    console.log('[addProperty] content-type:', req.headers['content-type']);
+    console.log('[addProperty] body keys:', Object.keys(req.body || {}));
+    console.log('[addProperty] file:', req.file ? req.file.originalname : 'none');
+    const { name, value, location, imageUrl } = req.body;
+    const parsedValue = Number(value);
     
     // Validate inputs
-    if (!name || !value || !location) {
+    if (!name || !location || !Number.isFinite(parsedValue) || parsedValue <= 0) {
       return res.status(400).json({ error: 'Name, value, and location are required' });
     }
 
-    // Get image path from multer upload
-    const imageUrl = req.file ? `/uploads/properties/${req.file.filename}` : '/1.jpg';
+    // Prefer uploaded file (stored as base64), else store provided imageUrl (including data URL)
+    const fileDataUrl = fileToDataUrl(req.file);
+    const finalImageUrl = fileDataUrl
+      || (typeof imageUrl === 'string' && imageUrl.trim() ? imageUrl.trim() : '/1.jpg');
 
     const newProperty = new Property({
       userId: req.user.id, 
       name, 
-      value, 
+      value: parsedValue, 
       location, 
-      imageUrl,
+      imageUrl: finalImageUrl,
     });
     await newProperty.save();
     res.status(201).json(newProperty);
@@ -76,19 +113,29 @@ const deleteProperty = async (req, res) => {
 
 const updateProperty = async (req, res) => {
   try {
-    const { name, value, location } = req.body;
-    
-    // Validate inputs
-    if (!name || !value || !location) {
-      return res.status(400).json({ error: 'Name, value, and location are required' });
+    console.log('[updateProperty] content-type:', req.headers['content-type']);
+    console.log('[updateProperty] body keys:', Object.keys(req.body || {}));
+    console.log('[updateProperty] file:', req.file ? req.file.originalname : 'none');
+    const { name, value, location, imageUrl } = req.body;
+
+    const existingProperty = await Property.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!existingProperty) {
+      return res.status(404).json({ error: 'Property not found' });
     }
 
-    // Build update object
-    const updateData = { name, value, location };
+    // Build update object, falling back to existing values when missing
+    const updateData = {
+      name: name || existingProperty.name,
+      value: value ? Number(value) : existingProperty.value,
+      location: location || existingProperty.location,
+    };
     
-    // If new image uploaded, update imageUrl
-    if (req.file) {
-      updateData.imageUrl = `/uploads/properties/${req.file.filename}`;
+    // If new image uploaded, store as base64, else use provided imageUrl (including data URL)
+    const fileDataUrl = fileToDataUrl(req.file);
+    if (fileDataUrl) {
+      updateData.imageUrl = fileDataUrl;
+    } else if (typeof imageUrl === 'string' && imageUrl.trim()) {
+      updateData.imageUrl = imageUrl.trim();
     }
 
     const property = await Property.findOneAndUpdate(
@@ -96,9 +143,6 @@ const updateProperty = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     );
-    if (!property) {
-      return res.status(404).json({ error: 'Property not found' });
-    }
     res.status(200).json(property);
   } catch (error) { 
     console.error('Update property error:', error);
@@ -135,7 +179,8 @@ const addPreciousHolding = async (req, res) => {
 const getTransactions = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
-    const transactions = await Transaction.find({ userId: req.user.id })
+    const now = new Date();
+    const transactions = await Transaction.find({ userId: req.user.id, date: { $lte: now } })
       .sort({ date: -1 })
       .limit(limit);
     res.status(200).json(transactions);

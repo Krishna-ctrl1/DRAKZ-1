@@ -22,6 +22,7 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
   const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -67,6 +68,7 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
 
     setImagePreview(url);
     setImageFile(null);
+    setImageLoading(false);
     setError('');
   };
 
@@ -89,9 +91,16 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
       }
 
       setImageFile(file);
+      setImageLoading(true);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
+        setImageLoading(false);
+      };
+      reader.onerror = () => {
+        setError('Failed to read the selected image. Please try again.');
+        setImagePreview('');
+        setImageLoading(false);
       };
       reader.readAsDataURL(file);
       setImageUrl(''); // Clear URL input if file is selected
@@ -115,33 +124,44 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
       setError("Please enter a valid property value.");
       return;
     }
-    // Minimum property value: $50,000
+    // Minimum property value: INR 50,000
     if (Number(value) < 50000) {
-      setError("Property value must be at least $50,000.");
+      setError("Property value must be at least INR 50,000.");
       return;
     }
 
-    if (imageUrl && !isValidImageUrl(imageUrl)) {
+    const shouldValidateUrl = !!imageUrl && !imageFile;
+    if (shouldValidateUrl && !isValidImageUrl(imageUrl)) {
       setError('Please enter a valid image URL (https://example.com/image.jpg).');
       return;
     }
 
-    let finalImageUrl = imageUrl || '/1.jpg';
-    
-    // If a file was selected, use the data URL
+    if (imageFile && !imagePreview) {
+      setError('Image is still loading. Please wait a moment and try again.');
+      return;
+    }
+
+    let finalImageUrl = imageUrl;
+
+    // Keep data URL for preview, but upload file when available
     if (imageFile && imagePreview) {
       finalImageUrl = imagePreview;
+    }
+
+    if (!finalImageUrl) {
+      finalImageUrl = '/1.jpg';
     }
 
     const propertyData = { 
       name, 
       value: Number(value), 
       location, 
-      imageUrl: finalImageUrl
+      imageUrl: finalImageUrl,
+      imageFile: imageFile || null
     };
 
-    if (property && property._id) {
-      propertyData.id = property._id;
+    if (property && (property._id || property.id)) {
+      propertyData.id = property._id || property.id;
     }
 
     onSave(propertyData);
@@ -180,7 +200,7 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
         </small>
       </div>
       <div className="form-group">
-        <label htmlFor="value">Property Value ($)</label>
+        <label htmlFor="value">Property Value (INR)</label>
         <input 
           id="value" 
           type="number" 
@@ -191,7 +211,7 @@ const AddPropertyForm = ({ onClose, onSave, property }) => {
           step="1000"
         />
         <small style={{color: '#94a3b8', fontSize: '0.85rem', marginTop: '4px', display: 'block'}}>
-          Minimum value: $50,000
+          Minimum value: INR 50,000
         </small>
       </div>
       <div className="form-group">

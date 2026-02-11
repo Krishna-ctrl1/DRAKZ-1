@@ -94,7 +94,7 @@ const PropertyUploadExample = () => {
 
         {/* Property Value */}
         <div className="form-group">
-          <label>Value ($):</label>
+          <label>Value (INR):</label>
           <input
             type="number"
             name="value"
