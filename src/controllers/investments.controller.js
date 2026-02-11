@@ -1,13 +1,14 @@
 // src/controllers/investments.controller.js
 const axios = require("axios");
 const Loan = require("../models/loan.model");
-const Transaction = require("../models/transaction.model");
+const Investment = require("../models/investment.model");
+
 
 // Cache for stock prices to avoid rate limiting (cache for 30 minutes)
 const stockCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
-const investmentData = require("../../scripts/investment.data");
+
 
 // Fallback prices in USD (approximate current values)
 const FALLBACK_PRICES = {
@@ -208,7 +209,7 @@ exports.getUserLoans = async (req, res) => {
 |   1Y  -> group by MONTH (last 12 months)
 |--------------------------------------------------------------------------
 */
-/* exports.getInvestmentHistory = async (req, res) => {
+ exports.getInvestmentHistory = async (req, res) => {
   try {
     // Filter by the logged-in user's ID
     const userId = req.user?.id;
@@ -230,9 +231,9 @@ exports.getUserLoans = async (req, res) => {
 
       groupStage = {
         _id: {
-          year: { $year: "$date" },
-          month: { $month: "$date" },
-          day: { $dayOfMonth: "$date" },
+          year: { $year: "$start_date" },
+          month: { $month: "$start_date" },
+          day: { $dayOfMonth: "$start_date" },
         },
         total: { $sum: "$amount" },
       };
@@ -250,8 +251,8 @@ exports.getUserLoans = async (req, res) => {
 
       groupStage = {
         _id: {
-          year: { $year: "$date" },
-          month: { $month: "$date" },
+          year: { $year: "$start_date" },
+          month: { $month: "$start_date" },
         },
         total: { $sum: "$amount" },
       };
@@ -261,18 +262,23 @@ exports.getUserLoans = async (req, res) => {
         "_id.month": 1,
       };
     }
+console.log("FROM DATE:", fromDate);
+  /* const data = await Investment.aggregate([
+  {
+    $match: {
+      start_date: { $gte: fromDate },
+    },
+  },
+  { $group: groupStage },
+  { $sort: sortStage },
+]); */
+const data = await Investment.aggregate([
+  { $group: groupStage },
+  { $sort: sortStage },
+]);
 
-    const data = await Transaction.aggregate([
-      {
-        $match: {
-          userId: userId,
-          category: "investment",
-          date: { $gte: fromDate },
-        },
-      },
-      { $group: groupStage },
-      { $sort: sortStage },
-    ]);
+
+console.log("AGG RESULT:", data);
 
     if (!data || data.length === 0) {
       return res.json([]);
@@ -317,12 +323,6 @@ exports.getUserLoans = async (req, res) => {
     console.error("Error building investment history:", err);
     return res.status(500).json({ error: "Server error" });
   }
-};  */
-exports.getInvestmentHistory = async (req, res) => {
-  try {
-    const range = req.query.range || "6M";
-    return res.json(investmentData[range] || []);
-  } catch (err) {
-    return res.status(500).json({ error: "Server error" });
-  }
-};
+};  
+ 
+ 

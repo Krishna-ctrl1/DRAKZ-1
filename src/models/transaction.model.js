@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Person', required: true },
-  type: { type: String, required: true, enum: ['Auto', 'Health', 'Life', 'Home', 'Insurance'] },
+  type: { type: String, required: true, enum: ['Auto', 'Health', 'Life', 'Home', 'Insurance', 'Investment'] },
   amount: { type: Number, required: true },
   status: { type: String, required: true, enum: ['Completed', 'Pending', 'Active', 'Failed'], default: 'Pending' },
   description: { type: String },
