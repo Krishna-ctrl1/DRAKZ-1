@@ -46,8 +46,11 @@ console.log("🔑 JWT_SECRET loaded:", process.env.JWT_SECRET ? "YES" : "NO (usi
 console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_URL);
 
 const allowedOrigins = [
-  "http://localhost:3000"
-];
+  "http://localhost:3000",
+  "https://drakz-frontend.onrender.com", 
+  "https://drakz-backend.onrender.com", 
+  process.env.FRONTEND_URL 
+].filter(Boolean); // Remove undefined values
 
 console.log("✅ Allowed CORS Origins:", allowedOrigins);
 
@@ -199,6 +202,13 @@ app.use("/api/cards", cacheControl, require("./src/routes/card.routes"));
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
+
+// Only start the server if we are NOT in a Vercel environment (or similar serverless)
+// Vercel exports the app and runs it differently.
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`Backend running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
