@@ -7,7 +7,7 @@ import Header from '../global/Header';
 import Sidebar from '../global/Sidebar';
 import '../../styles/gupta/UserVideo.css';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+import { BACKEND_URL } from '../../config/backend';
 const socket = io(BACKEND_URL);
 
 const UserVideo = () => {
