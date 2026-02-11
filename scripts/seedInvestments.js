@@ -10,7 +10,9 @@ async function seedInvestments() {
     console.log("Connected to MongoDB");
 
     // Get all users with role 'user'
-    const users = await Person.find({ role: 'user' }).lean();
+    //const users = await Person.find({ role: 'user' }).lean();
+    const users = await Person.find({ email: "YOUR_LOGIN_EMAIL" }).lean();
+
     if (!users || users.length === 0) {
       throw new Error("No users found. Run scripts/seed.js first.");
     }
@@ -19,7 +21,7 @@ async function seedInvestments() {
 
     // Clear old investment transactions for all users
     await Transaction.collection.deleteMany({
-      category: "investment",
+      category: "Investment",
     });
 
     const now = new Date();
@@ -46,7 +48,7 @@ async function seedInvestments() {
       
       const yearlyDocs = yearlyTemplate.map((m) => ({
         userId: user._id,
-        type: "investment",
+        type: "Investment",
         category: "investment",
         amount: m.amount,
         date: new Date(year, m.month, 10), // 10th of each month
@@ -61,7 +63,7 @@ async function seedInvestments() {
 
         dailyDocs.push({
           userId: user._id,
-          type: "investment",
+          type: "Investment",
           category: "investment",
           amount: 2000 + i * 20, // just incremental demo values
           date: d,
