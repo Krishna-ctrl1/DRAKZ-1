@@ -62,6 +62,12 @@ const MyPrivilege = () => {
     return `₹${inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
   };
 
+  const formatInrAmount = (amount) => {
+    const numeric = Number(amount);
+    if (!Number.isFinite(numeric)) return '₹0';
+    return `₹${numeric.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+  };
+
   const sanitizePrice = (value, fallbackValue, metalKey) => {
     const parsed = Number(value);
     if (Number.isFinite(parsed) && parsed > 0) {
@@ -564,7 +570,7 @@ const MyPrivilege = () => {
                         <div className="prop-details">
                           <h4>{prop.name}</h4>
                           <p><i className="fa-solid fa-location-dot"></i> {prop.location}</p>
-                          <span>{formatCurrency(prop.value)}</span>
+                          <span>{formatInrAmount(prop.value)}</span>
                         </div>
                       </div>
                     ))}
