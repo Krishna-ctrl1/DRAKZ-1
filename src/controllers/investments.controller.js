@@ -84,13 +84,13 @@ exports.getUserStocks = async (req, res) => {
 
     // Fetch stocks sequentially to avoid rate limiting
     const results = [];
-    
+
     for (const stock of baseStocks) {
       try {
         // Check cache first
         const cacheKey = stock.symbol;
         const cachedData = stockCache.get(cacheKey);
-        
+
         if (cachedData && (Date.now() - cachedData.timestamp < CACHE_DURATION)) {
           console.log(`✓ Using cached data for ${stock.symbol} (age: ${Math.round((Date.now() - cachedData.timestamp) / 1000)}s)`);
           results.push(cachedData.data);
@@ -100,7 +100,7 @@ exports.getUserStocks = async (req, res) => {
         // Fetch from API with delay to avoid rate limiting
         console.log(`Fetching fresh data for ${stock.symbol}...`);
         await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between requests
-        
+
         const url = `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${API_KEY}`;
         const { data } = await axios.get(url, { timeout: 10000 });
 
@@ -127,26 +127,26 @@ exports.getUserStocks = async (req, res) => {
           volume: data?.v ?? null,
           timestamp: data?.t ?? null,
         };
-        
+
         // Cache the result
         stockCache.set(cacheKey, {
           data: result,
           timestamp: Date.now()
         });
-        
+
         console.log(`✓ Cached fresh data for ${stock.symbol}`);
         results.push(result);
       } catch (err) {
-        const errorDetails = err.response?.status 
-          ? `HTTP ${err.response.status}` 
-          : err.code 
-          ? `${err.code}` 
-          : err.message || 'Unknown error';
-        
+        const errorDetails = err.response?.status
+          ? `HTTP ${err.response.status}`
+          : err.code
+            ? `${err.code}`
+            : err.message || 'Unknown error';
+
         console.error(
           `Error fetching stock ${stock.symbol}: ${errorDetails}`
         );
-        
+
         // Try to use cached data even if expired
         const cachedData = stockCache.get(stock.symbol);
         if (cachedData) {
@@ -157,7 +157,7 @@ exports.getUserStocks = async (req, res) => {
           console.log(`⚠ Using fallback price for ${stock.symbol}`);
           const fallback = FALLBACK_PRICES[stock.symbol];
           const convert = (val) => (val != null ? val * USD_TO_INR : null);
-          
+
           results.push({
             name: stock.name,
             symbol: stock.symbol,
@@ -190,7 +190,7 @@ exports.getUserLoans = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ error: "User not authenticated" });
     }
-    
+
     const loans = await Loan.find({ user_id: userId }).lean();
     return res.json(loans || []);
   } catch (err) {
@@ -209,7 +209,7 @@ exports.getUserLoans = async (req, res) => {
 |--------------------------------------------------------------------------
 */
 
-exports.getInvestmentHistory = async (req, res) => {
+/* exports.getInvestmentHistory = async (req, res) => {
   try {
     const mongoose = require("mongoose");
 
@@ -292,7 +292,7 @@ exports.getInvestmentHistory = async (req, res) => {
     const months = [
       "Jan","Feb","Mar","Apr","May","Jun",
       "Jul","Aug","Sep","Oct","Nov","Dec"
-    ];
+    ]; */
 /* 
     const chartData = data.map((item) => {
       if (range === "1M") {
@@ -309,56 +309,206 @@ exports.getInvestmentHistory = async (req, res) => {
     });
 
     res.json(chartData); */
-    let chartData = [];
+/* let chartData = [];
 
 if (range === "1M") {
-  const map = new Map();
+const map = new Map();
 
-  data.forEach(d => {
-    map.set(d._id.day, d.total);
-  });
+data.forEach(d => {
+map.set(d._id.day, d.total);
+});
 
-  // fill last 30 days
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
+// fill last 30 days
+for (let i = 29; i >= 0; i--) {
+const d = new Date(now);
+d.setDate(now.getDate() - i);
 
-    const day = d.getDate();
+const day = d.getDate();
 
-    chartData.push({
-      name: String(day),
-      value: map.get(day) || 0,
-    });
-  }
+chartData.push({
+  name: String(day),
+  value: map.get(day) || 0,
+});
+}
 
 } else {
-  const months = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec"
-  ];
+const months = [
+"Jan","Feb","Mar","Apr","May","Jun",
+"Jul","Aug","Sep","Oct","Nov","Dec"
+];
 
-  const map = new Map();
-  data.forEach(d => {
-    map.set(`${d._id.year}-${d._id.month}`, d.total);
-  });
+const map = new Map();
+data.forEach(d => {
+map.set(`${d._id.year}-${d._id.month}`, d.total);
+});
 
-  const monthsCount = range === "6M" ? 6 : 12;
+const monthsCount = range === "6M" ? 6 : 12;
 
-  for (let i = monthsCount - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setMonth(now.getMonth() - i);
+for (let i = monthsCount - 1; i >= 0; i--) {
+const d = new Date(now);
+d.setMonth(now.getMonth() - i);
 
-    const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
 
-    chartData.push({
-      name: months[d.getMonth()],
-      value: map.get(key) || 0,
-    });
-  }
+chartData.push({
+  name: months[d.getMonth()],
+  value: map.get(key) || 0,
+});
+}
 }
 
 res.json(chartData);
 
+
+} catch (err) {
+console.error("Investment history error:", err);
+res.status(500).json({ error: "Server error" });
+}
+};
+*/
+
+exports.getInvestmentHistory = async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+
+    if (!req.user?.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const range = req.query.range || "6M";
+    const now = new Date();
+
+    let fromDate, groupStage, sortStage;
+
+    /* ---------------- RANGE SETUP ---------------- */
+
+    if (range === "1M") {
+      fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - 29); // 30 days including today
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+          day: { $dayOfMonth: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+        "_id.day": 1,
+      };
+
+    } else if (range === "6M") {
+      fromDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+      };
+
+    } else { // 1Y
+      fromDate = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+
+      groupStage = {
+        _id: {
+          year: { $year: "$date" },
+          month: { $month: "$date" },
+        },
+        total: { $sum: "$amount" },
+      };
+
+      sortStage = {
+        "_id.year": 1,
+        "_id.month": 1,
+      };
+    }
+
+    /* ---------------- AGGREGATION ---------------- */
+
+    const data = await Transaction.aggregate([
+      {
+        $match: {
+          userId,
+          type: "Investment",
+          date: { $gte: fromDate },
+        },
+      },
+      { $group: groupStage },
+      { $sort: sortStage },
+    ]);
+
+    /* ---------------- BUILD CHART ---------------- */
+
+    let chartData = [];
+
+    if (range === "1M") {
+      const map = new Map();
+
+      data.forEach(d => {
+        const key =
+          `${d._id.year}-${String(d._id.month).padStart(2, "0")}-${String(d._id.day).padStart(2, "0")}`;
+
+        map.set(key, d.total);
+      });
+
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+
+        const key =
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+        const monthNamesShort = [
+          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        chartData.push({
+          name: `${d.getDate()} ${monthNamesShort[d.getMonth()]}`,
+          value: map.get(key) || 0,
+        });
+
+      }
+
+    } else {
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+
+      const map = new Map();
+      data.forEach(d => {
+        map.set(`${d._id.year}-${d._id.month}`, d.total);
+      });
+
+      const monthsCount = range === "6M" ? 6 : 12;
+
+      for (let i = monthsCount - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setMonth(now.getMonth() - i);
+
+        const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+
+        chartData.push({
+          name: months[d.getMonth()],
+          value: map.get(key) || 0,
+        });
+      }
+    }
+
+    res.json(chartData);
 
   } catch (err) {
     console.error("Investment history error:", err);
