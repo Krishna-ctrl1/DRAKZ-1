@@ -140,8 +140,3 @@ A `Socket.IO` instance runs directly natively attached to the `Express.js` HTTP 
 - **`broadcast_video`**: Bypasses typical message bounds, forcing video stream broadcast payloads completely outwardly to all online targeted socket recipients.
 
 ---
-
-## 3. GraphQL and RPC 
-Upon comprehensive review of the core application configuration, logic layers, schemas, and file extensions:
-- **No GraphQL**: The backend leverages a completely REST-driven methodology. There are no GraphQL type definitions, resolver nodes, schemas, or Apollo configurations.
-- **No SOAP/RPC**: No external gRPC definitions or XML payload services were discovered. Integrations are fully established on `application/json` boundaries using REST conventions.
