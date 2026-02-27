@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [isLoading, setIsLoading] = useState(true);
+    const [loginTransition, setLoginTransition] = useState(null); // { role, name, dest }
 
     // Initialize auth state
     useEffect(() => {
@@ -46,11 +47,13 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("role");
         setToken(null);
         setUser(null);
-        // Force reload or redirect might be handled by AuthGate
     };
 
+    const showLoginTransition = (role, name, dest) => setLoginTransition({ role, name, dest });
+    const clearLoginTransition = () => setLoginTransition(null);
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, isLoading, loginTransition, showLoginTransition, clearLoginTransition }}>
             {children}
         </AuthContext.Provider>
     );
