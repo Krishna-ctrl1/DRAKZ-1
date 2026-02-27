@@ -173,14 +173,7 @@ Three new full pages were added to the Advisor section:
 - **PDF Generation**: jsPDF (client-side)
 - **Video Conferencing**: WebRTC integration
 
-### Backend
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB (Mongoose ODM)
-- **Authentication**: JWT (JSON Web Tokens)
-- **File Uploads**: Multer
-- **Real-Time**: Socket.io
-- **API Architecture**: RESTful APIs
+
 
 ### AI & Integration
 - **AI Services**: Custom AI integration for financial advisory
