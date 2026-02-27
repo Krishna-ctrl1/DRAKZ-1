@@ -16,6 +16,11 @@ import AdvisorList from "./components/gupta/AdvisorList";
 import AdvisorSession from "./components/gupta/AdvisorVideo"; // Uses file AdvisorVideo.jsx
 import UserSession from "./components/gupta/UserVideo"; // Uses file UserVideo.jsx
 
+// --- NEW ADVISOR PAGE IMPORTS ---
+import AdvisorProfile from "./components/gupta/AdvisorProfile";
+import AdvisorClients from "./components/gupta/AdvisorClients";
+import AdvisorAnalytics from "./components/gupta/AdvisorAnalytics";
+
 import ProtectedRoute from "./auth/ProtectedRoute";
 import AuthGate from "./auth/AuthGate";
 import RoleRoute from "./auth/RoleRoute";
@@ -54,6 +59,9 @@ function App() {
             <Route element={<RoleRoute allowed={["advisor"]} />}>
               <Route path="/advisor/dashboard" element={<AdvisorDashboard />} />
               <Route path="/advisor/video" element={<AdvisorSession />} />
+              <Route path="/advisor/profile" element={<AdvisorProfile />} />
+              <Route path="/advisor/clients" element={<AdvisorClients />} />
+              <Route path="/advisor/analytics" element={<AdvisorAnalytics />} />
             </Route>
 
             {/* ADMIN ROUTES */}

@@ -55,6 +55,71 @@ export const fetchAdvisorStats = createAsyncThunk(
   }
 );
 
+// Fetch advisor's own profile
+export const fetchAdvisorProfile = createAsyncThunk(
+  'advisor/fetchProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/advisor/profile');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.msg || 'Failed to fetch profile');
+    }
+  }
+);
+
+// Update advisor profile
+export const updateAdvisorProfile = createAsyncThunk(
+  'advisor/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await api.patch('/api/advisor/profile', profileData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.msg || 'Failed to update profile');
+    }
+  }
+);
+
+// Fetch a specific client's financial report
+export const fetchClientReport = createAsyncThunk(
+  'advisor/fetchClientReport',
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/advisor/client/${userId}/report`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.msg || 'Failed to fetch client report');
+    }
+  }
+);
+
+// Remove / unassign a client
+export const removeClient = createAsyncThunk(
+  'advisor/removeClient',
+  async (userId, { rejectWithValue }) => {
+    try {
+      await api.delete(`/api/advisor/client/${userId}`);
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.msg || 'Failed to remove client');
+    }
+  }
+);
+
+// Fetch advisor analytics
+export const fetchAdvisorAnalytics = createAsyncThunk(
+  'advisor/fetchAnalytics',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/api/advisor/analytics');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.msg || 'Failed to fetch analytics');
+    }
+  }
+);
+
 // ==================== USER THUNKS ====================
 
 // Fetch available advisors (for users)
@@ -103,12 +168,12 @@ export const fetchMyAdvisorStatus = createAsyncThunk(
       // Log token status for debugging
       const token = localStorage.getItem('token');
       console.log('[ADVISOR-SLICE] fetchMyAdvisorStatus - Token exists:', !!token);
-      
+
       if (!token) {
         console.error('[ADVISOR-SLICE] No token available, aborting status check');
         return rejectWithValue('No authentication token available');
       }
-      
+
       // DO NOT pass headers explicitly - let the axios interceptor handle it!
       const response = await api.get('/api/user/advisor/status');
       return response.data;
@@ -142,6 +207,18 @@ const advisorSlice = createSlice({
     pendingRequests: [],
     stats: { totalClients: 0, pendingRequests: 0 },
     selectedClient: null,
+
+    // Profile state
+    profile: null,
+    profileLoading: false,
+
+    // Client report state
+    clientReport: null,
+    reportLoading: false,
+
+    // Analytics state
+    analytics: null,
+    analyticsLoading: false,
 
     // User advisor browsing state
     availableAdvisors: [],
@@ -260,6 +337,62 @@ const advisorSlice = createSlice({
       .addCase(cancelAdvisorRequest.fulfilled, (state, action) => {
         state.myPendingRequests = state.myPendingRequests.filter(r => r._id !== action.payload);
         state.successMessage = 'Request cancelled';
+      })
+
+      // Fetch advisor profile
+      .addCase(fetchAdvisorProfile.pending, (state) => { state.profileLoading = true; })
+      .addCase(fetchAdvisorProfile.fulfilled, (state, action) => {
+        state.profileLoading = false;
+        state.profile = action.payload;
+      })
+      .addCase(fetchAdvisorProfile.rejected, (state, action) => {
+        state.profileLoading = false;
+        state.error = action.payload;
+      })
+
+      // Update advisor profile
+      .addCase(updateAdvisorProfile.pending, (state) => { state.profileLoading = true; })
+      .addCase(updateAdvisorProfile.fulfilled, (state, action) => {
+        state.profileLoading = false;
+        state.profile = action.payload.advisor;
+        state.successMessage = 'Profile updated successfully!';
+      })
+      .addCase(updateAdvisorProfile.rejected, (state, action) => {
+        state.profileLoading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch client report
+      .addCase(fetchClientReport.pending, (state) => { state.reportLoading = true; state.clientReport = null; })
+      .addCase(fetchClientReport.fulfilled, (state, action) => {
+        state.reportLoading = false;
+        state.clientReport = action.payload;
+      })
+      .addCase(fetchClientReport.rejected, (state, action) => {
+        state.reportLoading = false;
+        state.error = action.payload;
+      })
+
+      // Remove client
+      .addCase(removeClient.fulfilled, (state, action) => {
+        state.clients = state.clients.filter(c => c._id !== action.payload);
+        if (state.selectedClient?._id === action.payload) state.selectedClient = null;
+        state.stats.totalClients = Math.max(0, state.stats.totalClients - 1);
+        state.successMessage = 'Client removed successfully';
+      })
+      .addCase(removeClient.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      // Fetch analytics
+      .addCase(fetchAdvisorAnalytics.pending, (state) => { state.analyticsLoading = true; })
+      .addCase(fetchAdvisorAnalytics.fulfilled, (state, action) => {
+        state.analyticsLoading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchAdvisorAnalytics.rejected, (state, action) => {
+        state.analyticsLoading = false;
+        state.error = action.payload;
       });
   },
 });

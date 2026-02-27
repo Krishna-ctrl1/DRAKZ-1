@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../../styles/global/Sidebar.css";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // MODIFIED: Accepts state and setter as props
 // Using the same props as your original file
@@ -8,6 +9,8 @@ export default function Sidebar({ collapsed = true, setCollapsed }) {
   const location = useLocation();
   const hoverTimerRef = useRef(null);
   const wasCollapsedRef = useRef(collapsed);
+  const pendingRequests = useSelector(s => s.advisor?.pendingRequests || []);
+  const pendingCount = pendingRequests.length;
 
   // Get the current path from the location object
   const currentPath = location.pathname;
@@ -43,8 +46,11 @@ export default function Sidebar({ collapsed = true, setCollapsed }) {
   const topMenuItems = isAdvisor
     ? [
       // Advisor Menu
-      { id: "dashboard", label: "Dashboard", icon: "fa-solid fa-border-all", path: "/advisor/dashboard" },
+      { id: "dashboard", label: "Dashboard", icon: "fa-solid fa-border-all", path: "/advisor/dashboard", badge: pendingCount },
+      { id: "clients", label: "Clients Hub", icon: "fa-solid fa-users", path: "/advisor/clients" },
+      { id: "analytics", label: "Analytics", icon: "fa-solid fa-chart-line", path: "/advisor/analytics" },
       { id: "video", label: "Broadcast Updates", icon: "fa-solid fa-tower-broadcast", path: "/advisor/video" },
+      { id: "profile", label: "My Profile", icon: "fa-solid fa-id-card", path: "/advisor/profile" },
     ]
     : [
       // User Menu  
@@ -92,10 +98,14 @@ export default function Sidebar({ collapsed = true, setCollapsed }) {
               className={currentPath === item.path ? "active" : ""}
               aria-label={item.label}
               data-tooltip={item.label}
+              style={{ position: 'relative' }}
             >
               <Link to={item.path} className="sidebar-link">
                 <i className={item.icon}></i>
                 {!collapsed && <span>{item.label}</span>}
+                {item.badge > 0 && (
+                  <span className="sidebar-badge">{item.badge}</span>
+                )}
               </Link>
             </li>
           ))}

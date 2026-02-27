@@ -224,3 +224,227 @@ exports.getAdvisorStats = async (req, res) => {
     res.status(500).json({ msg: 'Server error fetching stats' });
   }
 };
+
+// Get logged-in advisor's own profile
+exports.getAdvisorProfile = async (req, res) => {
+  try {
+    const advisor = await Person.findById(req.user?.id).select('-password');
+    if (!advisor) return res.status(404).json({ msg: 'Advisor not found' });
+    res.json(advisor);
+  } catch (err) {
+    console.error('Error fetching advisor profile:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+// Update logged-in advisor's profile
+exports.updateAdvisorProfile = async (req, res) => {
+  try {
+    const { name, phone, bio, specialization, price, experience, certificate, contactEmail, contactPhone, isAcceptingClients } = req.body;
+
+    const updateFields = { name, phone };
+    updateFields['advisorProfile.bio'] = bio;
+    updateFields['advisorProfile.specialization'] = specialization;
+    updateFields['advisorProfile.price'] = price;
+    updateFields['advisorProfile.experience'] = experience;
+    updateFields['advisorProfile.certificate'] = certificate;
+    updateFields['advisorProfile.contactEmail'] = contactEmail;
+    updateFields['advisorProfile.contactPhone'] = contactPhone;
+    if (typeof isAcceptingClients === 'boolean') {
+      updateFields['advisorProfile.isAcceptingClients'] = isAcceptingClients;
+    }
+
+    // Remove undefined fields
+    Object.keys(updateFields).forEach(k => updateFields[k] === undefined && delete updateFields[k]);
+
+    const updated = await Person.findByIdAndUpdate(
+      req.user?.id,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({ msg: 'Profile updated successfully', advisor: updated });
+  } catch (err) {
+    console.error('Error updating advisor profile:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+};
+
+// Get a specific client's financial report (for Clients Hub page)
+exports.getClientReport = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const advisorId = req.user?.id;
+
+    // Verify this client is actually assigned to this advisor
+    const client = await Person.findOne({
+      _id: userId,
+      assignedAdvisor: new mongoose.Types.ObjectId(advisorId)
+    }).select('-password');
+
+    if (!client) return res.status(404).json({ msg: 'Client not found or not assigned to you' });
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Get spending breakdown by category
+    const categoryBreakdown = await Spending.aggregate([
+      { $match: { user: userObjectId } },
+      {
+        $group: {
+          _id: { category: '$category', type: { $toLower: '$type' } },
+          total: { $sum: '$amount' }
+        }
+      },
+      { $sort: { total: -1 } }
+    ]);
+
+    // Get monthly income vs expense for last 6 months
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyTrend = await Spending.aggregate([
+      { $match: { user: userObjectId, date: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$date' },
+            month: { $month: '$date' },
+            type: { $toLower: '$type' }
+          },
+          total: { $sum: '$amount' }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+
+    // Overall totals
+    const totals = await Spending.aggregate([
+      { $match: { user: userObjectId } },
+      {
+        $group: {
+          _id: { $toLower: '$type' },
+          total: { $sum: '$amount' }
+        }
+      }
+    ]);
+
+    const income = totals.find(t => t._id === 'income')?.total || 0;
+    const expense = totals.find(t => t._id === 'expense')?.total || 0;
+
+    res.json({
+      client,
+      financials: { totalIncome: income, totalExpense: expense, balance: income - expense },
+      categoryBreakdown,
+      monthlyTrend
+    });
+  } catch (err) {
+    console.error('Error fetching client report:', err);
+    res.status(500).json({ msg: 'Server error fetching client report' });
+  }
+};
+
+// Remove / unassign a client from this advisor
+exports.removeClient = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const advisorId = req.user?.id;
+
+    const client = await Person.findOne({
+      _id: userId,
+      assignedAdvisor: new mongoose.Types.ObjectId(advisorId)
+    });
+
+    if (!client) return res.status(404).json({ msg: 'Client not found or not assigned to you' });
+
+    await Person.findByIdAndUpdate(userId, { $set: { assignedAdvisor: null } });
+
+    console.log(`🚫 Removed client ${userId} from advisor ${advisorId}`);
+    res.json({ msg: 'Client removed successfully' });
+  } catch (err) {
+    console.error('Error removing client:', err);
+    res.status(500).json({ msg: 'Server error removing client' });
+  }
+};
+
+// Get aggregated analytics for advisor's analytics page
+exports.getAdvisorAnalytics = async (req, res) => {
+  try {
+    const advisorId = req.user?.id;
+    const advisorObjectId = new mongoose.Types.ObjectId(advisorId);
+
+    const clients = await Person.find({ assignedAdvisor: advisorObjectId }).select('_id name creditScore riskProfile occupation created_at');
+    const clientIds = clients.map(c => c._id);
+
+    // Total income & expense across all clients
+    let totalIncome = 0, totalExpense = 0;
+    let categoryData = [];
+    let monthlyData = [];
+
+    if (clientIds.length > 0) {
+      const totals = await Spending.aggregate([
+        { $match: { user: { $in: clientIds } } },
+        {
+          $group: {
+            _id: { $toLower: '$type' },
+            total: { $sum: '$amount' }
+          }
+        }
+      ]);
+      totalIncome = totals.find(t => t._id === 'income')?.total || 0;
+      totalExpense = totals.find(t => t._id === 'expense')?.total || 0;
+
+      // Top expense categories across all clients
+      categoryData = await Spending.aggregate([
+        { $match: { user: { $in: clientIds }, $expr: { $eq: [{ $toLower: '$type' }, 'expense'] } } },
+        { $group: { _id: '$category', total: { $sum: '$amount' } } },
+        { $sort: { total: -1 } },
+        { $limit: 6 }
+      ]);
+
+      // Monthly trend (last 6 months)
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      monthlyData = await Spending.aggregate([
+        { $match: { user: { $in: clientIds }, date: { $gte: sixMonthsAgo } } },
+        {
+          $group: {
+            _id: { year: { $year: '$date' }, month: { $month: '$date' }, type: { $toLower: '$type' } },
+            total: { $sum: '$amount' }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } }
+      ]);
+    }
+
+    // Risk profile distribution
+    const riskDistribution = clients.reduce((acc, c) => {
+      const risk = c.riskProfile || 'Moderate';
+      acc[risk] = (acc[risk] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Average credit score
+    const avgCreditScore = clients.length > 0
+      ? Math.round(clients.reduce((sum, c) => sum + (c.creditScore || 0), 0) / clients.length)
+      : 0;
+
+    // Pending requests count
+    const pendingCount = await AdvisorRequest.countDocuments({ advisor: advisorObjectId, status: 'pending' });
+
+    res.json({
+      totalClients: clients.length,
+      totalIncome,
+      totalExpense,
+      netBalance: totalIncome - totalExpense,
+      avgCreditScore,
+      pendingRequests: pendingCount,
+      riskDistribution,
+      categoryData,
+      monthlyData,
+      clients: clients.map(c => ({ name: c.name, creditScore: c.creditScore, riskProfile: c.riskProfile, occupation: c.occupation, joinedAt: c.created_at }))
+    });
+  } catch (err) {
+    console.error('Error fetching analytics:', err);
+    res.status(500).json({ msg: 'Server error fetching analytics' });
+  }
+};

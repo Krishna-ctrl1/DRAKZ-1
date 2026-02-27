@@ -3,13 +3,20 @@
   Easily change your app's entire look here.
 --- */
 :root {
-  --page-bg: #050b16; /* Dark navy background for the page body */
-  --sidebar-bg: #071a2e; /* Sidebar background */
-  --icon-color: #c7d4ec; /* Default icon color */
-  --icon-hover-color: #5fe1ff; /* Icon color on hover */
-  --active-bg: linear-gradient(120deg, #22d3ee, #3b82f6); /* Active pill background */
-  --active-icon-color: #041120; /* Icon/text color inside active pill */
-  --text-color: #e5edf6; /* Text color for labels */
+  --page-bg: #050b16;
+  /* Dark navy background for the page body */
+  --sidebar-bg: #071a2e;
+  /* Sidebar background */
+  --icon-color: #c7d4ec;
+  /* Default icon color */
+  --icon-hover-color: #5fe1ff;
+  /* Icon color on hover */
+  --active-bg: linear-gradient(120deg, #22d3ee, #3b82f6);
+  /* Active pill background */
+  --active-icon-color: #041120;
+  /* Icon/text color inside active pill */
+  --text-color: #e5edf6;
+  /* Text color for labels */
 }
 
 /* ---
@@ -17,7 +24,8 @@
 --- */
 /* default: expanded */
 .sidebar {
-  width: 250px; /* expanded width by default */
+  width: 250px;
+  /* expanded width by default */
   position: fixed;
   top: 6rem;
   left: 1rem;
@@ -46,13 +54,17 @@
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
+
 /* ---
   Expanded State
 --- */
 .sidebar:not(.collapsed) {
-  width: 250px; /* Width when expanded */
-  align-items: flex-start; /* Align text to the left */
+  width: 250px;
+  /* Width when expanded */
+  align-items: flex-start;
+  /* Align text to the left */
 }
+
 /* Icon image inside button */
 .toggle-icon {
   width: 26px;
@@ -95,47 +107,62 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3rem; /* Space between items */
+  gap: 3rem;
+  /* Space between items */
   width: 100%;
 }
 
 .sidebar-list li {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center icons when collapsed */
+  justify-content: center;
+  /* Center icons when collapsed */
   height: 48px;
-  width: calc(100% - 1.5rem); /* Full width minus some padding */
+  width: calc(100% - 1.5rem);
+  /* Full width minus some padding */
   margin: 0 0.75rem;
   padding: 0;
   cursor: pointer;
-  border-radius: 1.3rem; /* Rounded box for the active state */
+  border-radius: 1.3rem;
+  /* Rounded box for the active state */
   transition: background-color 0.3s ease;
   position: relative;
   color: var(--icon-color);
-  overflow: hidden; /* Prevent content overflow */
+  overflow: hidden;
+  /* Prevent content overflow */
 }
+
 .sidebar-link {
-  display: flex; /* Makes the link fill the entire <li> */
+  display: flex;
+  /* Makes the link fill the entire <li> */
   align-items: center;
-  justify-content: inherit; /* Inherit from parent li */
+  justify-content: inherit;
+  /* Inherit from parent li */
   width: 100%;
   height: 100%;
   padding: 0;
-  text-decoration: none; /* <-- FIX: Removes the underline */
-  color: inherit; /* <-- FIX: Makes text color match the parent */
-  overflow: hidden; /* Prevent overflow */
+  text-decoration: none;
+  /* <-- FIX: Removes the underline */
+  color: inherit;
+  /* <-- FIX: Makes text color match the parent */
+  overflow: hidden;
+  /* Prevent overflow */
 }
+
 /* ---
   Icon Styling
 --- */
 .sidebar-list li i {
   font-size: 1.2rem;
-  color: var(--icon-color); /* Default grey */
+  color: var(--icon-color);
+  /* Default grey */
   transition: color 0.3s ease;
-  min-width: 28px; /* Minimum width for alignment */
+  min-width: 28px;
+  /* Minimum width for alignment */
   width: 28px;
   text-align: center;
-  flex-shrink: 0; /* Prevent icon from shrinking */
+  flex-shrink: 0;
+  /* Prevent icon from shrinking */
 }
 
 /* When collapsed, ensure icons are perfectly centered */
@@ -160,13 +187,17 @@
   Text Label Styling (Expanded)
 --- */
 .sidebar:not(.collapsed) .sidebar-list li {
-  justify-content: flex-start; /* Align icon/text left */
-  padding-left: 15px; /* Indent items */
-  padding-right: 10px; /* Add right padding to prevent overflow */
+  justify-content: flex-start;
+  /* Align icon/text left */
+  padding-left: 15px;
+  /* Indent items */
+  padding-right: 10px;
+  /* Add right padding to prevent overflow */
 }
 
 .sidebar:not(.collapsed) .sidebar-list li i {
-  width: 28px; /* Adjust icon width */
+  width: 28px;
+  /* Adjust icon width */
   min-width: 28px;
   text-align: center;
   margin-right: 12px;
@@ -176,9 +207,11 @@
 .sidebar:not(.collapsed) .sidebar-list li span {
   color: var(--text-color);
   font-weight: 500;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap;
+  /* Prevent text wrapping */
   overflow: hidden;
-  text-overflow: ellipsis; /* Add ellipsis for long text */
+  text-overflow: ellipsis;
+  /* Add ellipsis for long text */
   flex: 1;
 }
 
@@ -191,6 +224,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -302,4 +336,29 @@
 
 .sidebar.collapsed .collapse-btn:active {
   transform: translateX(50%) scale(0.95);
+}
+
+/* Notification badge */
+.sidebar-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #071a2e;
+  z-index: 10;
+}
+
+.sidebar.collapsed .sidebar-badge {
+  right: 4px;
+  top: 4px;
 }
