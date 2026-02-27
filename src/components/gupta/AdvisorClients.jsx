@@ -6,6 +6,7 @@ import {
 } from '../../redux/slices/advisorSlice';
 import Header from '../global/Header';
 import Sidebar from '../global/Sidebar';
+import { generateClientReportPDF } from '../../utils/generateClientPDF';
 import '../../styles/gupta/AdvisorClients.css';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -16,6 +17,15 @@ const AdvisorClients = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [search, setSearch] = useState('');
     const [confirmRemove, setConfirmRemove] = useState(null);
+    const [pdfLoading, setPdfLoading] = useState(false);
+
+    // Get advisor name for PDF header
+    const getAdvisorName = () => {
+        try {
+            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            return u.name || 'Advisor';
+        } catch { return 'Advisor'; }
+    };
 
     useEffect(() => {
         dispatch(fetchClients());
@@ -43,6 +53,18 @@ const AdvisorClients = () => {
     const handleRemove = (clientId) => {
         dispatch(removeClient(clientId));
         setConfirmRemove(null);
+    };
+
+    const handleExportPDF = async () => {
+        if (!selectedClient || !clientReport) return;
+        setPdfLoading(true);
+        try {
+            await generateClientReportPDF(selectedClient, clientReport, getAdvisorName());
+        } catch (err) {
+            console.error('PDF generation failed:', err);
+        } finally {
+            setPdfLoading(false);
+        }
     };
 
     // Build monthly chart data
@@ -173,6 +195,18 @@ const AdvisorClients = () => {
                                                 </div>
                                             </div>
                                             <div className="report-header-actions">
+                                                {/* PDF Export */}
+                                                <button
+                                                    className="btn-export-pdf"
+                                                    onClick={handleExportPDF}
+                                                    disabled={pdfLoading || reportLoading || !clientReport}
+                                                    title="Export client report as PDF"
+                                                >
+                                                    {pdfLoading
+                                                        ? <><i className="fa-solid fa-spinner fa-spin"></i> Generating...</>
+                                                        : <><i className="fa-solid fa-file-pdf"></i> Export PDF</>}
+                                                </button>
+
                                                 {confirmRemove === selectedClient._id ? (
                                                     <div className="confirm-remove">
                                                         <span>Remove this client?</span>
