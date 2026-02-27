@@ -1,0 +1,253 @@
+/* ================================================
+   LOGIN TRANSITION OVERLAY
+   ================================================ */
+
+/* ── Overlay ──────────────────────────────────── */
+.lt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #080c18;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.lt-overlay.lt-enter {
+    /* appear instantly — no fade-in, we don't want dashboard showing through */
+    opacity: 1;
+}
+
+.lt-overlay.lt-exit {
+    animation: lt-fade-out 0.4s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes lt-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes lt-fade-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(1.04);
+    }
+}
+
+/* ── Glow blob ───────────────────────────────── */
+.lt-glow-blob {
+    position: absolute;
+    width: 480px;
+    height: 480px;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: 0.22;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: lt-pulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes lt-pulse {
+    from {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.18;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.28;
+    }
+}
+
+/* ── Floating particles ──────────────────────── */
+.lt-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.lt-particle {
+    position: absolute;
+    left: var(--x);
+    bottom: -20px;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: var(--color);
+    opacity: 0;
+    animation: lt-float 3.2s ease-in infinite;
+    animation-delay: var(--delay);
+}
+
+@keyframes lt-float {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 0.6;
+    }
+
+    80% {
+        opacity: 0.25;
+    }
+
+    100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+}
+
+/* ── Center card ─────────────────────────────── */
+.lt-card {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: lt-card-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes lt-card-in {
+    from {
+        transform: translateY(24px) scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* ── Logo ────────────────────────────────────── */
+.lt-logo {
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: none;
+    animation: lt-logo-glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes lt-logo-glow {
+    from {
+        filter: brightness(1);
+    }
+
+    to {
+        filter: brightness(1.3) drop-shadow(0 0 12px currentColor);
+    }
+}
+
+/* ── Welcome text ────────────────────────────── */
+.lt-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.lt-hi {
+    font-size: 22px;
+    font-weight: 700;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.lt-role {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+}
+
+/* ── SVG Ring ────────────────────────────────── */
+.lt-ring-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px 0;
+    animation: lt-ring-breathe 2s ease-in-out infinite alternate;
+}
+
+.lt-ring {
+    width: 80px;
+    height: 80px;
+}
+
+.lt-pct {
+    position: absolute;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Inter', monospace, sans-serif;
+}
+
+@keyframes lt-ring-breathe {
+    from {
+        transform: scale(0.97);
+    }
+
+    to {
+        transform: scale(1.03);
+    }
+}
+
+/* ── Tip text ────────────────────────────────── */
+.lt-tip {
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.2px;
+    animation: lt-tip-in 0.3s ease;
+    min-height: 20px;
+}
+
+@keyframes lt-tip-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Progress bar ────────────────────────────── */
+.lt-bar-track {
+    width: 280px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.lt-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.03s linear;
+}

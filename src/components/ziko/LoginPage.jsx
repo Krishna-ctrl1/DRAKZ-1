@@ -5,7 +5,7 @@ import axios from 'axios';
 import API from '../../config/api.config.js';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, showLoginTransition } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({
     name: '', email: '', password: '', role: 'user',
@@ -48,7 +48,11 @@ const LoginPage = () => {
           advisor: '/advisor/dashboard',
           user: '/user/dashboard',
         };
-        navigate(map[data.user.role] || '/', { replace: true });
+        const dest = map[data.user.role] || '/';
+
+        showLoginTransition(data.user.role, data.user.name, dest);
+        // 50ms lets the overlay paint before the route change fires
+        setTimeout(() => navigate(dest, { replace: true }), 50);
 
       } else {
         // --- SIGNUP LOGIC ---
@@ -83,13 +87,14 @@ const LoginPage = () => {
           // Use the login helper from context to update state and storage
           login(data.user, data.token);
 
-          // Redirect
           const map = {
             admin: '/admin/dashboard',
             advisor: '/advisor/dashboard',
             user: '/user/dashboard',
           };
-          navigate(map[data.user.role] || '/user/dashboard', { replace: true });
+          const dest = map[data.user.role] || '/user/dashboard';
+          showLoginTransition(data.user.role, data.user.name, dest);
+          setTimeout(() => navigate(dest, { replace: true }), 50);
         }
       }
 

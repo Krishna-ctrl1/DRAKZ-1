@@ -38,16 +38,32 @@ import SettingsPage from "./components/ziko/admin/SettingsPage";
 import LogsPage from "./components/ziko/admin/LogsPage";
 import ChatWidget from "./components/ziko/ChatWidget"; // NEW
 import { AuthProvider, useAuth } from "./context/AuthProvider";
+import LoginTransition from "./components/global/LoginTransition";
 
 const ChatWrapper = () => {
   const { user } = useAuth();
   return user && user.role !== 'admin' ? <ChatWidget user={user} /> : null;
 };
 
+// Renders the login→dashboard overlay at the top level so it
+// stays alive during route changes (fixes the flash-of-login-page bug)
+const GlobalLoginTransition = () => {
+  const { loginTransition, clearLoginTransition } = useAuth();
+  if (!loginTransition) return null;
+  return (
+    <LoginTransition
+      role={loginTransition.role}
+      userName={loginTransition.name}
+      onComplete={clearLoginTransition}
+    />
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <div className="App">
+        <GlobalLoginTransition />
         <ChatWrapper />
         <Routes>
           <Route path="/" element={<Home />} />
