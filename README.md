@@ -10,6 +10,7 @@ DRAKZ is a sophisticated, full-stack financial management platform that provides
 
 - [Overview](#overview)
 - [Key Features](#key-features)
+- [Recent Updates](#recent-updates)
 - [Team Contributions](#team-contributions)
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
@@ -55,13 +56,64 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 
 ### 👥 Expert Consultation
 - **Video Advisory Platform**: Schedule and conduct live sessions with financial experts
-- **Live Video Sessions**: In-platform video conferencing for personalized advice
+- **Advisor Hub**: Browse, connect with, and manage certified financial advisors
+
+---
+
+## 🆕 Recent Updates
+
+### Advisor Dashboard Expansion
+Three new full pages were added to the Advisor section:
+
+#### 🧑‍💼 Advisor Profile Edit Page (`/advisor/profile`)
+- Full profile editing form (name, phone, bio, specialization, price, experience, certificates, languages)
+- Toggle to accept/reject new client requests
+- Quick stats sidebar (clients, experience, price)
+- Backend: `GET /api/advisor/profile`, `PATCH /api/advisor/profile`
+
+#### 👥 Clients Hub Page (`/advisor/clients`)
+- Searchable client list with live filtering
+- Detailed financial report panel per client (income, expenses, balance, credit score, spending categories, monthly trend charts)
+- Remove client with confirmation dialog
+- **PDF Export**: Download a professionally branded client financial report as PDF (using jsPDF), including financial summary cards, category bar charts, and monthly data table
+- Backend: `GET /api/advisor/clients`, `GET /api/advisor/client/:id/report`, `DELETE /api/advisor/client/:id`
+
+#### 📈 Advisor Analytics Page (`/advisor/analytics`)
+- Key performance indicators (total clients, income managed, average credit score, pending requests)
+- Portfolio breakdown charts (category spending, monthly income vs expense trends)
+- Risk profile distribution
+- Client overview table
+- Backend: `GET /api/advisor/analytics`
+
+---
+
+### 🔐 Login → Dashboard Transition Animation
+- A branded **full-screen loading animation** plays between login and the dashboard for all 3 roles
+- **Role-specific colors**: Indigo (User), Green (Advisor), Amber (Admin)
+- **Animated elements**: SVG progress ring (0→100%), floating particles, pulsing glow blob, cycling loading tips
+- **Smooth exit**: Fades out over the already-rendered dashboard with no flash
+- Built with pure CSS animations — no additional library required
+- Files: `src/components/global/LoginTransition.jsx`, `src/styles/global/LoginTransition.css`
+
+---
+
+### 📄 Client Report PDF Export
+- One-click download of a professionally styled PDF from the Clients Hub
+- **PDF contents**: DRAKZ-branded header, client info card, financial summary, spending category bars, monthly trend table, page footer
+- Generated entirely client-side with **jsPDF** (no server round-trip)
+- File: `src/utils/generateClientPDF.js`
+
+---
+
+### 🧩 Sidebar Navigation Updates
+- Added navigation links for Advisor Profile, Clients Hub, and Analytics pages to the advisor sidebar
+- Consistent icon styling with Font Awesome
 
 ---
 
 ## 👨‍💻 Team Contributions
 
-### Krishna Gupta - Lead Architect & AI Integration
+### Krishna Gupta — Lead Architect & AI Integration
 **Primary Responsibilities:**
 - Overall project architecture and technical planning
 - Complete AI ecosystem development including:
@@ -72,8 +124,11 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 - Video Advisory platform development
 - Live video session interface implementation
 - Backend integration for AI services
+- **Advisor Dashboard expansion** (Profile, Clients Hub, Analytics pages)
+- **Login transition animation** and global UX improvements
+- **PDF report export** for client financial reports
 
-### M Deepthi - Dashboard & Analytics
+### M Deepthi — Dashboard & Analytics
 **Primary Responsibilities:**
 - User dashboard development and design
 - Account summary visualizations
@@ -81,7 +136,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 - Data visualization components
 - Backend server development for analytics features
 
-### Nagineni Ragamaie - Investments & Content
+### Nagineni Ragamaie — Investments & Content
 **Primary Responsibilities:**
 - Investment tracking system implementation
 - Stock market chart integrations
@@ -89,7 +144,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 - Financial blog platform development
 - Backend server development for investment features
 
-### Zulqarnain Ahmed - UI/UX & Administration
+### Zulqarnain Ahmed — UI/UX & Administration
 **Primary Responsibilities:**
 - Landing page design and development
 - 3D card models and animations
@@ -97,7 +152,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 - User interface design and user experience optimization
 - Backend server development for admin features
 
-### Malle Abhinay - Privilege & Asset Management
+### Malle Abhinay — Privilege & Asset Management
 **Primary Responsibilities:**
 - "My Privilege" asset management suite
 - Insurance tracking and management system
@@ -110,17 +165,21 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 ## 🛠 Technology Stack
 
 ### Frontend
-- **Framework**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip with Vite
-- **Styling**: Modern CSS with responsive design
-- **State Management**: React Hooks & Context API
-- **Data Visualization**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip / Recharts
+- **Framework**: React 18 with Vite
+- **Styling**: Vanilla CSS with responsive dark-theme design
+- **State Management**: Redux Toolkit + React Context API
+- **Data Visualization**: Chart.js / Recharts
+- **Animations**: CSS keyframe animations, Framer Motion
+- **PDF Generation**: jsPDF (client-side)
 - **Video Conferencing**: WebRTC integration
 
 ### Backend
-- **Runtime**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
-- **Framework**: https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
-- **Database**: MongoDB
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB (Mongoose ODM)
 - **Authentication**: JWT (JSON Web Tokens)
+- **File Uploads**: Multer
+- **Real-Time**: Socket.io
 - **API Architecture**: RESTful APIs
 
 ### AI & Integration
@@ -135,7 +194,7 @@ DRAKZ revolutionizes personal finance management by combining advanced AI capabi
 ### Prerequisites
 
 Ensure you have the following installed:
-- **https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip**: v14.x or higher
+- **Node.js**: v14.x or higher
 - **npm**: v6.x or higher
 - **MongoDB**: Local installation or MongoDB Atlas account
 
@@ -143,8 +202,8 @@ Ensure you have the following installed:
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
-cd drakz
+git clone https://github.com/Krishna-ctrl1/DRAKZ-1.git
+cd DRAKZ-1
 ```
 
 2. **Install dependencies**
@@ -189,27 +248,31 @@ This will start:
 ## 📁 Project Structure
 
 ```
-DRAKZ/
-├── client/                  # Frontend React application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API service functions
-│   │   ├── utils/          # Utility functions
-│   │   └── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip         # Main application component
-│   └── public/             # Static assets
+DRAKZ-1/
+├── src/
+│   ├── components/
+│   │   ├── global/          # Shared components (Header, Sidebar, LoginTransition)
+│   │   ├── deepthi/         # User dashboard components
+│   │   ├── gupta/           # Advisor dashboard components
+│   │   ├── ragamaie/        # Investments & blog components
+│   │   ├── abhinay/         # Privilege & asset components
+│   │   └── ziko/            # Landing, login, admin components
+│   ├── styles/              # Per-module CSS files
+│   ├── redux/               # Redux Toolkit slices & store
+│   ├── context/             # React Context (AuthProvider)
+│   ├── utils/               # Utility functions (generateClientPDF.js)
+│   ├── api/                 # Axios API instance
+│   ├── auth/                # Route guards (ProtectedRoute, RoleRoute, AuthGate)
+│   ├── config/              # App configuration (backend URL, API config)
+│   └── App.jsx              # Root component & routing
 │
-├── server/                  # Backend Express application
-│   ├── config/             # Configuration files
-│   ├── controllers/        # Route controllers
-│   ├── models/             # MongoDB models
-│   ├── routes/             # API routes
-│   ├── middleware/         # Custom middleware
-│   └── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip           # Main server file
-│
-├── .env                     # Environment variables
-├── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip            # Project dependencies
-└── https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip               # Project documentation
+├── src/controllers/         # Express route controllers
+├── src/models/              # Mongoose models
+├── src/routes/              # Express route definitions
+├── src/middleware/          # Auth middleware
+├── server.js                # Express entry point
+├── package.json
+└── README.md
 ```
 
 ---
@@ -251,11 +314,8 @@ Comprehensive stock data platform providing:
 ### Available Scripts
 
 ```bash
-# Start development server (frontend + backend)
+# Start development server (frontend + backend concurrently)
 npm run dev
-
-# Start the LLM Model
-python https://github.com/Abrockyt/DRAKZ-1/raw/refs/heads/main/scripts/DRAK_v2.2.zip
 
 # Start backend server only
 npm run server
@@ -263,30 +323,34 @@ npm run server
 # Build frontend for production
 npm run build
 
-# Run tests
-npm test
-
-# Code linting
-npm run lint
+# Preview production build
+npm run preview
 ```
 
 ### API Endpoints
 
-The backend provides RESTful API endpoints for:
-- User authentication and management
-- Asset and investment tracking
-- AI chatbot interactions
-- Video session management
-- Analytics and reporting
+#### Auth
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login` | User login |
+| POST | `/api/auth/register` | User registration |
 
-### Database Schema
+#### Advisor
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/advisor/profile` | Get advisor profile |
+| PATCH | `/api/advisor/profile` | Update advisor profile |
+| GET | `/api/advisor/clients` | Get all assigned clients |
+| GET | `/api/advisor/client/:id/report` | Get client financial report |
+| DELETE | `/api/advisor/client/:id` | Remove client |
+| GET | `/api/advisor/analytics` | Get advisor analytics |
+| GET | `/api/advisor/stats` | Get advisor dashboard stats |
+| GET | `/api/advisor/requests` | Get pending client requests |
 
-The MongoDB database is organized with collections for:
-- Users and authentication
-- Financial assets and investments
-- AI conversation history
-- Video session records
-- Analytics and reports
+#### Settings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/settings/profile-picture` | Upload profile picture |
 
 ---
 
@@ -298,6 +362,7 @@ DRAKZ implements multiple layers of security:
 - **HTTPS**: Encrypted data transmission (production)
 - **Input Validation**: Protection against injection attacks
 - **CORS Configuration**: Controlled cross-origin requests
+- **Rate Limiting**: Express rate limiter on sensitive routes
 
 ---
 
@@ -322,11 +387,11 @@ This project is developed as part of an academic/professional initiative by the 
 
 For questions or support, please contact the development team:
 
-- **Krishna Gupta** - AI & Architecture
-- **M Deepthi Nagineni** - Analytics
-- **Nagineni Ragamaie** - Investments
-- **Zulqarnain Ahmed** - UI/UX & Admin
-- **Malle Abhinay** - Asset Management
+- **Krishna Gupta** — AI & Architecture
+- **M Deepthi Nagineni** — Analytics
+- **Nagineni Ragamaie** — Investments
+- **Zulqarnain Ahmed** — UI/UX & Admin
+- **Malle Abhinay** — Asset Management
 
 ---
 
