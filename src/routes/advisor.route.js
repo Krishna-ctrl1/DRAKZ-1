@@ -6,7 +6,12 @@ const {
     getAdvisors,
     getAdvisorRequests,
     respondToRequest,
-    getAdvisorStats
+    getAdvisorStats,
+    getAdvisorProfile,
+    updateAdvisorProfile,
+    getClientReport,
+    removeClient,
+    getAdvisorAnalytics
 } = require('../controllers/advisor.controller.js');
 
 /**
@@ -99,5 +104,16 @@ router.post('/requests/:requestId/respond', auth, respondToRequest);
  *         description: Advisor stats
  */
 router.get('/stats', auth, getAdvisorStats);
+
+// Profile routes
+router.get('/profile', auth, getAdvisorProfile);
+router.patch('/profile', auth, updateAdvisorProfile);
+
+// Client hub routes
+router.get('/client/:userId/report', auth, getClientReport);
+router.delete('/client/:userId', auth, removeClient);
+
+// Analytics route
+router.get('/analytics', auth, getAdvisorAnalytics);
 
 module.exports = router;
