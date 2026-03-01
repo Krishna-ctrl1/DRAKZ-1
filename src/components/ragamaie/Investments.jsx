@@ -61,20 +61,17 @@ export default function Investments() {
   const getXAxisTicks = () => {
     if (range !== "1M" || data.length === 0) return undefined;
 
-    const days = data
-      .map((d) => Number(d.name))
-      .filter((n) => !Number.isNaN(n));
-
-    if (days.length === 0) return undefined;
-
-    const min = Math.min(...days);
-    const max = Math.max(...days);
-
     const candidates = [1, 5, 10, 15, 20, 25, 30, 31];
 
-    return candidates
-      .filter((d) => d >= min && d <= max)
-      .map((d) => String(d));
+    // We only want the matching string names for the candidates
+    const ticks = data
+      .filter((d) => {
+        const dayNum = parseInt(d.name.split(" ")[0], 10);
+        return candidates.includes(dayNum);
+      })
+      .map((d) => d.name);
+
+    return ticks.length > 0 ? ticks : undefined;
   };
 
   return (

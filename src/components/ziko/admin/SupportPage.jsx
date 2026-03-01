@@ -51,7 +51,7 @@ const TextArea = styled.textarea`
   width: 100%; height: 120px; padding: 12px;
   background: #141423; border: 1px solid #2e2e48; border-radius: 8px;
   color: #fff; font-family: inherit; resize: vertical; margin-top: 10px;
-  &:focus { outline: none; border-color: #764ba2; }
+  &:focus { outline: none; border-color: #3b82f6; }
 `;
 
 const Select = styled.select`
@@ -222,8 +222,8 @@ const SupportPage = () => {
         <>
             <Title>Support Center</Title>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
-                <ActionButton onClick={() => setView('tickets')} style={{ background: view === 'tickets' ? '#764ba2' : '#2e2e48' }}>Tickets</ActionButton>
-                <ActionButton onClick={() => setView('chat')} style={{ background: view === 'chat' ? '#764ba2' : '#2e2e48' }}>Live Chat</ActionButton>
+                <ActionButton onClick={() => setView('tickets')} style={{ background: view === 'tickets' ? '#3b82f6' : '#2e2e48' }}>Tickets</ActionButton>
+                <ActionButton onClick={() => setView('chat')} style={{ background: view === 'chat' ? '#3b82f6' : '#2e2e48' }}>Live Chat</ActionButton>
             </div>
 
             {view === 'tickets' ? (
@@ -281,7 +281,7 @@ const SupportPage = () => {
                                 onClick={() => openChat(chat)}
                                 style={{
                                     padding: '10px',
-                                    background: currentChatUser?.userId === chat.userId ? '#764ba2' : '#141423',
+                                    background: currentChatUser?.userId === chat.userId ? '#3b82f6' : '#141423',
                                     borderRadius: '8px', marginBottom: '8px', cursor: 'pointer'
                                 }}>
                                 <div style={{ fontWeight: 'bold', color: '#fff' }}>{chat.name}</div>
@@ -303,7 +303,7 @@ const SupportPage = () => {
                                     {chatMessages.map((msg, i) => (
                                         <div key={i} style={{
                                             alignSelf: msg.sender === 'admin' ? 'flex-end' : 'flex-start',
-                                            background: msg.sender === 'admin' ? '#764ba2' : '#2b2b40',
+                                            background: msg.sender === 'admin' ? '#3b82f6' : '#2b2b40',
                                             color: 'white', padding: '10px 15px', borderRadius: '12px', maxWidth: '70%'
                                         }}>
                                             {msg.text}
@@ -318,7 +318,7 @@ const SupportPage = () => {
                                         onChange={e => setAdminInput(e.target.value)}
                                         onKeyPress={e => e.key === 'Enter' && handleAdminSend()}
                                     />
-                                    <button onClick={handleAdminSend} style={{ background: '#764ba2', border: 'none', color: 'white', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer' }}><MdSend /></button>
+                                    <button onClick={handleAdminSend} style={{ background: '#3b82f6', border: 'none', color: 'white', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer' }}><MdSend /></button>
                                 </div>
                             </>
                         ) : (
