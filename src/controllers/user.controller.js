@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Person = require('../models/people.model.js');
 const bcrypt = require('bcryptjs');
 const os = require('os');
+const Chat = require('../models/chat.model.js'); // Added Chat model import
 
 // 1. GET ALL USERS
 exports.getAllUsers = async (req, res) => {

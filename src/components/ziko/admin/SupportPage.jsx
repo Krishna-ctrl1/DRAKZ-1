@@ -35,7 +35,7 @@ const PriorityBadge = ({ priority }) => {
 // --- MODAL STYLES ---
 const ModalOverlay = styled.div`
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85); z-index: 1000;
+  background: rgba(0,0,0,0.85); z-index: 999999;
   display: flex; justify-content: center; align-items: center;
   backdrop-filter: blur(5px);
 `;
@@ -87,8 +87,26 @@ const SupportPage = () => {
     const [view, setView] = useState("tickets"); // "tickets" or "chat"
     const [socket, setSocket] = useState(null);
 
+    // Fetch active chats from backend
+    const fetchActiveChats = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${BACKEND_URL}/api/privilege/admin/active-chats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setActiveChats(data);
+            }
+        } catch (error) { console.error('Error fetching active chats:', error); }
+    };
+
     // Socket Init
     useEffect(() => {
+        if (view === 'chat') {
+            fetchActiveChats();
+        }
+
         const newSocket = io(BACKEND_URL);
         setSocket(newSocket);
 
@@ -101,18 +119,35 @@ const SupportPage = () => {
             // Update Active Chats List (Simple Unique Logic)
             setActiveChats(prev => {
                 const existing = prev.find(c => c.userId === msg.userId);
-                if (existing) return prev; // Already in list
-                return [...prev, { userId: msg.userId, name: "User " + msg.userId.substr(-4), lastMsg: msg.text }];
+                if (existing) {
+                    return prev.map(c =>
+                        c.userId === msg.userId ? { ...c, lastMsg: msg.text } : c
+                    );
+                }
+                const newName = msg.name || "User " + msg.userId.substr(-4);
+                return [{ userId: msg.userId, name: newName, lastMsg: msg.text }, ...prev];
             });
 
             // If chat window open for this user, append
-            if (currentChatUser && currentChatUser.userId === msg.userId) {
-                setChatMessages(prev => [...prev, msg]);
-            }
+            // Use functional state update to ensure latest currentChatUser is referenced
         });
 
         return () => newSocket.close();
-    }, [currentChatUser]);
+    }, [view]);
+
+    // Handle incoming messages while chat is open
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (msg) => {
+            if (currentChatUser && currentChatUser.userId === msg.userId) {
+                setChatMessages(prev => [...prev, msg]);
+            }
+        };
+
+        socket.on('admin_receive_message', handleNewMessage);
+        return () => socket.off('admin_receive_message', handleNewMessage);
+    }, [socket, currentChatUser]);
 
     const handleAdminSend = () => {
         if (!adminInput.trim() || !currentChatUser || !socket) return;
@@ -120,8 +155,7 @@ const SupportPage = () => {
         const msgData = {
             userId: currentChatUser.userId,
             text: adminInput,
-            sender: 'admin',
-            adminId: 'admin' // In real app, use actual admin ID
+            sender: 'admin'
         };
 
         socket.emit('send_message', msgData);
@@ -129,10 +163,57 @@ const SupportPage = () => {
         setAdminInput("");
     };
 
-    const openChat = (user) => {
+    const openChat = async (user) => {
         setCurrentChatUser(user);
-        // In real app, fetch chat history from DB here
         setChatMessages([]);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${BACKEND_URL}/api/privilege/admin/chat/${user.userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const history = await res.json();
+                setChatMessages(history);
+            }
+        } catch (error) { console.error('Error fetching chat history:', error); }
+    };
+
+    const openTicket = (ticket) => {
+        setSelectedTicket(ticket);
+        setNewStatus(ticket.status);
+        setReplyText(ticket.adminReply || "");
+    };
+
+    const handleUpdate = async () => {
+        if (!selectedTicket) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${BACKEND_URL}/api/privilege/admin/support/${selectedTicket._id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: newStatus,
+                    adminReply: replyText
+                })
+            });
+
+            if (res.ok) {
+                // Refresh list
+                const updatedTicketRes = await res.json();
+                setTickets(prev => prev.map(t => t._id === selectedTicket._id ? updatedTicketRes.ticket : t));
+                setSelectedTicket(null);
+            } else {
+                alert("Failed to update ticket.");
+            }
+        } catch (error) {
+            console.error("Error updating ticket:", error);
+            alert("Error updating ticket.");
+        }
     };
 
     if (loading) return <div style={{ padding: "20px", color: "#fff" }}>Loading tickets...</div>;
