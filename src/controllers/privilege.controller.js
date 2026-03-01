@@ -10,6 +10,7 @@ const Person = require('../models/people.model.js');
 const Settings = require('../models/Settings.js');
 const Contact = require('../models/ContactModel.js');
 const { logAdminAction } = require('../utils/logger.js');
+const Chat = require('../models/chat.model.js');
 
 const OZ_TO_GRAM = 31.1035;
 const USD_TO_INR = Number(process.env.USD_TO_INR || 83.5);
@@ -848,6 +849,45 @@ const getAdminLogs = async (req, res) => {
     }
 };
 
+// New Advanced Admin Routes
+const getActiveChats = async (req, res) => {
+    try {
+        const activeChats = await Chat.find({ status: 'active' })
+            .populate('userId', 'name email')
+            .sort({ lastActive: -1 });
+            
+        // Map to format frontend expects
+        const formattedChats = activeChats.map(chat => {
+            const lastMsg = chat.messages.length > 0 ? chat.messages[chat.messages.length - 1].text : '';
+            return {
+                userId: chat.userId._id,
+                name: chat.userId.name || "User " + String(chat.userId._id).substr(-4),
+                lastMsg: lastMsg,
+                lastActive: chat.lastActive
+            };
+        });
+        
+        res.status(200).json(formattedChats);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const getChatHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const chat = await Chat.findOne({ userId, status: 'active' });
+        
+        if (!chat) {
+            return res.status(200).json([]); // No chat found, return empty array
+        }
+        
+        res.status(200).json(chat.messages);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
   getUserProfile,
   addProperty, 
@@ -876,5 +916,7 @@ module.exports = {
   getAnalytics,
   createAdmin,
   updateAdminPermissions,
-  getAdminLogs
+  getAdminLogs,
+  getActiveChats,
+  getChatHistory
 };

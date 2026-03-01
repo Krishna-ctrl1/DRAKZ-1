@@ -258,7 +258,9 @@ const {
   updateSettings,
   createAdmin,
   updateAdminPermissions,
-  getAdminLogs
+  getAdminLogs,
+  getActiveChats,
+  getChatHistory
 } = require('../controllers/privilege.controller.js');
 
 const { requireAdmin } = require('../middlewares/auth.middleware.js');
@@ -391,6 +393,10 @@ router.get('/admin/support', auth, requireAdmin, getSupportTickets);
 router.patch('/admin/support/:id', auth, requireAdmin, updateTicketStatus);
 router.get('/admin/settings', auth, requireAdmin, getSettings);
 router.put('/admin/settings', auth, requireAdmin, updateSettings);
+
+// Chat Admin Routes
+router.get('/admin/active-chats', auth, requireAdmin, getActiveChats);
+router.get('/admin/chat/:userId', auth, requireAdmin, getChatHistory);
 
 // RBAC Routes
 router.post('/admin/create-admin', auth, requireAdmin, createAdmin);

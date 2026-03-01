@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
 
   // Handle Message
   socket.on("send_message", async (data) => {
-    const { userId, text, sender, adminId } = data; // sender: 'user' or 'admin'
+    const { userId, text, sender, adminId, name } = data; // sender: 'user' or 'admin'
     
     // Save to DB
     try {
@@ -152,7 +152,7 @@ io.on("connection", (socket) => {
 
         // Emit to Admin Room
         if (sender === 'user') {
-            io.to('admin_notifications').emit("admin_receive_message", { ...message, userId });
+            io.to('admin_notifications').emit("admin_receive_message", { ...message, userId, name });
         }
         
     } catch (err) {
