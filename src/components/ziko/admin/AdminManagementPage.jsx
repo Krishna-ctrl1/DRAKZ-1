@@ -127,7 +127,7 @@ const AdminManagementPage = () => {
                 <FullWidthBox>
                     <UserTableContainer>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '15px' }}>
-                            <ActionButton onClick={handleOpenAdd} style={{ background: '#764ba2', color: '#fff' }}>
+                            <ActionButton onClick={handleOpenAdd} style={{ background: '#3b82f6', color: '#fff' }}>
                                 + Create New Admin
                             </ActionButton>
                         </div>

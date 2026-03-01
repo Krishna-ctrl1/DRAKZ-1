@@ -437,6 +437,26 @@ exports.getInvestmentHistory = async (req, res) => {
 
     /* ---------------- AGGREGATION ---------------- */
 
+    // 1. Get base total (all investments BEFORE fromDate) to compute the running total
+    const baseAgg = await Transaction.aggregate([
+      {
+        $match: {
+          userId,
+          type: "Investment",
+          date: { $lt: fromDate },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" }
+        }
+      }
+    ]);
+
+    let runningTotal = baseAgg.length > 0 ? baseAgg[0].total : 0;
+
+    // 2. Aggregate buckets inside the range
     const data = await Transaction.aggregate([
       {
         $match: {
@@ -474,10 +494,12 @@ exports.getInvestmentHistory = async (req, res) => {
           "Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
+        
+        runningTotal += (map.get(key) || 0);
 
         chartData.push({
           name: `${d.getDate()} ${monthNamesShort[d.getMonth()]}`,
-          value: map.get(key) || 0,
+          value: parseFloat(runningTotal.toFixed(2)),
         });
 
       }
@@ -497,13 +519,17 @@ exports.getInvestmentHistory = async (req, res) => {
 
       for (let i = monthsCount - 1; i >= 0; i--) {
         const d = new Date(now);
+        // Ensure month calculation safely rolls backwards
+        d.setDate(1); 
         d.setMonth(now.getMonth() - i);
 
         const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+        
+        runningTotal += (map.get(key) || 0);
 
         chartData.push({
           name: months[d.getMonth()],
-          value: map.get(key) || 0,
+          value: parseFloat(runningTotal.toFixed(2)),
         });
       }
     }

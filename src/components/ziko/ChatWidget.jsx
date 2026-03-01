@@ -15,7 +15,7 @@ const WidgetContainer = styled.div`
 const ChatButton = styled.button`
   width: 60px; height: 60px;
   border-radius: 50%;
-  background: #764ba2;
+  background: #3b82f6;
   color: white;
   border: none;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);

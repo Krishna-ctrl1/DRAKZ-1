@@ -67,8 +67,8 @@ const FormGroup = styled.div`
     transition: 0.3s;
 
     &:focus {
-      border-color: #764ba2; /* Purple focus color */
-      box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+      border-color: #3b82f6; /* Blue focus color */
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
     }
   }
 `;
@@ -88,9 +88,9 @@ const ModalButton = styled.button`
   cursor: pointer;
   transition: opacity 0.2s;
 
-  /* Primary (Save) - Purple Gradient to match your screenshot */
+  /* Primary (Save) - Blue to match your screenshot */
   ${props => props.primary && `
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    background: #3b82f6;
     color: white;
   `}
 
