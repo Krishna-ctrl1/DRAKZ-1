@@ -10,5 +10,8 @@ const insuranceSchema = new mongoose.Schema({
   endDate: { type: Date },
 }, { timestamps: true });
 
+// Add index on userId for faster queries
+insuranceSchema.index({ userId: 1 });
+
 const Insurance = mongoose.model('Insurance', insuranceSchema);
 module.exports = Insurance;
