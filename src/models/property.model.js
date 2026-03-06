@@ -28,6 +28,9 @@ const propertySchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Add index on userId for faster queries
+propertySchema.index({ userId: 1 });
+
 const Property = mongoose.model('Property', propertySchema);
 
 module.exports = Property;

@@ -135,8 +135,6 @@ const MyPrivilege = () => {
 
   const fetchLiveMetalPrices = async () => {
     try {
-      // Clear existing prices to force fresh update
-      setLiveMetalPrices({ Gold: 0, Silver: 0, Platinum: 0 });
       setPricesLoading(true);
       console.log('[MetalPrices] Fetching live metal prices...');
       
@@ -182,23 +180,34 @@ const MyPrivilege = () => {
     setLoading(true);
     setError(null);
     try {
-      const [profileRes, insurancesRes, propertiesRes, holdingsRes, transactionsRes] = await Promise.all([
+      // Fetch critical data first (profile and insurances) to show UI faster
+      const [profileRes, insurancesRes] = await Promise.all([
         api.get("/api/privilege/profile"),
-        api.get("/api/privilege/insurances"),
-        api.get("/api/privilege/properties"),
-        api.get("/api/privilege/precious_holdings"),
-        api.get("/api/privilege/transactions?limit=20")
+        api.get("/api/privilege/insurances")
       ]);
 
       setUserData(profileRes.data || { name: "User", email: "" });
       setAllInsurances(insurancesRes.data || []);
-      setProperties(propertiesRes.data || []);
-      setHoldings(holdingsRes.data || []);
-      setTransactions(transactionsRes.data || []);
+      
+      // Set loading to false early so UI shows faster
+      setLoading(false);
+      
+      // Fetch remaining data in background without blocking UI
+      Promise.all([
+        api.get("/api/privilege/properties"),
+        api.get("/api/privilege/precious_holdings"),
+        api.get("/api/privilege/transactions?limit=20")
+      ]).then(([propertiesRes, holdingsRes, transactionsRes]) => {
+        setProperties(propertiesRes.data || []);
+        setHoldings(holdingsRes.data || []);
+        setTransactions(transactionsRes.data || []);
+      }).catch(err => {
+        console.error("Error fetching secondary data:", err);
+      });
+      
     } catch (err) {
       console.error("Error fetching data:", err);
       setError("Failed to load data. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -236,42 +245,6 @@ const MyPrivilege = () => {
         return newPrices;
       });
     }, 15000);
-    
-    // Function to add ONE pending transaction if user doesn't have any
-    const ensureOnePendingTransaction = async () => {
-      try {
-        // Check if user already has pending transactions
-        const transactionsRes = await api.get("/api/privilege/transactions");
-        const allTransactions = transactionsRes.data || [];
-        const hasPending = allTransactions.some(tx => tx.status?.toLowerCase() === 'pending');
-        
-        // Only add one pending if user has none
-        if (!hasPending) {
-          const types = ['Auto', 'Health', 'Life', 'Home'];
-          const randomType = types[Math.floor(Math.random() * types.length)];
-          const randomAmount = Math.floor(Math.random() * 800) + 200; // $200-$1000
-          
-          await api.post('/api/privilege/transactions', {
-            type: randomType,
-            amount: randomAmount,
-            status: 'Pending',
-            description: `${randomType} Insurance Premium`,
-            date: new Date()
-          });
-          
-          // Refresh transactions
-          const updatedRes = await api.get("/api/privilege/transactions?limit=20");
-          setTransactions(updatedRes.data || []);
-          
-          console.log('✅ Added one pending transaction for user');
-        }
-      } catch (err) {
-        console.error('Failed to check/add pending transaction:', err);
-      }
-    };
-    
-    // Check and add one pending transaction on mount
-    ensureOnePendingTransaction();
     
     return () => {
       clearInterval(priceInterval);

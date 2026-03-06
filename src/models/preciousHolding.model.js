@@ -10,5 +10,8 @@ const preciousHoldingSchema = new mongoose.Schema({
   purchaseDate: { type: Date, required: true },
 }, { timestamps: true });
 
+// Add index on userId for faster queries
+preciousHoldingSchema.index({ userId: 1 });
+
 const PreciousHolding = mongoose.model('PreciousHolding', preciousHoldingSchema);
 module.exports = PreciousHolding;

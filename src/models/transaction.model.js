@@ -9,5 +9,8 @@ const transactionSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
 }, { timestamps: true });
 
+// Add compound index on userId and date for faster sorted queries
+transactionSchema.index({ userId: 1, date: -1 });
+
 const Transaction = mongoose.model('Transaction', transactionSchema);
 module.exports = Transaction;
