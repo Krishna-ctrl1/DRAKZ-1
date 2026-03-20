@@ -48,6 +48,7 @@ console.log("🔒 CORS Setup - Configured FRONTEND_URL:", process.env.FRONTEND_U
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://localhost:3001",
   process.env.FRONTEND_URL,
   process.env.BACKEND_URL
 ].filter(Boolean); // Remove undefined values
@@ -59,7 +60,7 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
+
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
@@ -129,40 +130,40 @@ io.on("connection", (socket) => {
 
   // Handle Message
   socket.on("send_message", async (data) => {
-    const { userId, text, sender, adminId, name } = data; // sender: 'user' or 'admin'
-    
+    const { userId, text, sender, adminId } = data; // sender: 'user' or 'admin'
+
     // Save to DB
     try {
-        // Find active chat or create new
-        let chat = await Chat.findOne({ userId, status: 'active' });
-        
-        if (!chat) {
-            chat = new Chat({ userId, messages: [] });
-        }
-        
-        const message = { sender, text, timestamp: new Date() };
-        chat.messages.push(message);
-        chat.lastActive = new Date();
-        if (sender === 'admin' && adminId) chat.adminId = adminId;
-        
-        await chat.save();
-        
-        // Emit to User Room
-        io.to(userId).emit("receive_message", message);
+      // Find active chat or create new
+      let chat = await Chat.findOne({ userId, status: 'active' });
 
-        // Emit to Admin Room
-        if (sender === 'user') {
-            io.to('admin_notifications').emit("admin_receive_message", { ...message, userId, name });
-        }
-        
+      if (!chat) {
+        chat = new Chat({ userId, messages: [] });
+      }
+
+      const message = { sender, text, timestamp: new Date() };
+      chat.messages.push(message);
+      chat.lastActive = new Date();
+      if (sender === 'admin' && adminId) chat.adminId = adminId;
+
+      await chat.save();
+
+      // Emit to User Room
+      io.to(userId).emit("receive_message", message);
+
+      // Emit to Admin Room
+      if (sender === 'user') {
+        io.to('admin_notifications').emit("admin_receive_message", { ...message, userId });
+      }
+
     } catch (err) {
-        console.error("Chat Error:", err);
+      console.error("Chat Error:", err);
     }
   });
 
   // Typing Indicator
   socket.on("typing", (data) => {
-      socket.to(data.room).emit("display_typing", data);
+    socket.to(data.room).emit("display_typing", data);
   });
 
   // --- EXISTING BROADCAST FEATURE ---
