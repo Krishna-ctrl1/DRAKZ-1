@@ -11,10 +11,101 @@ const { auth } = require("../middlewares/auth.middleware.js");
  *   description: Blog management
  */
 
-// 1. ADMIN ROUTES 
-router.get("/admin/list", auth, blogCtrl.getAdminBlogs); 
+// 1. ADMIN ROUTES
+
+/**
+ * @swagger
+ * /blogs/admin/list:
+ *   get:
+ *     summary: Get all blogs for admin review
+ *     tags: [Blogs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all blogs for admin
+ */
+router.get("/admin/list", auth, blogCtrl.getAdminBlogs);
+
+/**
+ * @swagger
+ * /blogs/admin/{id}/status:
+ *   patch:
+ *     summary: Update blog approval status (Admin)
+ *     tags: [Blogs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approved, rejected]
+ *               rejection_reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Blog status updated
+ */
 router.patch("/admin/:id/status", auth, blogCtrl.updateBlogStatus);
+
+/**
+ * @swagger
+ * /blogs/admin/{id}/flag:
+ *   patch:
+ *     summary: Toggle blog flag status (Admin)
+ *     tags: [Blogs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               isFlagged:
+ *                 type: boolean
+ *               flagReason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Blog flag toggled
+ */
 router.patch("/admin/:id/flag", auth, blogCtrl.toggleBlogFlag);
+
+/**
+ * @swagger
+ * /blogs/admin/{id}:
+ *   delete:
+ *     summary: Delete a blog by admin
+ *     tags: [Blogs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Blog deleted by admin
+ */
 router.delete("/admin/:id", auth, blogCtrl.deleteBlogByAdmin);
 
 /**

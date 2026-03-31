@@ -550,21 +550,195 @@ router.patch('/admin/advisors/:id/reject', auth, requireAdmin, rejectAdvisor);
  */
 router.post('/admin/assign', auth, requireAdmin, assignAdvisor);
 
-// New Advanced Admin Routes
+/**
+ * @swagger
+ * /privilege/admin/business-analytics:
+ *   get:
+ *     summary: Get business analytics (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Business analytics data
+ */
 router.get('/admin/business-analytics', auth, requireAdmin, getBusinessAnalytics);
+
+/**
+ * @swagger
+ * /privilege/admin/support:
+ *   get:
+ *     summary: Get support tickets (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of support tickets
+ */
 router.get('/admin/support', auth, requireAdmin, getSupportTickets);
+
+/**
+ * @swagger
+ * /privilege/admin/support/{id}:
+ *   patch:
+ *     summary: Update support ticket status (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Ticket status updated
+ */
 router.patch('/admin/support/:id', auth, requireAdmin, updateTicketStatus);
+
+/**
+ * @swagger
+ * /privilege/admin/settings:
+ *   get:
+ *     summary: Get admin settings (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Admin settings
+ *   put:
+ *     summary: Update admin settings (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Settings updated
+ */
 router.get('/admin/settings', auth, requireAdmin, getSettings);
 router.put('/admin/settings', auth, requireAdmin, updateSettings);
 
+/**
+ * @swagger
+ * /privilege/admin/active-chats:
+ *   get:
+ *     summary: Get active chat sessions (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of active chats
+ */
 // Chat Admin Routes
 router.get('/admin/active-chats', auth, requireAdmin, getActiveChats);
+
+/**
+ * @swagger
+ * /privilege/admin/chat/{userId}:
+ *   get:
+ *     summary: Get chat history for a user (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Chat history
+ */
 router.get('/admin/chat/:userId', auth, requireAdmin, getChatHistory);
 
+/**
+ * @swagger
+ * /privilege/admin/create-admin:
+ *   post:
+ *     summary: Create a new admin user (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               permissions:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Admin created
+ */
 // RBAC Routes
 router.post('/admin/create-admin', auth, requireAdmin, createAdmin);
+
+/**
+ * @swagger
+ * /privilege/admin/update-permissions/{id}:
+ *   patch:
+ *     summary: Update admin permissions (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               permissions:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Permissions updated
+ */
 router.patch('/admin/update-permissions/:id', auth, requireAdmin, updateAdminPermissions);
 
+/**
+ * @swagger
+ * /privilege/admin/logs:
+ *   get:
+ *     summary: Get admin activity logs (Admin only)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of admin logs
+ */
 // Logs
 router.get('/admin/logs', auth, requireAdmin, getAdminLogs);
 
