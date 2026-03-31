@@ -27,9 +27,51 @@ const { auth } = require("../middlewares/auth.middleware.js");
  *     tags: [Cards]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - holderName
+ *               - type
+ *               - cardNumber
+ *               - expiryMonth
+ *               - expiryYear
+ *             properties:
+ *               holderName:
+ *                 type: string
+ *                 description: Name on the card
+ *               type:
+ *                 type: string
+ *                 enum: [credit, debit]
+ *                 description: Card type
+ *               brand:
+ *                 type: string
+ *                 description: Card brand (e.g., Visa, Mastercard)
+ *               cardNumber:
+ *                 type: string
+ *                 description: Card number (12+ digits)
+ *               expiryMonth:
+ *                 type: integer
+ *                 description: Expiry month (1-12)
+ *               expiryYear:
+ *                 type: integer
+ *                 description: Expiry year (4 digits, e.g., 2025)
+ *               colorTheme:
+ *                 type: string
+ *                 description: Card color theme
+ *               notes:
+ *                 type: string
+ *                 description: Additional notes
  *     responses:
- *       200:
- *         description: Card created
+ *       201:
+ *         description: Card created successfully
+ *       400:
+ *         description: Missing required fields or invalid data
+ *       401:
+ *         description: Unauthorized
  */
 router.get("/", auth, controller.listCards);
 router.post("/", auth, controller.createCard);
@@ -68,9 +110,25 @@ router.delete("/:cardId", auth, controller.deleteCard);
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: User password for security verification
  *     responses:
  *       200:
  *         description: Card number revealed
+ *       400:
+ *         description: Password required
+ *       401:
+ *         description: Unauthorized or invalid password
  */
 router.post("/:cardId/reveal", auth, controller.revealCardNumber);
 

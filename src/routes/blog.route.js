@@ -167,9 +167,29 @@ router.get("/my-blogs", auth, blogCtrl.getMyBlogs); // Get My Blogs
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Blog title
+ *               content:
+ *                 type: string
+ *                 description: Blog content
+ *               image:
+ *                 type: string
+ *                 description: Blog image URL or base64
  *     responses:
  *       200:
- *         description: Blog updated
+ *         description: Blog updated and resubmitted for approval
+ *       403:
+ *         description: Unauthorized - not the blog author
+ *       404:
+ *         description: Blog not found
  */
 router.put("/update/:id", auth, blogCtrl.updateBlogContent); // Edit & Resubmit
 

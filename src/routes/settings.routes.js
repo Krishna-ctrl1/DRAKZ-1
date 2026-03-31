@@ -50,9 +50,31 @@ const settingsErrorHandler = (err, req, res, next) => {
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *                 minLength: 2
+ *                 maxLength: 100
+ *               phone:
+ *                 type: string
+ *                 example: "+91 9876543210"
+ *                 description: Phone number (10-15 digits)
+ *               occupation:
+ *                 type: string
+ *                 example: "Software Engineer"
+ *                 maxLength: 200
  *     responses:
  *       200:
  *         description: Profile updated
+ *       400:
+ *         description: Validation failed
  */
 // @route   GET /api/settings/profile
 // @desc    Get user profile
@@ -72,9 +94,30 @@ router.put("/profile", auth, validateProfileUpdate, updateProfile);
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currency:
+ *                 type: string
+ *                 enum: [INR, USD, EUR, GBP]
+ *                 example: "INR"
+ *               riskProfile:
+ *                 type: string
+ *                 enum: [Conservative, Moderate, Aggressive]
+ *                 example: "Moderate"
+ *               monthlyIncome:
+ *                 type: number
+ *                 example: 50000
+ *                 minimum: 0
  *     responses:
  *       200:
  *         description: Preferences updated
+ *       400:
+ *         description: Validation failed
  */
 // @route   PUT /api/settings/financial
 // @desc    Update financial preferences

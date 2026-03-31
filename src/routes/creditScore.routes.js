@@ -29,16 +29,36 @@ router.get("/me", auth, creditController.getMyCreditScore);
  * @swagger
  * /credit-score:
  *   post:
- *     summary: Set credit score
+ *     summary: Set credit score (Admin only)
  *     tags: [CreditScore]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - score
+ *             properties:
+ *               score:
+ *                 type: number
+ *                 description: Credit score (typically 300-900)
+ *               note:
+ *                 type: string
+ *                 description: Optional note about the score
+ *               userId:
+ *                 type: string
+ *                 description: Target user ID (admin only, if setting for another user)
  *     responses:
  *       200:
  *         description: Credit score set
+ *       403:
+ *         description: Forbidden - Admin only
  */
-// POST set credit score (user can set their own; admins can set for any user)
-router.post("/", auth, creditController.setCreditScore);
+// POST set credit score (Admin only)
+router.post("/", auth, requireRole(["admin"]), creditController.setCreditScore);
 
 /**
  * @swagger
