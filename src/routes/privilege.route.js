@@ -40,11 +40,18 @@ const uploadIfMultipart = (req, res, next) => {
  *   get:
  *     summary: Get user profile
  *     tags: [Privilege]
+ *     description: Returns the authenticated user's profile. No request parameters are required.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: User profile
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
  */
 router.get('/profile', auth, getUserProfile);
 
@@ -54,19 +61,47 @@ router.get('/profile', auth, getUserProfile);
  *   get:
  *     summary: Get properties
  *     tags: [Privilege]
+ *     description: Returns all properties for the authenticated user. No request parameters are required.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of properties
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  *   post:
  *     summary: Add a property
  *     tags: [Privilege]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, value, location]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               value:
+ *                 type: number
+ *               location:
+ *                 type: string
+ *               imageUrl:
+ *                 type: string
+ *                 description: Public URL or base64 data URL
  *     responses:
- *       200:
- *         description: Property added
+ *       201:
+ *         description: Property created
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 // Properties
 router.get('/properties', auth, getProperties);
@@ -86,9 +121,30 @@ router.post('/properties', auth, uploadIfMultipart, addProperty);
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               value:
+ *                 type: number
+ *               location:
+ *                 type: string
+ *               imageUrl:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Property updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Property not found
+ *       500:
+ *         description: Server error
  *   delete:
  *     summary: Delete a property
  *     tags: [Privilege]
@@ -103,6 +159,10 @@ router.post('/properties', auth, uploadIfMultipart, addProperty);
  *     responses:
  *       200:
  *         description: Property deleted
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 router.put('/properties/:id', auth, uploadIfMultipart, updateProperty);
 router.delete('/properties/:id', auth, deleteProperty);
@@ -113,11 +173,16 @@ router.delete('/properties/:id', auth, deleteProperty);
  *   get:
  *     summary: Get insurances
  *     tags: [Privilege]
+ *     description: Returns all insurances for the authenticated user. No request parameters are required.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of insurances
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 // Insurances
 router.get('/insurances', auth, getInsurances);
@@ -128,19 +193,53 @@ router.get('/insurances', auth, getInsurances);
  *   get:
  *     summary: Get precious holdings
  *     tags: [Privilege]
+ *     description: Returns all precious metal holdings for the authenticated user. No request parameters are required.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of holdings
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  *   post:
  *     summary: Add precious holding
  *     tags: [Privilege]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, type, amount, purchasedValue, purchaseDate]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [Gold, Silver, Platinum, Other]
+ *               amount:
+ *                 type: string
+ *                 description: Weight text, e.g. "10 g" or "0.5 oz"
+ *               purchasedValue:
+ *                 type: number
+ *               currentValue:
+ *                 type: number
+ *               purchaseDate:
+ *                 type: string
+ *                 format: date-time
  *     responses:
- *       200:
+ *       201:
  *         description: Holding added
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 // Precious Holdings
 router.get('/precious_holdings', auth, getPreciousHoldings);
@@ -163,6 +262,12 @@ router.post('/precious_holdings', auth, addPreciousHolding);
  *     responses:
  *       200:
  *         description: Holding deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Holding not found
+ *       500:
+ *         description: Server error
  */
 router.delete('/precious_holdings/:id', auth, deletePreciousHolding);
 
@@ -174,17 +279,55 @@ router.delete('/precious_holdings/:id', auth, deletePreciousHolding);
  *     tags: [Privilege]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of latest transactions to return
  *     responses:
  *       200:
  *         description: List of transactions
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  *   post:
  *     summary: Create transaction
  *     tags: [Privilege]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [type, amount]
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [Auto, Health, Life, Home, Insurance, Investment]
+ *               amount:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *                 enum: [Pending, Active, Completed, Failed]
+ *               description:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date-time
  *     responses:
- *       200:
+ *       201:
  *         description: Transaction created
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 // Transactions
 router.get('/transactions', auth, getTransactions);
@@ -204,9 +347,28 @@ router.post('/transactions', auth, createTransaction);
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Pending, Active, Completed, Failed]
  *     responses:
  *       200:
  *         description: Transaction updated
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Transaction not found
+ *       500:
+ *         description: Server error
  */
 router.put('/transactions/:id', auth, updateTransaction);
 
@@ -216,11 +378,12 @@ router.put('/transactions/:id', auth, updateTransaction);
  *   get:
  *     summary: Get live metal prices
  *     tags: [Privilege]
- *     security:
- *       - bearerAuth: []
+ *     description: Returns live metal prices (Gold/Silver/Platinum). No request parameters are required.
  *     responses:
  *       200:
  *         description: Metal prices
+ *       500:
+ *         description: Server error
  */
 // Live metal prices
 router.get('/live-metal-prices', auth, getLiveMetalPrices);
