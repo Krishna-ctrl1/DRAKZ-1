@@ -100,10 +100,25 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/logs", logsRoutes);
 app.use("/api/kyc", kycRoutes);
 
+// Simple health-check endpoint for the keep-awake cronjob
+app.get("/api/ping", (req, res) => res.status(200).send("pong"));
+
 // Global Error Handler Middleware (MUST be last)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
+  
+  // --- RENDER KEEP-AWAKE CRONJOB ---
+  // Render spins down free web services after 15 minutes of inactivity.
+  // This sends an HTTP request to its own public URL every 10 minutes to reset the sleep timer.
+  if (process.env.BACKEND_URL && process.env.NODE_ENV === "production") {
+    console.log(`🚀 Automated Keep-Awake Cronjob initialized for: ${process.env.BACKEND_URL}`);
+    setInterval(() => {
+      fetch(`${process.env.BACKEND_URL}/api/ping`)
+        .then((res) => console.log(`⏱️ Keep-awake ping successful: [${res.status}]`))
+        .catch((err) => console.error(`❌ Keep-awake ping failed:`, err.message));
+    }, 10 * 60 * 1000); // 10 minutes
+  }
 });

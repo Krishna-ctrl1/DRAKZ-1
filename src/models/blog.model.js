@@ -29,6 +29,7 @@ const BlogSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for faster blog queries
+BlogSchema.index({ title: "text", content: "text" }, { weights: { title: 10, content: 2 }, name: "TextSearchIndex" });
 BlogSchema.index({ author_id: 1 });
 BlogSchema.index({ status: 1, createdAt: -1 });
 

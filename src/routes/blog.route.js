@@ -195,6 +195,23 @@ router.get("/my-blogs", auth, blogCtrl.getMyBlogs); // Get My Blogs
 router.put("/update/:id", auth, blogCtrl.updateBlogContent); // Edit & Resubmit
 
 // 3. PUBLIC ROUTES
+/**
+ * @swagger
+ * /blogs/search:
+ *   get:
+ *     summary: Search public approved blogs utilizing full-text indexing
+ *     tags: [Blogs]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Search results sorted by relevance
+ */
+router.get("/search", blogCtrl.searchBlogs);
 router.get("/", redisCache(120, () => "cache:blogs:public"), blogCtrl.getBlogs); // Public Feed (cached 2 min)
 
 /**
