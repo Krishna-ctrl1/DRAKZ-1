@@ -36,9 +36,14 @@ const { connectRedis } = require("./src/config/redis.config");
 connectRedis();
 
 // Global Middleware
+const allowedOrigins = ["http://localhost:3000", "http://localhost:5173"];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: allowedOrigins,
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -54,7 +59,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // --- SOCKET SERVER ---
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
