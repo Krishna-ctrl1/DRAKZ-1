@@ -10,12 +10,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    # We bring up Redis service for the tests to work with caching layer enabled
+    # We bring up Redis and MongoDB services for the tests
     services:
       redis:
         image: redis:7-alpine
         ports:
           - 6379:6379
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
 
     steps:
     - uses: actions/checkout@v4
@@ -37,10 +41,10 @@ jobs:
       env:
         NODE_ENV: test
         JWT_SECRET: test-super-secret-key
-        REDIS_URI: redis://localhost:6379
+        REDIS_URI: redis://127.0.1.1:6379
         # Assuming you provide a safe fallback DB in tests or mock it
         # Mongoose handles mock/test connects in setup.js if needed
-        # MONGO_URI: mongodb://localhost:27017/testdb
+        MONGO_URI: mongodb://127.0.1.1:27017/drakz_test
 
     - name: Upload Test Report
       if: always()
