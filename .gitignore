@@ -13,6 +13,7 @@
 
 # uploads (user-uploaded images)
 /uploads
+/dist
 
 # logs (morgan and other logs)
 /logs
