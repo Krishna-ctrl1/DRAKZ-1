@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const accountSummaryController = require("../controllers/accountSummary.controller");
 const { auth } = require("../middlewares/auth.middleware");
+const { redisCache } = require("../middlewares/redisCache.middleware");
 
 /**
  * @swagger
@@ -22,6 +23,6 @@ const { auth } = require("../middlewares/auth.middleware");
  *       200:
  *         description: Account summary data
  */
-router.get("/", auth, accountSummaryController.getAccountSummary);
+router.get("/", auth, redisCache(180), accountSummaryController.getAccountSummary);
 
 module.exports = router;

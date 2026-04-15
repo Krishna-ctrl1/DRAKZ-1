@@ -21,6 +21,9 @@ const CardSchema = new Schema(
   { timestamps: true },
 );
 
+// Index on user for faster per-user queries
+CardSchema.index({ user: 1 });
+
 const Card = mongoose.models.Card || mongoose.model("Card", CardSchema);
 
 module.exports = Card;

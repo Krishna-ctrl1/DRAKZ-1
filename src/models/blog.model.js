@@ -28,4 +28,8 @@ const BlogSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
+// Indexes for faster blog queries
+BlogSchema.index({ author_id: 1 });
+BlogSchema.index({ status: 1, createdAt: -1 });
+
 module.exports = mongoose.model("Blog", BlogSchema);

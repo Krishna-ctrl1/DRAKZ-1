@@ -41,4 +41,8 @@ const KycSchema = new mongoose.Schema({
   }
 });
 
+// Indexes for faster KYC queries
+KycSchema.index({ user: 1 });
+KycSchema.index({ status: 1 });
+
 module.exports = mongoose.model('Kyc', KycSchema);

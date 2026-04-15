@@ -26,4 +26,7 @@ const loanSchema = new Schema(
   { timestamps: true }
 );
 
+// Index on user_id for faster per-user queries
+loanSchema.index({ user_id: 1 });
+
 module.exports = mongoose.model("Loan", loanSchema);

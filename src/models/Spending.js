@@ -17,4 +17,7 @@ const SpendingSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Compound index on user and date for faster sorted queries
+SpendingSchema.index({ user: 1, date: -1 });
+
 module.exports = mongoose.model("Spending", SpendingSchema);

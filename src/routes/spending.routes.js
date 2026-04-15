@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/spendingController");
 const { auth } = require("../middlewares/auth.middleware.js"); // adjust if path differs
+const { redisCache } = require("../middlewares/redisCache.middleware");
 
 /**
  * @swagger
@@ -51,7 +52,7 @@ router.post("/", auth, controller.createSpending);
  *         description: Weekly summary
  */
 // weekly summary
-router.get("/weekly", auth, controller.getWeeklySummary);
+router.get("/weekly", auth, redisCache(60), controller.getWeeklySummary);
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ router.get("/list", auth, controller.getRecentSpendings);
  *         description: Expense distribution data
  */
 // expense distribution pie chart data (past 30 days default)
-router.get("/distribution-pie", auth, controller.getExpenseDistributionPie);
+router.get("/distribution-pie", auth, redisCache(60), controller.getExpenseDistributionPie);
 
 /**
  * @swagger

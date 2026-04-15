@@ -30,6 +30,9 @@ const holdingSchema = new mongoose.Schema({
   timestamps: true 
 });
 
+// Index on userId for faster per-user queries
+holdingSchema.index({ userId: 1 });
+
 const Holding = mongoose.model('Holding', holdingSchema);
 
 module.exports = Holding;

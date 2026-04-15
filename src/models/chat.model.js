@@ -24,4 +24,8 @@ const ChatSchema = new mongoose.Schema({
   lastActive: { type: Date, default: Date.now }
 }, { timestamps: true });
 
+// Indexes for faster chat queries
+ChatSchema.index({ userId: 1, status: 1 });
+ChatSchema.index({ lastActive: -1 });
+
 module.exports = mongoose.model('Chat', ChatSchema);

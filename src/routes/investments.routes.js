@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const { auth } = require("../middlewares/auth.middleware");
+const { redisCache } = require("../middlewares/redisCache.middleware");
 
 const {
   getStockApiKey,
@@ -61,7 +62,7 @@ router.get("/stocks/realtime", auth, getRealTimeStock);
  *         description: User stocks
  */
 // Stocks (Your Stocks table, now real-time) (protected)
-router.get("/user-investments", auth, getUserStocks);
+router.get("/user-investments", auth, redisCache(60), getUserStocks);
 
 /**
  * @swagger
@@ -91,6 +92,6 @@ router.get("/user-loans", auth, getUserLoans);
  *         description: History
  */
 // Investment Chart (Total Investment graph) (protected)
-router.get("/investment-history", auth, getInvestmentHistory);
+router.get("/investment-history", auth, redisCache(90), getInvestmentHistory);
 
 module.exports = router;

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const creditController = require("../controllers/creditScoreController");
 const { auth, requireRole } = require("../middlewares/auth.middleware.js"); // adjust path if your auth is elsewhere
+const { redisCache } = require("../middlewares/redisCache.middleware");
 
 /**
  * @swagger
@@ -23,7 +24,7 @@ const { auth, requireRole } = require("../middlewares/auth.middleware.js"); // a
  *         description: Credit score
  */
 // GET my credit score
-router.get("/me", auth, creditController.getMyCreditScore);
+router.get("/me", auth, redisCache(300), creditController.getMyCreditScore);
 
 /**
  * @swagger

@@ -17,6 +17,7 @@
     "express-session": "^1.18.2",
     "framer-motion": "^12.23.24",
     "gsap": "^3.13.0",
+    "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^4.2.0",
     "lucide-react": "^0.544.0",
@@ -41,12 +42,15 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/ui": "^4.1.4",
     "autoprefixer": "^10.4.14",
     "concurrently": "^8.2.0",
     "nodemon": "^3.0.1",
     "postcss": "^8.4.24",
+    "supertest": "^7.2.2",
     "tailwindcss": "^3.3.2",
-    "vite": "^7.1.10"
+    "vite": "^7.1.10",
+    "vitest": "^4.1.4"
   },
   "scripts": {
     "start": "node server.js",
@@ -56,6 +60,9 @@
     "server": "node server.js",
     "server-prod": "node server.js",
     "dev": "concurrently \"npm run server\" \"vite\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "test-servers": "curl http://localhost:5000/api/test-all"
   },
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",

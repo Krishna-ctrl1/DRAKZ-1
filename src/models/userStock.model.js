@@ -15,4 +15,7 @@ const userStockSchema = new Schema(
   { timestamps: true }
 );
 
+// Index on user_id for faster per-user queries
+userStockSchema.index({ user_id: 1 });
+
 module.exports = mongoose.model("UserStock", userStockSchema);

@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const blogCtrl = require("../controllers/blog.controller.js");
 const { auth } = require("../middlewares/auth.middleware.js");
+const { redisCache, invalidateCache } = require("../middlewares/redisCache.middleware");
 
 /**
  * @swagger
@@ -194,7 +195,7 @@ router.get("/my-blogs", auth, blogCtrl.getMyBlogs); // Get My Blogs
 router.put("/update/:id", auth, blogCtrl.updateBlogContent); // Edit & Resubmit
 
 // 3. PUBLIC ROUTES
-router.get("/", blogCtrl.getBlogs); // Public Feed
+router.get("/", redisCache(120, () => "cache:blogs:public"), blogCtrl.getBlogs); // Public Feed (cached 2 min)
 
 /**
  * @swagger

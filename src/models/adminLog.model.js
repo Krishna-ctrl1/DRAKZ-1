@@ -16,4 +16,8 @@ const AdminLogSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
+// Indexes for faster log queries
+AdminLogSchema.index({ timestamp: -1 });
+AdminLogSchema.index({ adminId: 1 });
+
 module.exports = mongoose.model('AdminLog', AdminLogSchema);

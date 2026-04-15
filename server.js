@@ -31,6 +31,10 @@ const errorHandler = require("./src/middlewares/errorHandler.middleware.js");
 
 connectDB();
 
+// Initialize Redis
+const { connectRedis } = require("./src/config/redis.config");
+connectRedis();
+
 // Global Middleware
 app.use(
   cors({
