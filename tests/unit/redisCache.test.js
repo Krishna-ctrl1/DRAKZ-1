@@ -6,6 +6,9 @@
 // Mock Redis config
 const mockGet = vi.fn();
 const mockSetex = vi.fn().mockResolvedValue("OK");
+const mockKeys = vi.fn().mockResolvedValue([]);
+const mockDel = vi.fn().mockResolvedValue(0);
+
 const redisConfig = require("../../src/config/redis.config");
 redisConfig.getRedisClient = () => ({
   get: mockGet,
