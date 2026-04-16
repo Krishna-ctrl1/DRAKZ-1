@@ -4,6 +4,7 @@ export const API = {
   base: BACKEND_URL,
   login: `${BACKEND_URL}/api/auth/login`,
   register: `${BACKEND_URL}/api/auth/register`,
+  registerAdvisor: `${BACKEND_URL}/api/auth/register-advisor`,
   // ... other routes ...
   advisorClients: `${BACKEND_URL}/api/advisor/clients`,
 };

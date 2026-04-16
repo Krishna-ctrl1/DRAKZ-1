@@ -45,7 +45,15 @@ const { advisorDocumentUpload } = require('../middlewares/upload.middleware.js')
  *       500:
  *         description: Server error
  */
-router.post('/register', advisorDocumentUpload.array('documents', 5), register);
+/**
+ * @swagger
+ * /auth/register-advisor:
+ *   post:
+ *     summary: Register a new advisor (Requires documents)
+...
+ */
+router.post('/register', register); // Generic JSON
+router.post('/register-advisor', advisorDocumentUpload.array('documents', 5), register);
 
 /**
  * @swagger

@@ -38,4 +38,32 @@ router.get('/access', auth, requireAdmin, logsController.getAccessLogs);
  */
 router.get('/error', auth, requireAdmin, logsController.getErrorLogs);
 
+/**
+ * @swagger
+ * /logs/telemetry:
+ *   get:
+ *     summary: Live Advanced DevOps Telemetry Analytics
+ *     tags: [Logs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Real-time hardware and cache telemetry 
+ */
+router.get('/telemetry', auth, requireAdmin, logsController.getTelemetry);
+
+/**
+ * @swagger
+ * /logs/flush-cache:
+ *   delete:
+ *     summary: Invalidate and wipe the entire Redis cache (Panic Button)
+ *     tags: [Logs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache wiped successfully
+ */
+router.delete('/flush-cache', auth, requireAdmin, logsController.flushCache);
+
 module.exports = router;

@@ -14,6 +14,8 @@
 # uploads (user-uploaded images)
 /uploads
 /dist
+drakz-startup-plan.md
+/ui_mockups
 
 # logs (morgan and other logs)
 /logs
