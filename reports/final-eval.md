@@ -1,4 +1,4 @@
-# 🚀 DRAKZ Final Presentation Guide
+# DRAKZ Final Presentation Guide
 > **Purpose:** This document is the ultimate "cheat sheet" for your team during the final review. It maps exactly how our codebase fulfills every single requirement from the professor's rubric. 
 
 ---
