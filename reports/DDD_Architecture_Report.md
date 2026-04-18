@@ -23,13 +23,14 @@ Beyond standard tracking, DRAKZ differentiates itself by incorporating an AI-dri
 
 ### A. Bounded Contexts
 
-To maintain high cohesion and low coupling across a complex system, the DRAKZ Core Domain has been partitioned into five principal Bounded Contexts. Each context encapsulates its own ubiquitous language and business logic.
+To maintain high cohesion and low coupling across a complex system, the DRAKZ Core Domain has been partitioned into six principal Bounded Contexts. Each context encapsulates its own ubiquitous language and business logic aligning strictly with the system's database schema.
 
 1. **Identity and Access Context:** Manages core authentication, role-based access control (RBAC), and profile data for generic persons. This context enforces system-wide security constraints.
 2. **Financial Core Context:** Handles high-volume, day-to-day financial operations. It is bounded strictly to tracking operational cash flow rather than long-term asset valuation.
-3. **Asset and Wealth Context:** Specialized in tracking illiquid and semi-liquid assets such as physical properties, life insurances, and fixed deposits.
+3. **Asset and Wealth Context:** Specialized in tracking illiquid and semi-liquid assets such as physical properties, life insurances, precious holdings, and fixed deposits.
 4. **Investment Context:** Manages market-driven, volatile financial instruments. It handles real-time portfolio tracking for stocks and mutual funds against specific financial goals.
 5. **Advisory and Engagement Context:** Facilitates B2B and B2C interactions, allowing certified advisors to manage authorized client portfolios, conduct video sessions, and publish financial articles.
+6. **AI and Intelligence Context:** Dedicated to processing natural language queries, running prediction models, and generating automated advisory outputs via the internal LLM orchestration layer.
 
 ```mermaid
 graph TD
@@ -39,18 +40,18 @@ graph TD
     Root --> AST[Asset and Wealth]
     Root --> INV[Investment]
     Root --> ADV[Advisory and Engagement]
+    Root --> AIL[AI and Intelligence]
     
     IAM --> IAM1[Authentication]
     IAM --> IAM2[User Profiles]
-    IAM --> IAM3[Role Management]
 
     FIN --> FIN1[Bank Accounts]
     FIN --> FIN2[Cards]
     FIN --> FIN3[Expenses and Transactions]
 
-    AST --> AST1[Properties]
-    AST --> AST2[Insurances]
-    AST --> AST3[Fixed Deposits and Loans]
+    AST --> AST1[Properties and Insurances]
+    AST --> AST2[Fixed Deposits and Precious Holdings]
+    AST --> AST3[Loans and EMIs]
 
     INV --> INV1[Stocks]
     INV --> INV2[Mutual Funds]
@@ -59,15 +60,19 @@ graph TD
     ADV --> ADV1[Advisor CRM]
     ADV --> ADV2[Video Sessions]
     ADV --> ADV3[Blogs and Articles]
+
+    AIL --> AIL1[Financial Chatbot]
+    AIL --> AIL2[Stock Recommendations]
+    AIL --> AIL3[Data Analytics Engine]
 ```
 
 ### B. Context Mappings
 
-Integration between contexts relies primarily on a **Customer-Supplier** pattern. The system is designed defensively where core infrastructure supplies data to engagement layers without bleeding domain logic.
+Integration between contexts relies primarily on a **Customer-Supplier** pattern. The system is designed defensively where core infrastructure supplies data to engagement and intelligence layers without bleeding domain logic.
 
 *   **Upstream Identity:** The Identity Context serves as the ultimate upstream dependency. Downstream contexts rely on the Shared Kernel of a JSON Web Token (JWT) payload to identify the user and authorize domain actions.
 *   **Supplier Contexts:** The Financial, Asset, and Investment contexts act as strictly isolated suppliers. They do not communicate with each other directly but store specialized data independently tied back to user identities.
-*   **Customer Context:** The Advisory Context acts as a customer to the supplier contexts. When authorized via the mapping collections, the Advisory Context aggregates data from Financial, Asset, and Investment domains strictly for execution of Read operations to populate the Advisor Dashboard and generate PDF reports.
+*   **Customer Contexts:** The Advisory and AI Contexts act as customers to the supplier contexts. When authorized via mapping collections, these contexts aggregate data from Financial, Asset, and Investment domains strictly for execution of Read operations to populate the Advisor Dashboard, generate PDF reports, and formulate AI context windows.
 
 ```mermaid
 graph TD
@@ -76,15 +81,21 @@ graph TD
     AST[Asset and Wealth - Supplier]
     INV[Investment - Supplier]
     ADV[Advisory and Engagement - Customer]
+    AIL[AI and Intelligence - Customer]
 
     IAM -->|Provides Auth and Roles| FIN
     IAM -->|Provides Auth and Roles| AST
     IAM -->|Provides Auth and Roles| INV
     IAM -->|Provides Auth and Roles| ADV
+    IAM -->|Provides Auth and Context| AIL
 
     FIN -.->|Financial Data| ADV
     AST -.->|Valuation Data| ADV
     INV -.->|Portfolio Metrics| ADV
+
+    FIN -.->|Raw Spendings| AIL
+    INV -.->|Stock Portfolio| AIL
+    AIL -->|Actionable Insights| ADV
 ```
 
 ### C. Domain Architecture: Entities, Value Objects, & Services
@@ -94,10 +105,11 @@ Each Bounded Context manages its distinct components. **Entities** possess stric
 | Bounded Context | Root & Child Entities | Value Objects | Domain Services |
 | :--- | :--- | :--- | :--- |
 | **Identity & Access** | `Person` (Root)<br>`User`, `Advisor`, `Admin` | `Credentials` (Cryptographic Hash)<br>`ContactInfo` (Email, Phone)<br>`RoleType` (Enum) | `AuthenticationService`<br>`ProfileManagementService` |
-| **Financial Core** | `Transaction` (Root)<br>`BankAccount`, `Card`, `Expense` | `Money` (Amount, Currency Code)<br>`DateRange`<br>`CategoryType` | `CategorizationService`<br>`FinancialAnalyticsService` |
-| **Asset & Wealth** | `Asset` (Root)<br>`Property`, `Insurance`, `Loan` | `ValuationAmount`<br>`InterestRate`<br>`PolicyDetails` | `AssetValuationService`<br>`AmortizationCalculator` |
-| **Investment** | `Portfolio` (Root)<br>`Stock`, `MutualFund`, `Goal` | `TickerSymbol`<br>`RiskProfile`<br>`NetAssetValue` | `MarketDataService`<br>`GoalTrackingService` |
+| **Financial Core** | `Transaction` (Root)<br>`BankAccount`, `Card`, `Expense`<br>`EMI` | `Money` (Amount, Currency Code)<br>`DateRange`<br>`CategoryType` | `CategorizationService`<br>`FinancialAnalyticsService` |
+| **Asset & Wealth** | `Asset` (Root)<br>`Property`, `Insurance`, `Loan`<br>`FixedDeposit`, `PreciousHolding` | `ValuationAmount`<br>`InterestRate`<br>`PolicyDetails` | `AssetValuationService`<br>`AmortizationCalculator` |
+| **Investment** | `Portfolio` (Root)<br>`Stock`, `MutualFund`<br>`FinancialGoal` | `TickerSymbol`<br>`RiskProfile`<br>`NetAssetValue` | `MarketDataService`<br>`GoalTrackingService` |
 | **Advisory Model** | `AdvisorySession` (Root)<br>`UserAdvisorLink`<br>`Blog` | `VideoRoomURL`<br>`ConsultationSchedule` | `MatchmakingService`<br>`ReportGenerationService` |
+| **AI Intelligence** | `AI_Interaction` (Root)<br>`Recommendation` | `PromptPayload`<br>`SentimentScore`<br>`ConfidenceInterval` | `LLM_OrchestrationService`<br>`PredictiveAnalysisService` |
 
 ### D. Cardinality Ratios
 
@@ -106,13 +118,13 @@ The relationships defining the underlying schema dictate how context mappings ar
 *   **Inheritance / 1:1 Constraints:**
     *   `Person` **`1 : 1`** (`User` | `Advisor` | `Admin`): Implements strict sub-typing extension. A generalized persona is extended exclusively into one operational role per account.
 *   **Composition / 1:N Constraints:**
-    *   `User` **`1 : N`** `Expenses`: A user can have multiple expenses, but an expense belongs exclusively to one user lifecycle.
-    *   `User` **`1 : N`** `BankAccounts` & `Cards`: A user manages multiple instances of internal tracking accounts.
-    *   `User` **`1 : N`** `Investments`: A user owns multiple volatile assets spanning stocks and mutual funds.
-    *   `User` **`1 : N`** `Assets`: A user owns multiple static assets encompassing property and insurance portfolios.
+    *   `User` **`1 : N`** `Expenses` & `Transactions`: A user can have multiple expenses spanning their lifecycle.
+    *   `User` **`1 : N`** `BankAccounts`, `Cards`, `EMIs`: A user manages multiple instances of internal tracking instruments.
+    *   `User` **`1 : N`** `Investments`: A user owns multiple volatile assets spanning stocks and mutual funds tracking toward `FinancialGoals`.
+    *   `User` **`1 : N`** `Assets`: A user owns multiple static assets encompassing property, insurances, fixed deposits, and precious holdings.
     *   `Advisor` **`1 : N`** `Blogs`: An advisor maintains an exclusive authorship over published articles.
 *   **Aggregation / M:N Constraints:**
-    *   `User` **`M : N`** `Advisor`: Facilitated through intermediate mapping collections, allowing a single user to engage multiple specialist advisors simultaneously while an advisor concurrently manages a broader client pool.
+    *   `User` **`M : N`** `Advisor`: Facilitated through intermediate mapping collections (managed by the Entity `UserAdvisorLink`), allowing a single user to engage multiple specialist advisors simultaneously while an advisor concurrently manages a broader client pool.
 
 ### E. Domain Aggregates
 
@@ -120,15 +132,15 @@ Aggregates define a strong boundary around one or more entities to ensure transa
 
 **1. The User Fin-Core Aggregate**
 *   **Aggregate Root:** `User`
-*   **Boundaries:** `BankAccounts`, `Cards`, `Expenses`, `FinancialGoals`
+*   **Boundaries:** `BankAccounts`, `Cards`, `Expenses`, `Transactions`, `EMIs`.
 *   **Invariants:** An `Expense` entity must rigidly link to an existing `BankAccount` or `Card` entity within the same user boundary. If the `User` root is deleted from the Identity Context, all boundaries within the Fin-Core aggregate must instantly undergo cascade-deletion to avoid orphaned transactional data.
 
 **2. The Wealth Portfolio Aggregate**
 *   **Aggregate Root:** `Portfolio` (Bound strictly to the `User` profile)
-*   **Boundaries:** `Stocks`, `MutualFunds`, `Properties`, `Insurances`.
+*   **Boundaries:** `Stocks`, `MutualFunds`, `Properties`, `Insurances`, `FixedDeposits`, `PreciousHoldings`.
 *   **Invariants:** The total net worth calculation forms an invariant that must consistently sum current valuations across all asset boundaries. Modifying an underlying asset (e.g., updating a property's market value) triggers a forced recalculation of the encompassing `Portfolio` aggregate state.
 
 **3. The Advisory Relationship Aggregate**
 *   **Aggregate Root:** `Advisor`
-*   **Boundaries:** `users_advisors` (Relationship mappings), Assigned Clients.
+*   **Boundaries:** `UserAdvisorLink` (Relationship mappings), Assigned Clients.
 *   **Invariants:** Core access control parameters dictate that `User` data accessible to the `Advisor` root must be treated as structurally immutable (strictly Read-Only) proxy data. Furthermore, establishing this aggregate boundary requires bi-directional consent. A user cannot be injected into the advisor's client boundary without recorded explicit approval.
