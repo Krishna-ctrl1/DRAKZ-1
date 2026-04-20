@@ -213,23 +213,53 @@ const FinBot = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:5002/api/financial-advice", {
+      // --- GROQ LLM API (llama-3.3-70b-versatile) ---
+      const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+      const GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || "llama-3.3-70b-versatile";
+
+      const systemPrompt = `You are a highly intelligent financial advisor for the DRAKZ Fintech app. Keep your advice concise, practical, and highly tailored to the user's data. Do NOT use markdown like asterisks (*), keep the response as plain readable text.
+
+User's Financial Context:
+- Monthly Income: ${contextData.monthly_income}
+- Monthly Expenses: ${contextData.total_expenses}
+- Monthly Savings: ${contextData.savings}
+- Currency: ${contextData.currency}`;
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          query: userMessage,
-          userData: contextData, 
+          model: GROQ_MODEL,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          temperature: 0.7,
+          max_tokens: 1024,
         }),
       });
 
-      if (!response.ok) throw new Error("Advisor offline");
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error(`Groq API ${response.status}:`, errBody);
+        throw new Error(`Groq API error ${response.status}`);
+      }
+
       const data = await response.json();
-      setChatMessages((prev) => [...prev, { sender: "bot", text: data.response }]);
+      const botReply = data.choices?.[0]?.message?.content || "I encountered an error analyzing your data.";
+      
+      setChatMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
     } catch (error) {
-      setChatMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "I'm having trouble connecting to the brain. Please ensure the Python server is running." },
-      ]);
+      console.error(error);
+      const msg = error.message.includes("429")
+        ? "⚠️ Rate limit hit. Wait a moment and try again."
+        : error.message.includes("401")
+        ? "⚠️ API key is invalid. Check your VITE_GROQ_API_KEY in .env."
+        : `⚠️ ${error.message}. Check the browser console for details.`;
+      setChatMessages((prev) => [...prev, { sender: "bot", text: msg }]);
     } finally {
       setIsBotTyping(false);
     }

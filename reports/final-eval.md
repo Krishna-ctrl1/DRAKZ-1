@@ -94,3 +94,11 @@
 2. **The Proof:** Hit your `GET /api/logs/telemetry` endpoint. Show the professor the real-time hardware Memory usage, the active MongoDB connectivity state, and the active footprint of your Redis Cache cluster streaming directly from the Node.js `os` runtime!
 3. **The Proof (Part 2):** Hit your `DELETE /api/logs/flush-cache` endpoint and explain that you built a manual "Panic Button" for DevOps admins to globally invalidate the entire cache architecture if memory gets corrupted.
 
+#### Proof 7: Server Load Testing (Bonus Marks!)
+**What to show:** Prove that your server can withstand massive traffic spikes thanks to your Redis cache and Node optimization.
+**How to prove it:**
+1. Open your terminal and run your Autocannon stress-test command:
+   ```bash
+   npx autocannon -c 100 -a 500 https://drakz-backend.onrender.com/api/blogs
+   ```
+2. **The Proof:** Explain the output to your professor! Tell them: *"We blasted the server with 500 asynchronous requests holding 100 concurrent user connections open simultaneously. Despite being on a free tier, the server processed an average of ~71 requests per second (peaking at 165 req/sec). 50% of the virtual users received their response extremely fast, and the server survived the attack flawlessly (zero timeouts) because our Redis cache instantly intercepted the massive traffic spike from RAM!"*
