@@ -57,7 +57,7 @@
     "start:frontend": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node server.js",
+    "server": "nodemon server.js",
     "server-prod": "node server.js",
     "dev": "concurrently \"npm run server\" \"vite\"",
     "test": "vitest run",

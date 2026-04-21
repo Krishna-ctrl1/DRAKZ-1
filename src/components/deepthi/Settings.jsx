@@ -66,10 +66,10 @@ const Settings = () => {
       // Set profile picture preview if exists
       if (data.profilePicture) {
         // Handle both base64 data URLs and path-based URLs
-        if (data.profilePicture.startsWith('data:')) {
+        if (data.profilePicture.startsWith('data:') || data.profilePicture.startsWith('http')) {
           setProfilePicturePreview(data.profilePicture);
         } else {
-          setProfilePicturePreview(`${BACKEND_URL}${data.profilePicture}`);
+          setProfilePicturePreview(`${BACKEND_URL}${data.profilePicture.startsWith('/') ? '' : '/'}${data.profilePicture}`);
         }
       }
 
@@ -363,10 +363,10 @@ const Settings = () => {
       setMessage({ type: "success", text: "Profile picture updated successfully!" });
       setProfilePictureFile(null);
       // Keep the preview showing the newly uploaded picture (now a base64 data URL)
-      if (updatedProfilePicture.startsWith('data:')) {
+      if (updatedProfilePicture.startsWith('data:') || updatedProfilePicture.startsWith('http')) {
         setProfilePicturePreview(updatedProfilePicture);
       } else {
-        setProfilePicturePreview(`${BACKEND_URL}${updatedProfilePicture}`);
+        setProfilePicturePreview(`${BACKEND_URL}${updatedProfilePicture.startsWith('/') ? '' : '/'}${updatedProfilePicture}`);
       }
     } catch (error) {
       setMessage({

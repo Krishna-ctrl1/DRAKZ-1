@@ -76,20 +76,27 @@ exports.getBlogs = async (req, res) => {
   }
 };
 
-// PUBLIC: Search Approved Blogs using MongoDB Text Index
+// PUBLIC: Search Approved Blogs using MongoDB Regex
 exports.searchBlogs = async (req, res) => {
   const { q } = req.query;
   try {
     if (!q) {
       return res.status(400).json({ message: "Search query 'q' is required" });
     }
-    // Leverage the MongoDB Full-Text search engine and sort by relevance score
-    const blogs = await Blog.find(
-      { status: "approved", $text: { $search: q } },
-      { score: { $meta: "textScore" } }
-    )
-      .sort({ score: { $meta: "textScore" } })
+    
+    // Leverage Regex for partial matching (useful for typeahead/autocomplete)
+    const searchRegex = new RegExp(q, 'i');
+    
+    const blogs = await Blog.find({
+      status: "approved",
+      $or: [
+        { title: searchRegex },
+        { content: searchRegex }
+      ]
+    })
+      .sort({ createdAt: -1 })
       .populate('author_id', 'name email');
+      
     res.json(blogs);
   } catch (err) {
     res.status(500).json({ message: "Failed to search blogs" });

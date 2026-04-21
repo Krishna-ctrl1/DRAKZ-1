@@ -15,6 +15,7 @@ const Header = ({ collapsed }) => {
   const [userName, setUserName] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const dropdownRef = useRef(null);
   const { collapsed: uiCollapsed } = useUI();
 
@@ -22,6 +23,7 @@ const Header = ({ collapsed }) => {
   const updateProfilePicture = (newProfilePicture) => {
     console.log('📸 Header: updateProfilePicture called with:', newProfilePicture);
     setProfilePicture(newProfilePicture);
+    setImageError(false);
   };
 
   // Expose function globally for Settings component
@@ -50,6 +52,7 @@ const Header = ({ collapsed }) => {
     const handleProfilePictureUpdate = (event) => {
       console.log('📸 Header: Received profilePictureUpdated event:', event.detail.profilePicture);
       setProfilePicture(event.detail.profilePicture);
+      setImageError(false);
     };
 
     window.addEventListener("profilePictureUpdated", handleProfilePictureUpdate);
@@ -146,14 +149,13 @@ const Header = ({ collapsed }) => {
           <div className="profile-section" ref={dropdownRef}>
             <div className="profile-avatar-wrapper" onClick={toggleDropdown}>
               <div className="profile-avatar">
-                {profilePicture && profilePicture.trim() !== "" ? (
+                {profilePicture && profilePicture.trim() !== "" && !imageError ? (
                   <img
-                    src={profilePicture.startsWith('data:') ? profilePicture : `${BACKEND_URL}${profilePicture}`}
+                    src={profilePicture.startsWith('data:') || profilePicture.startsWith('http') ? profilePicture : `${BACKEND_URL}${profilePicture.startsWith('/') ? '' : '/'}${profilePicture}`}
                     alt="Profile"
                     onError={(e) => {
                       console.error('📸 Header: Image failed to load');
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<i class="fa-solid fa-user"></i>';
+                      setImageError(true);
                     }}
                   />
                 ) : (
