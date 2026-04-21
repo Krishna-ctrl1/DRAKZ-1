@@ -6,6 +6,7 @@ import Sidebar from "../global/Sidebar";
 import Modal from "../global/Modal";
 import AddPropertyForm from "./AddPropertyForm";
 import AddHoldingForm from "./AddHoldingForm";
+import { BACKEND_URL } from "../../config/backend";
 import InsuranceDetails from "./InsuranceDetails";
 import TransactionPayment from "./TransactionPayment";
 import TransactionReceipt from "./TransactionReceipt";
@@ -533,7 +534,7 @@ const MyPrivilege = () => {
                   <div className="property-cards">
                     {properties.map((prop) => (
                       <div className="property-card" key={prop._id}>
-                        <div className="prop-img" style={{backgroundImage: `url(${prop.imageUrl})`}}></div>
+                        <div className="prop-img" style={{backgroundImage: `url(${prop.imageUrl && prop.imageUrl.startsWith('/') ? BACKEND_URL + prop.imageUrl : prop.imageUrl})`}}></div>
                         <button className="edit-btn" onClick={(e) => { e.stopPropagation(); openEditPropertyModal(prop); }}>
                           <i className="fa-solid fa-pen"></i>
                         </button>

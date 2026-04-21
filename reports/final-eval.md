@@ -83,7 +83,7 @@
 
 #### Proof 5: Live API Documentation
 **What to show:** Ensure the B2C endpoints are fully mapped.
-**How to prove it:**
+**How to prove it:** 
 1. Open your live deployment window.
 2. **The Proof:** Go to `https://drakz-backend.onrender.com/api-docs` and interact with the professional Swagger UI dashboard mapping every single route automatically!
 
