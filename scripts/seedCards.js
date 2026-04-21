@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const Person = require("../src/models/people.model.js");
 const Card = require("../src/models/Card");
+const { encryptGCM } = require("../src/utils/crypto.util");
+
+const SHARED_CARD_ENC_KEY = "drakz-card-demo-key-v1";
+
+process.env.CARD_ENC_KEY = process.env.CARD_ENC_KEY || SHARED_CARD_ENC_KEY;
 
 // Generate truly unique card numbers based on user index
 function generateCardNumber(userIndex, cardIndex) {
@@ -27,6 +32,15 @@ function generateMasked(last4) {
   return `**** **** **** ${last4}`;
 }
 
+function encryptCardNumber(cardNumber) {
+  const enc = encryptGCM(cardNumber);
+  return {
+    encryptedNumber: enc.cipherText,
+    encryptedIv: enc.iv,
+    encryptedTag: enc.tag,
+  };
+}
+
 async function run() {
   if (!process.env.MONGO_URI) {
     throw new Error("Set MONGO_URI in .env");
@@ -46,7 +60,7 @@ async function run() {
     await Card.deleteMany({});
     console.log("Cleared existing cards");
 
-    const users = await Person.find({ role: "user" }).limit(10);
+    const users = await Person.find({ role: "user" });
     console.log(`Seeding cards for ${users.length} users\n`);
 
     const colorThemes = [
@@ -71,6 +85,8 @@ async function run() {
       // Seed credit card with UNIQUE details based on user index
       const creditLast4 = generateLast4(userIdx, 0);
       const creditMasked = generateMasked(creditLast4);
+      const creditCardNumber = generateCardNumber(userIdx, 0);
+      const creditEncrypted = encryptCardNumber(creditCardNumber);
       try {
         const creditCard = await Card.create({
           user: u._id,
@@ -79,6 +95,7 @@ async function run() {
           brand: userBrand,
           last4: creditLast4,
           masked: creditMasked,
+          ...creditEncrypted,
           expiryMonth: (userIdx % 12) + 1,
           expiryYear: 2027,
           colorTheme: userColor,
@@ -95,6 +112,8 @@ async function run() {
       const debitBrand = brands[(userIdx + 1) % brands.length];
       const debitLast4 = generateLast4(userIdx, 1);
       const debitMasked = generateMasked(debitLast4);
+      const debitCardNumber = generateCardNumber(userIdx, 1);
+      const debitEncrypted = encryptCardNumber(debitCardNumber);
       try {
         const debitCard = await Card.create({
           user: u._id,
@@ -103,6 +122,7 @@ async function run() {
           brand: debitBrand,
           last4: debitLast4,
           masked: debitMasked,
+          ...debitEncrypted,
           expiryMonth: ((userIdx + 6) % 12) + 1,
           expiryYear: 2026,
           colorTheme: colorThemes[(userIdx + 1) % colorThemes.length],
