@@ -143,17 +143,39 @@ const BlogSection = () => {
     setActiveTab("myBlogs");
   };
 
-  // --- UPDATED SEARCH FUNCTION ---
+  // --- SEARCH: Uses MongoDB Full-Text index via backend ---
+  const searchTimeout = React.useRef(null);
+
   const handleSearch = (query) => {
     const lowerQuery = query ? query.toLowerCase() : "";
 
-    // Filter Community
-    if (!query) setFilteredCommunity(communityBlogs);
-    else setFilteredCommunity(communityBlogs.filter(b => b.title.toLowerCase().includes(lowerQuery)));
-
-    // Filter My Blogs (Added this part)
+    // Always filter My Blogs locally (search endpoint only returns approved public blogs)
     if (!query) setFilteredMyBlogs(myBlogs);
     else setFilteredMyBlogs(myBlogs.filter(b => b.title.toLowerCase().includes(lowerQuery)));
+
+    // Debounce the API call for community search (300ms)
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+
+    if (!query) {
+      setFilteredCommunity(communityBlogs);
+      return;
+    }
+
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/blogs/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setFilteredCommunity(data);
+        } else {
+          // Fallback to client-side filter if API fails
+          setFilteredCommunity(communityBlogs.filter(b => b.title.toLowerCase().includes(lowerQuery)));
+        }
+      } catch (e) {
+        console.error("Search API error:", e);
+        setFilteredCommunity(communityBlogs.filter(b => b.title.toLowerCase().includes(lowerQuery)));
+      }
+    }, 300);
   };
 
   return (

@@ -189,109 +189,109 @@ const AdvisorList = () => {
                             </div>
                         )}
 
-                        {/* Advisors List */}
-                        {!myAdvisor && (
-                            <>
-                                <div className="advisors-header">
-                                    <h2>Find Your Financial Advisor</h2>
-                                    <p>Choose from our certified financial advisors to guide your investment journey</p>
-                                </div>
+                        {/* Advisors Directory - Always visible so users can discover advisors */}
+                        <div className="advisors-header">
+                            <h2>{myAdvisor ? 'Browse Other Advisors' : 'Find Your Financial Advisor'}</h2>
+                            <p>{myAdvisor ? 'Explore other certified advisors available on our platform' : 'Choose from our certified financial advisors to guide your investment journey'}</p>
+                        </div>
 
-                                {advisorsLoading || statusLoading ? (
-                                    <div className="loading-state">
-                                        <div className="loading-spinner"></div>
-                                        <p>Loading advisors...</p>
-                                    </div>
-                                ) : availableAdvisors.length === 0 ? (
-                                    <div className="empty-state">
-                                        <i className="fa-solid fa-user-tie"></i>
-                                        <p>No advisors available at the moment</p>
-                                    </div>
-                                ) : (
-                                    <div className="advisors-grid">
-                                        {availableAdvisors.map(advisor => (
-                                            <div key={advisor._id} className="advisor-card">
-                                                <div className="advisor-card-header">
-                                                    <div className="advisor-avatar">
-                                                        {advisor.name?.[0]?.toUpperCase() || 'A'}
-                                                    </div>
-                                                    <div className="advisor-identity">
-                                                        <h3>{advisor.name}</h3>
-                                                        {advisor.advisorProfile?.specialization && (
-                                                            <span className="spec-badge">{advisor.advisorProfile.specialization}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="advisor-details">
-                                                    {advisor.advisorProfile?.bio && (
-                                                        <p className="advisor-bio">{advisor.advisorProfile.bio}</p>
-                                                    )}
-
-                                                    <div className="advisor-stats">
-                                                        {advisor.advisorProfile?.experience > 0 && (
-                                                            <div className="stat-item">
-                                                                <span className="stat-value">{advisor.advisorProfile.experience}+</span>
-                                                                <span className="stat-label">Years Exp</span>
-                                                            </div>
-                                                        )}
-                                                        {advisor.advisorProfile?.certificate && (
-                                                            <div className="stat-item">
-                                                                <span className="stat-value"><i className="fa-solid fa-certificate"></i></span>
-                                                                <span className="stat-label">Certified</span>
-                                                            </div>
-                                                        )}
-                                                        {advisor.advisorProfile?.price > 0 && (
-                                                            <div className="stat-item">
-                                                                <span className="stat-value">{formatCurrency(advisor.advisorProfile.price)}</span>
-                                                                <span className="stat-label">/ session</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="advisor-contact">
-                                                        <div className="contact-item">
-                                                            <i className="fa-solid fa-envelope"></i>
-                                                            <span>{advisor.advisorProfile?.contactEmail || advisor.email}</span>
-                                                        </div>
-                                                        {advisor.advisorProfile?.contactPhone && (
-                                                            <div className="contact-item">
-                                                                <i className="fa-solid fa-phone"></i>
-                                                                <span>{advisor.advisorProfile.contactPhone}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {advisor.advisorProfile?.certificate && (
-                                                        <div className="certificate-badge">
-                                                            <i className="fa-solid fa-award"></i>
-                                                            <span>{advisor.advisorProfile.certificate}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="advisor-card-footer">
-                                                    {isPendingForAdvisor(advisor._id) ? (
-                                                        <button
-                                                            className="select-btn pending"
-                                                            onClick={() => handleCancelRequest(getPendingRequestId(advisor._id))}
-                                                        >
-                                                            <i className="fa-solid fa-clock"></i> Pending - Cancel
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            className="select-btn"
-                                                            onClick={() => handleSelectAdvisor(advisor._id)}
-                                                        >
-                                                            <i className="fa-solid fa-user-plus"></i> Select Advisor
-                                                        </button>
-                                                    )}
-                                                </div>
+                        {advisorsLoading || statusLoading ? (
+                            <div className="loading-state">
+                                <div className="loading-spinner"></div>
+                                <p>Loading advisors...</p>
+                            </div>
+                        ) : availableAdvisors.length === 0 ? (
+                            <div className="empty-state">
+                                <i className="fa-solid fa-user-tie"></i>
+                                <p>No advisors available at the moment</p>
+                            </div>
+                        ) : (
+                            <div className="advisors-grid">
+                                {availableAdvisors.map(advisor => (
+                                    <div key={advisor._id} className="advisor-card">
+                                        <div className="advisor-card-header">
+                                            <div className="advisor-avatar">
+                                                {advisor.name?.[0]?.toUpperCase() || 'A'}
                                             </div>
-                                        ))}
+                                            <div className="advisor-identity">
+                                                <h3>{advisor.name}</h3>
+                                                {advisor.advisorProfile?.specialization && (
+                                                    <span className="spec-badge">{advisor.advisorProfile.specialization}</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="advisor-details">
+                                            {advisor.advisorProfile?.bio && (
+                                                <p className="advisor-bio">{advisor.advisorProfile.bio}</p>
+                                            )}
+
+                                            <div className="advisor-stats">
+                                                {advisor.advisorProfile?.experience > 0 && (
+                                                    <div className="stat-item">
+                                                        <span className="stat-value">{advisor.advisorProfile.experience}+</span>
+                                                        <span className="stat-label">Years Exp</span>
+                                                    </div>
+                                                )}
+                                                {advisor.advisorProfile?.certificate && (
+                                                    <div className="stat-item">
+                                                        <span className="stat-value"><i className="fa-solid fa-certificate"></i></span>
+                                                        <span className="stat-label">Certified</span>
+                                                    </div>
+                                                )}
+                                                {advisor.advisorProfile?.price > 0 && (
+                                                    <div className="stat-item">
+                                                        <span className="stat-value">{formatCurrency(advisor.advisorProfile.price)}</span>
+                                                        <span className="stat-label">/ session</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="advisor-contact">
+                                                <div className="contact-item">
+                                                    <i className="fa-solid fa-envelope"></i>
+                                                    <span>{advisor.advisorProfile?.contactEmail || advisor.email}</span>
+                                                </div>
+                                                {advisor.advisorProfile?.contactPhone && (
+                                                    <div className="contact-item">
+                                                        <i className="fa-solid fa-phone"></i>
+                                                        <span>{advisor.advisorProfile.contactPhone}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {advisor.advisorProfile?.certificate && (
+                                                <div className="certificate-badge">
+                                                    <i className="fa-solid fa-award"></i>
+                                                    <span>{advisor.advisorProfile.certificate}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="advisor-card-footer">
+                                            {myAdvisor && myAdvisor._id === advisor._id ? (
+                                                <button className="select-btn assigned" disabled>
+                                                    <i className="fa-solid fa-check-circle"></i> Your Advisor
+                                                </button>
+                                            ) : isPendingForAdvisor(advisor._id) ? (
+                                                <button
+                                                    className="select-btn pending"
+                                                    onClick={() => handleCancelRequest(getPendingRequestId(advisor._id))}
+                                                >
+                                                    <i className="fa-solid fa-clock"></i> Pending - Cancel
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="select-btn"
+                                                    onClick={() => handleSelectAdvisor(advisor._id)}
+                                                >
+                                                    <i className="fa-solid fa-user-plus"></i> Select Advisor
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
-                            </>
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>

@@ -3,12 +3,13 @@ const path = require('path');
 const os = require('os');
 const mongoose = require('mongoose');
 const { getRedisClient, isRedisReady } = require('../config/redis.config');
+const AccessLog = require('../models/accessLog.model');
 
 // Path to logs directory
 const logsDir = path.join(__dirname, '../../logs');
 
 /**
- * Helper function to read log file
+ * Helper function to read log file (fallback for local dev)
  * @param {string} filename 
  * @param {number} lines Limit number of lines
  * @returns {Promise<string[]>}
@@ -18,7 +19,7 @@ const readLogFile = (filename, lines = 50) => {
     const filePath = path.join(logsDir, filename);
 
     if (!fs.existsSync(filePath)) {
-      return resolve(["Log file not found."]);
+      return resolve([]);
     }
 
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -33,8 +34,19 @@ const readLogFile = (filename, lines = 50) => {
 
 exports.getAccessLogs = async (req, res) => {
   try {
+    // Primary: Read from MongoDB (works on Render)
+    const dbLogs = await AccessLog.find({ type: 'access' })
+      .sort({ timestamp: -1 })
+      .limit(50)
+      .lean();
+
+    if (dbLogs.length > 0) {
+      return res.json({ logs: dbLogs.map(l => l.message || `[${l.timestamp}] ${l.method} ${l.path} ${l.statusCode}`) });
+    }
+
+    // Fallback: Read from file (local dev)
     const logs = await readLogFile('access.log');
-    res.json({ logs });
+    res.json({ logs: logs.length > 0 ? logs : ["No access logs recorded yet. Logs will appear as requests are made."] });
   } catch (err) {
     console.error("Error reading access logs:", err);
     res.status(500).json({ msg: 'Error reading access logs' });
@@ -43,8 +55,19 @@ exports.getAccessLogs = async (req, res) => {
 
 exports.getErrorLogs = async (req, res) => {
   try {
+    // Primary: Read from MongoDB
+    const dbLogs = await AccessLog.find({ type: 'error' })
+      .sort({ timestamp: -1 })
+      .limit(50)
+      .lean();
+
+    if (dbLogs.length > 0) {
+      return res.json({ logs: dbLogs.map(l => l.message || `[${l.timestamp}] ${l.method} ${l.path} ${l.statusCode}`) });
+    }
+
+    // Fallback: Read from file
     const logs = await readLogFile('error.log');
-    res.json({ logs });
+    res.json({ logs: logs.length > 0 ? logs : ["No error logs recorded yet."] });
   } catch (err) {
     console.error("Error reading error logs:", err);
     res.status(500).json({ msg: 'Error reading error logs' });

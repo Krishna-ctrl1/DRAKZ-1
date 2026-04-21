@@ -65,7 +65,12 @@ const Settings = () => {
 
       // Set profile picture preview if exists
       if (data.profilePicture) {
-        setProfilePicturePreview(`${BACKEND_URL}${data.profilePicture}`);
+        // Handle both base64 data URLs and path-based URLs
+        if (data.profilePicture.startsWith('data:')) {
+          setProfilePicturePreview(data.profilePicture);
+        } else {
+          setProfilePicturePreview(`${BACKEND_URL}${data.profilePicture}`);
+        }
       }
 
       setFinancialData({
@@ -357,7 +362,12 @@ const Settings = () => {
 
       setMessage({ type: "success", text: "Profile picture updated successfully!" });
       setProfilePictureFile(null);
-      setProfilePicturePreview(null);
+      // Keep the preview showing the newly uploaded picture (now a base64 data URL)
+      if (updatedProfilePicture.startsWith('data:')) {
+        setProfilePicturePreview(updatedProfilePicture);
+      } else {
+        setProfilePicturePreview(`${BACKEND_URL}${updatedProfilePicture}`);
+      }
     } catch (error) {
       setMessage({
         type: "error",

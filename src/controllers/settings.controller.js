@@ -28,7 +28,9 @@ const getProfile = async (req, res) => {
       currency: user.currency || "INR",
       riskProfile: user.riskProfile || "Moderate",
       monthlyIncome: user.monthlyIncome || 0,
-      profilePicture: user.profilePicture || "",
+      profilePicture: user.profilePicture && user.profilePicture.startsWith('data:') 
+        ? `/api/settings/profile-picture/view/${user._id}`
+        : user.profilePicture || "",
     });
   } catch (error) {
     console.error("Error in getProfile:", error);
@@ -231,7 +233,7 @@ const changePassword = async (req, res) => {
   }
 };
 
-// Upload profile picture
+// Upload profile picture (stored as base64 in MongoDB for Render compatibility)
 const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -239,14 +241,33 @@ const uploadProfilePicture = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const profilePicturePath = `/uploads/profile/${req.file.filename}`;
+    
+    // Convert uploaded file buffer/disk file to base64 data URL
+    // This persists in MongoDB and survives Render's ephemeral filesystem
+    const fs = require('fs');
+    const path = require('path');
+    let base64Data;
+
+    if (req.file.buffer) {
+      // If multer is using memoryStorage
+      base64Data = req.file.buffer.toString('base64');
+    } else {
+      // If multer saved to disk, read it then clean up
+      const filePath = path.resolve(req.file.path);
+      base64Data = fs.readFileSync(filePath).toString('base64');
+      // Clean up the temp file
+      fs.unlink(filePath, () => {});
+    }
+
+    const mimeType = req.file.mimetype || 'image/jpeg';
+    const dataUrl = `data:${mimeType};base64,${base64Data}`;
     
     console.log('📸 Uploading profile picture for user:', userId);
-    console.log('📁 File path:', profilePicturePath);
+    console.log('📁 Storing as base64 data URL in MongoDB');
 
     const user = await Person.findByIdAndUpdate(
       userId,
-      { $set: { profilePicture: profilePicturePath } },
+      { $set: { profilePicture: dataUrl } },
       { new: true }
     ).select("profilePicture");
 
@@ -254,16 +275,47 @@ const uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    console.log("✅ Profile picture updated in database:", user.profilePicture);
-    console.log("📤 Sending response with profilePicture:", user.profilePicture);
+    console.log("✅ Profile picture stored in MongoDB for user:", userId);
     
+    // Return a small URL to the frontend instead of the massive base64 string
+    // Add timestamp to bypass browser caching when uploading a new picture
     res.json({
       msg: "Profile picture updated successfully",
-      profilePicture: user.profilePicture,
+      profilePicture: `/api/settings/profile-picture/view/${userId}?t=${Date.now()}`,
     });
   } catch (error) {
     console.error("💥 Error in uploadProfilePicture:", error);
     res.status(500).json({ msg: "Server error" });
+  }
+};
+
+// Serve profile picture directly as an image buffer
+const viewProfilePicture = async (req, res) => {
+  try {
+    const user = await Person.findById(req.params.id).select("profilePicture").lean();
+    if (!user || !user.profilePicture) {
+      return res.status(404).json({ msg: "Profile picture not found" });
+    }
+
+    if (user.profilePicture.startsWith('data:')) {
+      const matches = user.profilePicture.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return res.status(400).send('Invalid image format');
+      }
+      
+      const mimeType = matches[1];
+      const buffer = Buffer.from(matches[2], 'base64');
+      
+      res.set('Content-Type', mimeType);
+      res.set('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+      return res.send(buffer);
+    } else {
+      // If it's a file path, redirect to it
+      return res.redirect(user.profilePicture);
+    }
+  } catch (error) {
+    console.error("Error viewing profile picture:", error);
+    res.status(500).send("Server error");
   }
 };
 
@@ -273,4 +325,5 @@ module.exports = {
   updateFinancialPreferences,
   changePassword,
   uploadProfilePicture,
+  viewProfilePicture,
 };

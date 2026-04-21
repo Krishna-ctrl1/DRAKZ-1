@@ -148,10 +148,10 @@ const Header = ({ collapsed }) => {
               <div className="profile-avatar">
                 {profilePicture && profilePicture.trim() !== "" ? (
                   <img
-                    src={`${BACKEND_URL}${profilePicture}`}
+                    src={profilePicture.startsWith('data:') ? profilePicture : `${BACKEND_URL}${profilePicture}`}
                     alt="Profile"
                     onError={(e) => {
-                      console.error('📸 Header: Image failed to load:', profilePicture);
+                      console.error('📸 Header: Image failed to load');
                       e.target.style.display = 'none';
                       e.target.parentElement.innerHTML = '<i class="fa-solid fa-user"></i>';
                     }}

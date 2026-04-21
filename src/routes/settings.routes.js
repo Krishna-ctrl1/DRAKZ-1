@@ -182,6 +182,28 @@ router.put("/password", auth, validatePasswordChange, changePassword);
 // @access  Private
 router.post("/profile-picture", auth, profileUpload.single("profilePicture"), uploadProfilePicture);
 
+/**
+ * @swagger
+ * /settings/profile-picture/view/{id}:
+ *   get:
+ *     summary: View user profile picture
+ *     tags: [Settings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Profile picture image
+ */
+// @route   GET /api/settings/profile-picture/view/:id
+// @desc    View profile picture directly as image
+// @access  Public
+const { viewProfilePicture } = require("../controllers/settings.controller");
+router.get("/profile-picture/view/:id", viewProfilePicture);
+
 // Attach router-level error handler for settings
 router.use(settingsErrorHandler);
 
