@@ -42,7 +42,7 @@ const DB_NAME = 'fdfed_test';
 // 👇 DATE RANGE — All generated data will fall within this window
 // Format: 'YYYY-MM-DD'
 const DATE_RANGE_START = '2025-10-01';
-const DATE_RANGE_END   = '2026-03-24';
+const DATE_RANGE_END   = '2026-04-24';
 
 // 👇 Set to true if you also want to re-create the users from scratch
 //    (WARNING: This will delete all existing users and create fresh ones)
