@@ -113,13 +113,13 @@ Three new full pages were added to the Advisor section:
 
 ## 👨‍💻 Team Contributions
 
-### Krishna Gupta — Lead Architect & AI Integration
+### Krishna Gupta and Gurleen Kaur Bhatia — Lead Architect & AI Integration
 **Primary Responsibilities:**
 - Overall project architecture and technical planning
-- Complete AI ecosystem development including:
+- Complete AI ecosystem development, including:
   - AI Advisor Chatbot interface
   - Financial Planning automation system
-  - Stock Recommendation engine
+  - Stock Recommendation engine 
   - Stock Information display system
 - Video Advisory platform development
 - Live video session interface implementation
@@ -388,6 +388,7 @@ This project is developed as part of an academic/professional initiative by the 
 For questions or support, please contact the development team:
 
 - **Krishna Gupta** — AI & Architecture
+- **Gurleen Kaur Bhatia** — AI & Data Science
 - **M Deepthi Nagineni** — Analytics
 - **Nagineni Ragamaie** — Investments
 - **Zulqarnain Ahmed** — UI/UX & Admin
