@@ -391,8 +391,8 @@ For questions or support, please contact the development team:
 - **Gurleen Kaur Bhatia** — AI & Data Science
 - **M Deepthi Nagineni** — Analytics
 - **Nagineni Ragamaie** — Investments
-- **Zulqarnain Ahmed** — UI/UX & Admin
-- **Malle Abhinay** — Asset Management
+- **Zulqarnain Ahmed** — Admin
+- **Malle Abhinay** — Asset Management, UI/UX Design & UI/UX Research
 
 ---
 
